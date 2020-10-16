@@ -1,0 +1,56 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory app:title="@string/tTerminSettings">
+
+        <ListPreference
+            app:defaultValue="@string/tDaily"
+            app:entries="@array/calendar_types_entries"
+            app:entryValues="@array/calendar_types_values"
+            app:key="calendarType"
+            app:title="@string/tdefaultCalendarType"
+            app:useSimpleSummaryProvider="true" />
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="defaultVideoChat"
+            android:summaryOff="@string/tOff"
+            android:summaryOn="@string/tOn"
+            android:title="Default videochat" />
+
+        <ListPreference
+            app:defaultValue="@string/tOneHour"
+            app:entries="@array/time_range_entries"
+            app:entryValues="@array/time_range_values"
+            app:key="timeRange"
+            app:title="@string/tDefaultTimeRange"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:defaultValue="Gyógytornász"
+            app:entries="@array/activity_type_entries"
+            app:entryValues="@array/activity_type_values"
+            app:key="activityType"
+            app:title="@string/tDefaultActivity"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            android:digits="0123456789"
+            android:inputType="number"
+            app:key="price"
+            app:title="@string/tPrice"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:defaultValue="Off"
+            app:entries="@array/time_range_entries"
+            app:entryValues="@array/time_range_values"
+            app:key="notification"
+            app:title="Notification"
+            app:useSimpleSummaryProvider="true" />
+
+
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

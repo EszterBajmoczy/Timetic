@@ -1,0 +1,57 @@
+<resources>
+    <string name="app_name">Timetic</string>
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome !"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="login_failed">"Login failed"</string>
+    <string name="tSignIn">Bejelentkezés</string>
+    <string name="tRegistration">Regisztráció</string>
+    <string name="tOrganisationSignIn">Alkalmazottaknak</string>
+    <string name="tDaily">Napi</string>
+    <string name="tWeekly">Heti</string>
+    <string name="tMonthly">Havi</string>
+
+
+    <string name="title_activity_main">MainActivity</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Beállítások</string>
+
+    <string name="home_second">Home Second</string>
+    <string name="title_activity_login">Sign in</string>
+    <string name="menuCalendar">Naptár</string>
+    <string name="menuStatistic">Kimutatások</string>
+    <string name="menuClientOperations">Ügyfélek kezelés</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Preference Titles -->
+    <string name="tTerminSettings">Időpont beállítások</string>
+
+    <string name="menuSettings">Beállítások</string>
+    <string name="tdefaultCalendarType">Default naptár nézet</string>
+    <string name="tPrice">Ár</string>
+
+    <string name="tOn">On</string>
+    <string name="tOff">Off</string>
+    <string name="tDefaultTimeRange">Default időponthossz</string>
+
+    <string name="tHalfHour">Fél óra</string>
+    <string name="tOneHour">1 óra</string>
+    <string name="tOneAndHalfHour">Másfél óra</string>
+    <string name="kHalfHour">half_hour</string>
+    <string name="kOneHour">one_hour</string>
+    <string name="kOneAndHalfHour">one_and_half_hour</string>
+    <string name="tDefaultActivity">Default activity</string>
+
+    <!-- Statistic Fragment -->
+    <string name="tSelectDateRange">Egyéni időtartam kiválasztása</string>
+
+</resources>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_calendar"
+            android:icon="@drawable/round_date_range_black_18dp"
+            android:title="@string/menuCalendar" />
+        <item
+            android:id="@+id/nav_statistic"
+            android:icon="@drawable/round_analytics_black_18dp"
+            android:title="@string/menuStatistic" />
+        <item
+            android:id="@+id/nav_client_operation"
+            android:icon="@drawable/round_account_circle_black_18dp"
+            android:title="@string/menuClientOperations" />
+    </group>
+</menu>

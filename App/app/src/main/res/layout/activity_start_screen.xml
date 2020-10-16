@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".StartScreenActivity"
+    android:gravity="center"
+    android:orientation="vertical">
+
+        <Button
+            style="@style/AppTheme.Button"
+            android:id="@+id/btSignIn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:width="200dp"
+            android:text="@string/tSignIn"
+            />
+
+        <Button
+            style="@style/AppTheme.Button"
+            android:id="@+id/btRegistration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:width="200dp"
+            android:layout_margin="10dp"
+            android:text="@string/tRegistration"/>
+
+        <Button
+            style="@style/MyAppTheme.ButtonLight"
+            android:id="@+id/btOrganisationSignIn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:width="200dp"
+            android:layout_margin="10dp"
+            android:text="@string/tOrganisationSignIn"/>
+
+
+</LinearLayout>

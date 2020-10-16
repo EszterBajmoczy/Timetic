@@ -1,0 +1,69 @@
+<resources>
+    <!-- Calendar Type Preference -->
+    <string-array name="calendar_types_entries">
+        <item>@string/tDaily</item>
+        <item>@string/tWeekly</item>
+        <item>@string/tMonthly</item>
+    </string-array>
+
+    <string-array name="calendar_types_values">
+        <item>@string/tDaily</item>
+        <item>@string/tWeekly</item>
+        <item>@string/tMonthly</item>
+    </string-array>
+
+    <!-- Default Time Range Preference -->
+    <string-array name="time_range_entries">
+        <item>@string/tHalfHour</item>
+        <item>@string/tOneHour</item>
+        <item>@string/tOneAndHalfHour</item>
+    </string-array>
+
+    <string-array name="time_range_values">
+        <item>@string/kHalfHour</item>
+        <item>@string/kOneHour</item>
+        <item>@string/kOneAndHalfHour</item>
+    </string-array>
+
+    <!-- Activity Type Preference -->
+    <string-array name="activity_type_entries">
+        <item>Gyógytornász</item>
+        <item>Masszőr</item>
+    </string-array>
+
+    <string-array name="activity_type_values">
+        <item>gyogytornasz</item>
+        <item>masszor</item>
+    </string-array>
+
+    <!-- Statistic Month Array -->
+    <string-array name="statistic_month_entries">
+        <item>Január</item>
+        <item>Február</item>
+        <item>Március</item>
+        <item>Április</item>
+        <item>Május</item>
+        <item>Június</item>
+        <item>Július</item>
+        <item>Augusztus</item>
+        <item>Szeptember</item>
+        <item>Október</item>
+        <item>November</item>
+        <item>December</item>
+    </string-array>
+
+    <string-array name="statistic_month_values">
+        <item>january</item>
+        <item>february</item>
+        <item>march</item>
+        <item>april</item>
+        <item>may</item>
+        <item>june</item>
+        <item>july</item>
+        <item>august</item>
+        <item>september</item>
+        <item>oktober</item>
+        <item>november</item>
+        <item>december</item>
+    </string-array>
+</resources>
