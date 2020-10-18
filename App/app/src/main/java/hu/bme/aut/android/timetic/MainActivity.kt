@@ -15,7 +15,6 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import hu.bme.aut.android.timetic.apis.ClientApi
 
 class MainActivity : AppCompatActivity() {
 
@@ -26,7 +25,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.main_activity)
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
-
 
         val fab: FloatingActionButton = findViewById(R.id.fab)
         fab.setOnClickListener { view ->
