@@ -1,6 +1,8 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: "com.yelp.codegen.plugin"
+apply plugin: "kotlin-kapt"
 
 android {
     compileSdkVersion 29
@@ -30,6 +32,7 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+        coreLibraryDesugaringEnabled true
     }
     kotlinOptions {
         jvmTarget = "1.8"
@@ -66,8 +69,29 @@ dependencies {
 
     implementation 'com.github.thellmund.Android-Week-View:core:4.1.6'
 
-    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
     implementation 'com.google.code.gson:gson:2.8.5'
-    implementation 'com.squareup.retrofit2:converter-gson:2.2.0'
-    implementation 'com.squareup.okhttp3:okhttp:4.4.0'
+
+    // Moshi + OkHttp + Retrofit
+    implementation "com.squareup.moshi:moshi:1.11.0"
+    implementation "com.squareup.moshi:moshi-adapters:1.9.2"
+    implementation "com.squareup.okhttp3:okhttp:4.4.0"
+    implementation "com.squareup.retrofit2:retrofit:2.7.1"
+    implementation "com.squareup.retrofit2:converter-moshi:2.7.1"
+    implementation "com.squareup.retrofit2:adapter-rxjava2:2.7.1"
+    kapt "com.squareup.moshi:moshi-kotlin-codegen:1.9.2"
+    debugImplementation "com.squareup.moshi:moshi-kotlin:1.8.0"
+
+    // Date Support via Desugaring
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.0.10'
+
+    // RxJava
+    implementation "io.reactivex.rxjava2:rxjava:2.2.17"
+    implementation "io.reactivex.rxjava2:rxandroid:2.1.1"
+}
+
+generateSwagger {
+    platform = "kotlin"
+    packageName = "hu.bme.aut.android.timetic"
+    inputFile = file("./organisation_backend.json")
+    outputDir = file("./src/main/java/")
 }
