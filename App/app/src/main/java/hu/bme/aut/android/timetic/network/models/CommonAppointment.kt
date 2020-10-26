@@ -12,8 +12,12 @@
 package hu.bme.aut.android.timetic.network.models
 
 
+import com.alamkanak.weekview.WeekViewDisplayable
+import com.alamkanak.weekview.WeekViewEvent
 import com.squareup.moshi.Json
-import hu.bme.aut.android.timetic.network.models.CommonActivity
+import hu.bme.aut.android.timetic.R
+import hu.bme.aut.android.timetic.data.model.Appointment
+import java.util.*
 
 /**
  * 
@@ -35,13 +39,15 @@ data class CommonAppointment (
     @Json(name = "isPrivate")
     val isPrivate: kotlin.Boolean? = null,
     @Json(name = "startTime")
-    val startTime: kotlin.Double? = null,
+    val startTime: kotlin.Long? = null,
     @Json(name = "endTime")
-    val endTime: kotlin.Double? = null,
+    val endTime: kotlin.Long? = null,
     @Json(name = "client")
     val client: CommonClient? = null,
     @Json(name = "activity")
     val activity: CommonActivity? = null,
+    @Json(name = "employee")
+    val employee: CommonEmployee? = null,
     @Json(name = "place")
     val place: kotlin.String? = null,
     @Json(name = "price")

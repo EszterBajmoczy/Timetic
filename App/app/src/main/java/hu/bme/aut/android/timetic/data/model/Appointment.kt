@@ -6,16 +6,17 @@ import hu.bme.aut.android.timetic.R
 import java.util.*
 
 class Appointment(
-    val id: Long,
-    val details: String,
+    val id: Long?,
+    val netId: String,
+    val note: String?,
     val start_date: Calendar,
     val end_date: Calendar,
-    val price: Int? = null,
+    val price: Double? = null,
     val private_appointment: Boolean,
     val videochat: Boolean,
-    val address: String,
-    val client_id: Int?,
-    val activity_id: Int?
+    val address: String?,
+    val client: String?,
+    val activity: String?
 ) : WeekViewDisplayable<Appointment> {
 
     override fun toWeekViewEvent(): WeekViewEvent<Appointment> {
@@ -26,8 +27,8 @@ class Appointment(
         // Build the WeekViewEvent via the Builder
         //TODO id, title!
         return WeekViewEvent.Builder<Appointment>(this)
-            .setId(id)
-            .setTitle(details)
+            .setId(id!!)
+            .setTitle(activity!!)
             .setStartTime(start_date)
             .setEndTime(end_date)
             .setStyle(style)

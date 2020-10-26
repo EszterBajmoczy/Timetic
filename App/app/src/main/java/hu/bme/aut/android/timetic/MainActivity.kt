@@ -2,6 +2,7 @@ package hu.bme.aut.android.timetic
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -15,6 +16,9 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import hu.bme.aut.android.timetic.network.models.CommonOrganization
+import hu.bme.aut.android.timetic.network.models.CommonToken
+import hu.bme.aut.android.timetic.settings.SettingsActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -44,8 +48,21 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
+    }
+    private fun succes(token: CommonToken) {
+        Log.d("EZAZ", "succcccess")
+        //TODO
+    }
+
+    private fun succesList(list: List<CommonOrganization>) {
+        Log.d("EZAZ", "succcccess")
+        //TODO
+    }
 
 
+    private fun error(e: Throwable) {
+        Log.d("EZAZ", "errrrrror")
+        //TODO
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -70,7 +87,6 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
-
 
 
 }

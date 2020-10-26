@@ -16,5 +16,9 @@
             android:id="@+id/nav_client_operation"
             android:icon="@drawable/round_account_circle_black_18dp"
             android:title="@string/menuClientOperations" />
+        <item
+            android:id="@+id/nav_log_out"
+            android:icon="@drawable/round_clear_black_18dp"
+            android:title="@string/menuLogout" />
     </group>
 </menu>

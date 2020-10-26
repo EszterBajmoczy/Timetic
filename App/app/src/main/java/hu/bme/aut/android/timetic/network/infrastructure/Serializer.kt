@@ -3,8 +3,6 @@ package hu.bme.aut.android.timetic.network.infrastructure
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.Rfc3339DateJsonAdapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import hu.bme.aut.android.timetic.network.infrastructure.LocalDateTimeAdapter
-import hu.bme.aut.android.timetic.network.infrastructure.OffsetDateTimeAdapter
 import java.util.Date
 
 object Serializer {

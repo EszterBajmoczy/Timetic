@@ -33,9 +33,9 @@ data class ForClientAppointment (
     @Json(name = "id")
     val id: kotlin.String? = null,
     @Json(name = "startTime")
-    val startTime: kotlin.Double? = null,
+    val startTime: kotlin.Long? = null,
     @Json(name = "endTime")
-    val endTime: kotlin.Double? = null,
+    val endTime: kotlin.Long? = null,
     @Json(name = "employee")
     val employee: CommonEmployee? = null,
     @Json(name = "activity")

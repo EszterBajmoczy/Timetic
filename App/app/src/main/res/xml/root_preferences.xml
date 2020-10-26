@@ -18,18 +18,14 @@
             android:summaryOn="@string/tOn"
             android:title="Default videochat" />
 
-        <ListPreference
-            app:defaultValue="@string/tOneHour"
-            app:entries="@array/time_range_entries"
-            app:entryValues="@array/time_range_values"
+        <EditTextPreference
+            android:digits="0123456789"
+            android:inputType="numberDecimal"
             app:key="timeRange"
             app:title="@string/tDefaultTimeRange"
             app:useSimpleSummaryProvider="true" />
 
         <ListPreference
-            app:defaultValue="Gyógytornász"
-            app:entries="@array/activity_type_entries"
-            app:entryValues="@array/activity_type_values"
             app:key="activityType"
             app:title="@string/tDefaultActivity"
             app:useSimpleSummaryProvider="true" />

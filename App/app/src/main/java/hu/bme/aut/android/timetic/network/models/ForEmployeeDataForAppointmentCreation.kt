@@ -28,6 +28,8 @@ data class ForEmployeeDataForAppointmentCreation (
     val activities: kotlin.collections.List<CommonActivity>? = null,
     @Json(name = "clients")
     val clients: kotlin.collections.List<CommonClient>? = null,
+    @Json(name = "employees")
+    val employees: kotlin.collections.List<CommonEmployee>? = null,
     @Json(name = "places")
     val places: kotlin.collections.List<kotlin.String>? = null
 )

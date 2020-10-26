@@ -25,4 +25,10 @@
         android:label="@string/menuClientOperations"
         tools:layout="@layout/fragment_client_operations" />
 
+    <fragment
+        android:id="@+id/nav_log_out"
+        android:name="hu.bme.aut.android.timetic.ui.loginAregistration.logout.LogoutFragment"
+        android:label="@string/menuLogout"
+        tools:layout="@layout/fragment_logout" />
+
 </navigation>

@@ -6,14 +6,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.ViewModelProviders
-import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import hu.bme.aut.android.timetic.NewAppointmentActivity
+import hu.bme.aut.android.timetic.create.NewAppointmentActivity
 import hu.bme.aut.android.timetic.R
 import hu.bme.aut.android.timetic.ui.calendar.month.MonthCalendarFragment
 import hu.bme.aut.android.timetic.ui.calendar.day_and_week.DayAndWeekCalendarFragment
@@ -29,11 +28,7 @@ class CalendarMainFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
-        val root = inflater.inflate(R.layout.fragment_calendar_main, container, false)
-
-
-        return root
+        return inflater.inflate(R.layout.fragment_calendar_main, container, false)
     }
 
     override fun onAttach(activity: Activity) {
@@ -43,8 +38,17 @@ class CalendarMainFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        calendarViewModel = ViewModelProviders.of(this).get(CalendarViewModel::class.java)
         // TODO: Use the ViewModel
+        val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
+        val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
+
+        val secureSharedPreferences = EncryptedSharedPreferences.create(
+            "secure_shared_preferences",
+            masterKeyAlias,
+            requireContext(),
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
 
         //set floating action button
         setFloatingActionButton()

@@ -1,6 +1,5 @@
 package hu.bme.aut.android.timetic.ui.statistic
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +9,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.datepicker.MaterialDatePicker
 import hu.bme.aut.android.timetic.R
-import hu.bme.aut.android.timetic.SettingsActivity
 import kotlinx.android.synthetic.main.fragment_statistic.*
 import java.util.*
 

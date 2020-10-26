@@ -25,17 +25,6 @@
         <item>@string/kOneAndHalfHour</item>
     </string-array>
 
-    <!-- Activity Type Preference -->
-    <string-array name="activity_type_entries">
-        <item>Gyógytornász</item>
-        <item>Masszőr</item>
-    </string-array>
-
-    <string-array name="activity_type_values">
-        <item>gyogytornasz</item>
-        <item>masszor</item>
-    </string-array>
-
     <!-- Statistic Month Array -->
     <string-array name="statistic_month_entries">
         <item>Január</item>

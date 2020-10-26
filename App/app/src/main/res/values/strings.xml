@@ -1,12 +1,15 @@
 <resources>
     <string name="app_name">Timetic</string>
     <!-- Strings related to login -->
+    <string name="prompt_name">Name</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
-    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in">Sign in</string>
+    <string name="action_register">Register</string>
     <string name="action_sign_in_short">Sign in</string>
-    <string name="welcome">"Welcome !"</string>
-    <string name="invalid_username">Not a valid username</string>
+    <string name="welcome">"Welcome!"</string>
+    <string name="invalid_name">Your whole name please</string>
+    <string name="invalid_email">Not a valid email address</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
     <string name="tSignIn">Bejelentkezés</string>
@@ -27,9 +30,11 @@
 
     <string name="home_second">Home Second</string>
     <string name="title_activity_login">Sign in</string>
+    <string name="title_activity_registration">Registration</string>
     <string name="menuCalendar">Naptár</string>
     <string name="menuStatistic">Kimutatások</string>
     <string name="menuClientOperations">Ügyfélek kezelés</string>
+    <string name="menuLogout">Kijelentkezés</string>
     <string name="title_activity_settings">Settings</string>
 
     <!-- Preference Titles -->
@@ -41,7 +46,7 @@
 
     <string name="tOn">On</string>
     <string name="tOff">Off</string>
-    <string name="tDefaultTimeRange">Default időponthossz</string>
+    <string name="tDefaultTimeRange">Default időponthossz (perc)</string>
 
     <string name="tHalfHour">Fél óra</string>
     <string name="tOneHour">1 óra</string>
@@ -53,5 +58,23 @@
 
     <!-- Statistic Fragment -->
     <string name="tSelectDateRange">Egyéni időtartam kiválasztása</string>
+    <string name="tLogoutQuestion">Biztosan ki szeretne jelentkezni?</string>
+    <string name="tYes">Igen</string>
+    <string name="tNo">Nem</string>
+
+    <string name="title_activity_new_appointment">Új időpont létrehozása</string>
+    <string name="tCancel">Mégsem</string>
+    <string name="tSave">Mentés</string>
+    <string name="tPrivate">Magán időpont:</string>
+    <string name="tActivity">Tevékenység:</string>
+    <string name="tDate">Időpont:</string>
+    <string name="tClient">Ügyfél:</string>
+    <string name="tPlace">Helyszín:</string>
+    <string name="tPrice_">Ár:</string>
+    <string name="tFT">Ft</string>
+    <string name="tVideoChat">Videochat:</string>
+    <string name="tNotification">Emlékeztető:</string>
+    <string name="tNote">Jegyzet:</string>
+
 
 </resources>
