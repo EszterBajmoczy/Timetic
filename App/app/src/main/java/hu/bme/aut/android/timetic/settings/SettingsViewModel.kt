@@ -26,6 +26,7 @@ class SettingsViewModel : ViewModel() {
 
     init{
         val dao = MyApplication.myDatabase.roomDao()
+        Log.d("EZAZ", "settings")
         repo = DBRepository(dao)
     }
 

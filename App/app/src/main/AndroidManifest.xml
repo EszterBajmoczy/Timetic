@@ -14,6 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
+        <activity android:name=".ui.calendar.detail.DetailActivity"></activity>
         <activity android:name=".ChooseOrganisationActivity" />
         <activity android:name=".create.NewAppointmentActivity" />
         <activity
@@ -25,10 +26,10 @@
                 android:value=".MainActivity" />
         </activity>
         <activity
-            android:name="hu.bme.aut.android.timetic.ui.loginAregistration.registration.RegistrationActivity"
+            android:name=".ui.loginAregistration.registration.RegistrationActivity"
             android:label="@string/title_activity_registration" />
         <activity
-            android:name="hu.bme.aut.android.timetic.ui.loginAregistration.login.LoginActivity"
+            android:name=".ui.loginAregistration.login.LoginActivity"
             android:label="@string/title_activity_login" />
         <activity
             android:name=".MainActivity"

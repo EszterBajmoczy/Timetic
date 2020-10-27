@@ -1,5 +1,7 @@
 package hu.bme.aut.android.timetic.ui.calendar
 
+import android.R.attr.fragment
+import android.R.attr.key
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -12,10 +14,10 @@ import androidx.preference.PreferenceManager
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import hu.bme.aut.android.timetic.create.NewAppointmentActivity
 import hu.bme.aut.android.timetic.R
-import hu.bme.aut.android.timetic.ui.calendar.month.MonthCalendarFragment
+import hu.bme.aut.android.timetic.create.NewAppointmentActivity
 import hu.bme.aut.android.timetic.ui.calendar.day_and_week.DayAndWeekCalendarFragment
+import hu.bme.aut.android.timetic.ui.calendar.month.MonthCalendarFragment
 import kotlinx.android.synthetic.main.fragment_calendar_main.*
 
 
@@ -78,9 +80,9 @@ class CalendarMainFragment : Fragment() {
         btWeekly.setOnClickListener {
             val calendarFragment =
                 DayAndWeekCalendarFragment()
-
-            calendarFragment.type = DayAndWeekCalendarFragment.ViewType.Weekly
-
+            val bundle = Bundle()
+            bundle.putString("CalendarType", "Weekly")
+            calendarFragment.arguments = bundle
 
             val fragManager: androidx.fragment.app.FragmentManager = childFragmentManager
 
@@ -98,7 +100,9 @@ class CalendarMainFragment : Fragment() {
             val calendarFragment =
                 DayAndWeekCalendarFragment()
 
-            calendarFragment.type = DayAndWeekCalendarFragment.ViewType.Daily
+            val bundle = Bundle()
+            bundle.putString("CalendarType", "Daily")
+            calendarFragment.arguments = bundle
 
             val fragManager: androidx.fragment.app.FragmentManager = childFragmentManager
 
@@ -129,7 +133,9 @@ class CalendarMainFragment : Fragment() {
                     val calendarFragment =
                         DayAndWeekCalendarFragment()
 
-                    calendarFragment.type = DayAndWeekCalendarFragment.ViewType.Daily
+                    val bundle = Bundle()
+                    bundle.putString("CalendarType", "Daily")
+                    calendarFragment.arguments = bundle
 
                     val fragManager: androidx.fragment.app.FragmentManager = childFragmentManager
 
@@ -147,7 +153,9 @@ class CalendarMainFragment : Fragment() {
                     val calendarFragment =
                         DayAndWeekCalendarFragment()
 
-                    calendarFragment.type = DayAndWeekCalendarFragment.ViewType.Weekly
+                    val bundle = Bundle()
+                    bundle.putString("CalendarType", "Weekly")
+                    calendarFragment.arguments = bundle
 
                     val fragManager: androidx.fragment.app.FragmentManager = childFragmentManager
 

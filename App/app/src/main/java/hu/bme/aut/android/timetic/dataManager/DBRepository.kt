@@ -1,5 +1,6 @@
 package hu.bme.aut.android.timetic.dataManager
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import hu.bme.aut.android.timetic.data.model.Appointment
@@ -23,6 +24,17 @@ class DBRepository(private val roomDao: RoomDao) {
             }
     }
 
+    fun getAppointmentByNetId(netId: String): LiveData<Appointment> {
+        return roomDao.getAppointmentByNetId(netId)
+            .map {roomAppointments ->
+                roomAppointments.toDomainModel()
+            }
+    }
+
+    suspend fun deleteAppointmentByNetId(netId: String) = withContext(Dispatchers.IO) {
+        roomDao.deleteAppointmentByNetId(netId)
+    }
+
     suspend fun insert(appointment: Appointment) = withContext(Dispatchers.IO) {
         roomDao.insertAppointment(appointment.toRoomModel())
     }
@@ -34,6 +46,7 @@ class DBRepository(private val roomDao: RoomDao) {
 
     suspend fun deleteAppointment(appointment: Appointment) = withContext(Dispatchers.IO) {
         roomDao.deleteAppointment(appointment.toRoomModel())
+        Log.d("EZAZ", "delete success")
     }
 
     private fun RoomAppointment.toDomainModel(): Appointment {

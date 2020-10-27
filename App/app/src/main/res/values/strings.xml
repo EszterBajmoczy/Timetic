@@ -57,12 +57,14 @@
     <string name="tDefaultActivity">Default activity</string>
 
     <!-- Statistic Fragment -->
-    <string name="tSelectDateRange">Egyéni időtartam kiválasztása</string>
+    <string name="tSelectDateRange">Időtartamválasztás</string>
+
     <string name="tLogoutQuestion">Biztosan ki szeretne jelentkezni?</string>
     <string name="tYes">Igen</string>
     <string name="tNo">Nem</string>
 
     <string name="title_activity_new_appointment">Új időpont létrehozása</string>
+    <string name="title_activity_new_appointment_Detail">Időpont</string>
     <string name="tCancel">Mégsem</string>
     <string name="tSave">Mentés</string>
     <string name="tPrivate">Magán időpont:</string>
@@ -75,6 +77,10 @@
     <string name="tVideoChat">Videochat:</string>
     <string name="tNotification">Emlékeztető:</string>
     <string name="tNote">Jegyzet:</string>
+    <string name="tModify">Módosítás</string>
+    <string name="tCancelAppointment">Lemondás</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 
 </resources>

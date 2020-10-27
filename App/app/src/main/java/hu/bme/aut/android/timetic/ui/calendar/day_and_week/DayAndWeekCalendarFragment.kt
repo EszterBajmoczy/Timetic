@@ -1,7 +1,9 @@
 package hu.bme.aut.android.timetic.ui.calendar.day_and_week
 
+import android.R.attr.key
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,9 +13,9 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
-import com.alamkanak.weekview.*
-import hu.bme.aut.android.timetic.create.NewAppointmentActivity
+import com.alamkanak.weekview.WeekView
 import hu.bme.aut.android.timetic.R
+import hu.bme.aut.android.timetic.create.NewAppointmentActivity
 import hu.bme.aut.android.timetic.data.model.Appointment
 import hu.bme.aut.android.timetic.ui.calendar.CalendarViewModel
 
@@ -39,7 +41,7 @@ class DayAndWeekCalendarFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProviders.of(this).get(CalendarViewModel::class.java)
-
+        Log.d("EZAZ", "fragment")
 
         weekView = requireActivity().findViewById<WeekView<Appointment>>(R.id.weekView)
         // TODO: Use the ViewModel
@@ -63,36 +65,44 @@ class DayAndWeekCalendarFragment : Fragment() {
         })
 
         //set viewType
-        setCalendarType()
+        val bundle = this.arguments
+        if (bundle != null) {
+            val type = bundle.getString("CalendarType", "Weekly")
+            setCalendarType(type)
+        }
 
         //TODO
         //set listeners
         weekView.setOnEventClickListener { data, rect ->
-            Toast.makeText(context, "Event  clicked: ", Toast.LENGTH_SHORT).show()
+            val intent = Intent(context, NewAppointmentActivity::class.java)
+            intent.putExtra("NetId", data.netId)
+            startActivity(intent)
         }
 
         weekView.setOnEventLongClickListener { data, rect ->
-            Toast.makeText(context, "Event  long clicked: ", Toast.LENGTH_SHORT).show()
+            val intent = Intent(context, NewAppointmentActivity::class.java)
+            intent.putExtra("NetId", data.netId)
+            startActivity(intent)
         }
 
         weekView.setOnEmptyViewLongClickListener {
             val intent = Intent(activity, NewAppointmentActivity::class.java)
             startActivity(intent)
         }
-        weekView.setOnRangeChangeListener { firstVisibleDate, lastVisibleDate ->  }
+
 
         weekView.setOnRangeChangeListener { firstVisibleDate, lastVisibleDate ->
             Toast.makeText(context, "weekchanged: ", Toast.LENGTH_SHORT).show()
-
+            //TODo
         }
 
     }
 
-    fun setCalendarType(){
+    fun setCalendarType(type: String){
         when (type){
-            ViewType.Daily ->
+            "Daily" ->
                 weekView.numberOfVisibleDays = 1
-            ViewType.Weekly ->
+            "Weekly" ->
                 weekView.numberOfVisibleDays = 7
         }
     }

@@ -27,7 +27,10 @@ class CalendarViewModel : ViewModel() {
 
     init{
         val dao = MyApplication.myDatabase.roomDao()
+        Log.d("EZAZ", "calendarvw")
         repo = DBRepository(dao)
+        Log.d("EZAZ", "getallapps")
+
         apps = repo.getAllAppointments()
         clients = repo.getAllClients()
     }

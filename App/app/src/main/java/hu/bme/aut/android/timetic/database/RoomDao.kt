@@ -17,6 +17,12 @@ interface RoomDao {
     @Query("SELECT * FROM appointment")
     fun getAllAppointments(): LiveData<List<RoomAppointment>>
 
+    @Query("SELECT * FROM appointment WHERE netId == :netId")
+    fun getAppointmentByNetId(netId: String): LiveData<RoomAppointment>
+
+    @Query("DELETE FROM appointment WHERE netId == :netId")
+    fun deleteAppointmentByNetId(netId: String)
+
     @Update
     fun updateAppointment(appointment: RoomAppointment): Int
 

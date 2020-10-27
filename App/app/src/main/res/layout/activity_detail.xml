@@ -2,14 +2,17 @@
 <ScrollView xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/detailAppointment"
+    android:background="@color/colorLight"
+    tools:context=".ui.calendar.detail.DetailActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <GridLayout xmlns:tools="http://schemas.android.com/tools"
+        <GridLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:context=".create.NewAppointmentActivity"
@@ -28,7 +31,7 @@
                 />
 
             <Switch
-                android:id="@+id/swPrivate"
+                android:id="@+id/dPrivate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:switchMinWidth="56dp"
@@ -52,7 +55,7 @@
                 />
 
             <Spinner
-                android:id="@+id/spActivity"
+                android:id="@+id/dActivity"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
@@ -72,14 +75,14 @@
                 android:layout_width="150dp"
                 android:layout_height="match_parent"
                 android:layout_column="0"
-                android:id="@+id/btChooseStartTime">
+                android:id="@+id/dChooseStartTime">
 
 
             </Button>
             <Button
                 android:layout_width="150dp"
                 android:layout_height="match_parent"
-                android:id="@+id/btChooseEndTime">
+                android:id="@+id/dChooseEndTime">
 
             </Button>
 
@@ -96,7 +99,7 @@
                 />
 
             <Spinner
-                android:id="@+id/spClient"
+                android:id="@+id/dClient"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
@@ -113,7 +116,7 @@
                 />
 
             <Spinner
-                android:id="@+id/spLocation"
+                android:id="@+id/dLocation"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
@@ -135,7 +138,7 @@
                 android:orientation="horizontal">
 
                 <EditText
-                    android:id="@+id/etPrice"
+                    android:id="@+id/dPrice"
                     android:layout_width="120dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="15dp"
@@ -163,7 +166,7 @@
                 />
 
             <Switch
-                android:id="@+id/swVideochat"
+                android:id="@+id/dVideochat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:switchMinWidth="56dp"
@@ -186,7 +189,7 @@
 
             <!--TODO numberpicker-->
             <Spinner
-                android:id="@+id/spNotification"
+                android:id="@+id/dNotification"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
@@ -211,7 +214,7 @@
                 />
 
             <EditText
-                android:id="@+id/etNote"
+                android:id="@+id/dNote"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
@@ -231,18 +234,17 @@
             android:layout_margin="20dp">
 
             <Button
-                android:id="@+id/btCancel"
+                android:id="@+id/dCancelAppointment"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
-                android:text="@string/tCancel"/>
+                android:text="@string/tCancelAppointment"/>
 
             <Button
-                android:id="@+id/btSave"
+                android:id="@+id/dModify"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
-                android:text="@string/tSave"/>
+                android:text="@string/tModify"/>
         </LinearLayout>
 
     </LinearLayout>
 </ScrollView>
-

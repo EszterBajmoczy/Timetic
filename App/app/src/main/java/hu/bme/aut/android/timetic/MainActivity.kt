@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
+        Log.d("EZAZ", "mainactivity")
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
@@ -48,21 +49,6 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
-    }
-    private fun succes(token: CommonToken) {
-        Log.d("EZAZ", "succcccess")
-        //TODO
-    }
-
-    private fun succesList(list: List<CommonOrganization>) {
-        Log.d("EZAZ", "succcccess")
-        //TODO
-    }
-
-
-    private fun error(e: Throwable) {
-        Log.d("EZAZ", "errrrrror")
-        //TODO
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

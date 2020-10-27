@@ -44,9 +44,5 @@
             app:key="notification"
             app:title="Notification"
             app:useSimpleSummaryProvider="true" />
-
-
-
     </PreferenceCategory>
-
 </PreferenceScreen>

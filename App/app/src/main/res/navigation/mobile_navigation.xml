@@ -17,7 +17,7 @@
         android:id="@+id/nav_statistic"
         android:name="hu.bme.aut.android.timetic.ui.statistic.StatisticDiagramFragment"
         android:label="@string/menuStatistic"
-        tools:layout="@layout/fragment_statistic" />
+        tools:layout="@layout/statistic_diagram_fragment" />
 
     <fragment
         android:id="@+id/nav_client_operation"
