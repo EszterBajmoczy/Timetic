@@ -141,6 +141,14 @@ class NetworkOrganisationInteractor(organisationUrl: String, auth: HttpBasicAuth
         this.runCallOnBackgroundThread(getToken, onSuccess, onError)
     }
 
+    fun getReportClients(
+        onSuccess: (List<CommonClient>) -> Unit,
+        onError: (Throwable) -> Unit
+    ){
+        val getToken = employeeApi.employeeClientsGet()
+        this.runCallOnBackgroundThread(getToken, onSuccess, onError)
+    }
+
     fun addClient(
         client: CommonClient,
         onSuccess: (CommonClient) -> Unit,
@@ -150,7 +158,7 @@ class NetworkOrganisationInteractor(organisationUrl: String, auth: HttpBasicAuth
         this.runCallOnBackgroundThread(getToken, onSuccess, onError)
     }
 
-    fun getClient(
+    fun getClients(
         onSuccess: (List<CommonClient>) -> Unit,
         onError: (Throwable) -> Unit
     ){

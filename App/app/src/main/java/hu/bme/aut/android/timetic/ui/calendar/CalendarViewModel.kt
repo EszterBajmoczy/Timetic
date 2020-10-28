@@ -1,8 +1,8 @@
 package hu.bme.aut.android.timetic.ui.calendar
 
-import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.*
+import androidx.lifecycle.Observer
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
 import hu.bme.aut.android.timetic.data.model.Appointment
@@ -35,14 +35,14 @@ class CalendarViewModel : ViewModel() {
         clients = repo.getAllClients()
     }
 
-    fun downloadAppointments(secureSharedPreferences: SharedPreferences) {
+    fun downloadAppointments(organisationUrl: String, token: String) {
         backend =
             NetworkOrganisationInteractor(
-                secureSharedPreferences.getString("OrganisationUrl", "").toString(),
+                organisationUrl,
                 null,
                 HttpBearerAuth(
                     "bearer",
-                    secureSharedPreferences.getString("Token", "").toString()
+                    token
                 )
             )
 
@@ -71,7 +71,7 @@ class CalendarViewModel : ViewModel() {
                     videochat = item.online!!, address = item.place, client = item.client!!.name, activity = item.activity!!.name)
                 insert(a)
 
-                if(newOrUpdatedClient(item.client!!)){
+                if(newOrUpdatedClient(item.client)){
                     val c = Client(id = null, netId = item.client.id!!, name = item.client.name!!, email = item.client.email!!, phone = item.client.phone!!)
                     insert(c)
                 }

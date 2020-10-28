@@ -1,6 +1,5 @@
 package hu.bme.aut.android.timetic.ui.calendar.day_and_week
 
-import android.R.attr.key
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -45,9 +44,7 @@ class DayAndWeekCalendarFragment : Fragment() {
 
         weekView = requireActivity().findViewById<WeekView<Appointment>>(R.id.weekView)
         // TODO: Use the ViewModel
-        viewModel.apps.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
-            weekView.submit(it)
-        })
+
 
         val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
         val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
@@ -59,9 +56,12 @@ class DayAndWeekCalendarFragment : Fragment() {
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )
-
-        viewModel.clients.observe(viewLifecycleOwner, Observer {
-            viewModel.downloadAppointments(secureSharedPreferences)
+        viewModel.apps.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
+            weekView.submit(it)
+            viewModel.clients.observe(viewLifecycleOwner, Observer {
+                viewModel.downloadAppointments(secureSharedPreferences.getString("OrganisationUrl", "").toString(),
+                    secureSharedPreferences.getString("Token", "").toString())
+            })
         })
 
         //set viewType
