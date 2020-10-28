@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
@@ -23,7 +24,7 @@ import kotlinx.android.synthetic.main.fragment_calendar_main.*
 
 class CalendarMainFragment : Fragment() {
     private var myContext: FragmentActivity? = null
-    private lateinit var calendarViewModel: CalendarViewModel
+    private lateinit var viewModel: CalendarViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,

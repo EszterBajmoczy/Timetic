@@ -73,9 +73,9 @@ class ClientAdapter(
         notifyItemInserted(list.size - 1)
     }
 
-    fun update(shoppingItems: List<Client>) {
+    fun update(items: List<Client>) {
         list.clear()
-        list.addAll(shoppingItems)
+        list.addAll(items)
         notifyDataSetChanged()
     }
 

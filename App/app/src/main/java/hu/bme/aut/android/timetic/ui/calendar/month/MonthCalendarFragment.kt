@@ -1,27 +1,41 @@
 package hu.bme.aut.android.timetic.ui.calendar.month
 
+import android.content.Intent
+import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
 import hu.bme.aut.android.timetic.R
+import hu.bme.aut.android.timetic.adapter.AppointmentAdapter
+import hu.bme.aut.android.timetic.create.NewAppointmentActivity
+import hu.bme.aut.android.timetic.data.model.Appointment
+import hu.bme.aut.android.timetic.ui.calendar.CalendarViewModel
+import hu.bme.aut.android.timetic.ui.calendar.CalendarViewModelFactory
 import hu.bme.aut.android.timetic.ui.calendar.CurrentDayDecorator
 import kotlinx.android.synthetic.main.month_calendar_fragment.*
+import java.util.*
 
 
-class MonthCalendarFragment : Fragment() {
+class MonthCalendarFragment : Fragment(), AppointmentAdapter.AppointmentItemClickListener {
 
     companion object {
         fun newInstance() =
             MonthCalendarFragment()
     }
 
-    private lateinit var viewModel: MonthCalendarViewModel
+    private lateinit var viewModel: CalendarViewModel
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var adapter: AppointmentAdapter
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -32,28 +46,49 @@ class MonthCalendarFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(MonthCalendarViewModel::class.java)
+        viewModel = ViewModelProvider(requireActivity(), CalendarViewModelFactory()).get(CalendarViewModel::class.java)
         // TODO: Use the ViewModel
 
-        //TODO egymásra rajzolást kijavítani
-        lateinit var widget: MaterialCalendarView
-        val activity = getActivity()
-        widget = view?.findViewById(R.id.calendarMonthView) as MaterialCalendarView
+        val calendarView = view?.findViewById(R.id.calendarMonthView) as MaterialCalendarView
+        viewModel.apps.observe(viewLifecycleOwner, Observer {
+            for(appointment in it){
+                val date = CalendarDay.from(appointment.start_date.get(Calendar.YEAR),  appointment.start_date.get(Calendar.MONTH) + 1, appointment.start_date.get(Calendar.DAY_OF_MONTH))
+                calendarView.addDecorators(CurrentDayDecorator(requireActivity(), date))
+            }
+            calendarView.setOnDateChangedListener { widget, date, selected ->
+                dateMonthView.text = date.day.toString()
+                //TODO list events under the calendar
+                val list = ArrayList<Appointment>()
+                for(item in it) {
+                    val appointmentDate = CalendarDay.from(item.start_date.get(Calendar.YEAR),  item.start_date.get(Calendar.MONTH) + 1, item.start_date.get(Calendar.DAY_OF_MONTH))
+                    if(date == appointmentDate){
+                        list.add(item)
+                    }
+                }
+                adapter.update(list)
+            }
+        })
 
-        val mydate= CalendarDay.from(2020,  10, 15) // year, month, date
-        val mydate0= CalendarDay.from(2020,  10, 14) // year, month, date
-        val mydate1= CalendarDay.from(2020,  10, 25) // year, month, date
-        widget.addDecorators(CurrentDayDecorator(activity, mydate))
-        widget.addDecorators(CurrentDayDecorator(activity, mydate))
-        widget.addDecorators(CurrentDayDecorator(activity, mydate0))
-        widget.addDecorators(CurrentDayDecorator(activity, mydate1))
-
-        calendarMonthView.setOnDateLongClickListener { widget, date ->
+        calendarView.setOnDateLongClickListener { widget, date ->
             Log.e("Yesss", "onDateClick:" + date.toString())
-            // TODO new event
+            val intent = Intent(activity, NewAppointmentActivity::class.java)
+            startActivity(intent)
         }
 
-        //TODO list events under the calendar
+        initRecyclerView()
+    }
+
+    private fun initRecyclerView() {
+        recyclerView = MainRecyclerView
+        adapter = AppointmentAdapter(this)
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        recyclerView.adapter = adapter
+    }
+
+    override fun onItemClick(appointment: Appointment) {
+        val intent = Intent(context, NewAppointmentActivity::class.java)
+        intent.putExtra("NetId", appointment.netId)
+        startActivity(intent)
     }
 
 }

@@ -16,17 +16,46 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys
 import hu.bme.aut.android.timetic.network.models.CommonOrganization
 import hu.bme.aut.android.timetic.network.models.CommonToken
 import hu.bme.aut.android.timetic.settings.SettingsActivity
+import hu.bme.aut.android.timetic.ui.calendar.CalendarViewModel
+import hu.bme.aut.android.timetic.ui.calendar.CalendarViewModelFactory
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
+    private lateinit var viewModel: CalendarViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
+
+        val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
+        val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
+
+        val secureSharedPreferences = EncryptedSharedPreferences.create(
+            "secure_shared_preferences",
+            masterKeyAlias,
+            applicationContext,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+
+        viewModel = ViewModelProvider(this, CalendarViewModelFactory()).get(CalendarViewModel::class.java)
+
+        //begin datafetch for calendarviews
+        viewModel.apps.observe(this, androidx.lifecycle.Observer {
+            viewModel.clients.observe(this, Observer {
+                viewModel.downloadAppointments(secureSharedPreferences.getString("OrganisationUrl", "").toString(),
+                    secureSharedPreferences.getString("Token", "").toString())
+            })
+        })
+
         Log.d("EZAZ", "mainactivity")
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)

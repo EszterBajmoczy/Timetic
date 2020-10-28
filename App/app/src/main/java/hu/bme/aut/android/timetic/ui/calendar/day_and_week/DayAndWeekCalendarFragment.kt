@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
@@ -17,6 +18,7 @@ import hu.bme.aut.android.timetic.R
 import hu.bme.aut.android.timetic.create.NewAppointmentActivity
 import hu.bme.aut.android.timetic.data.model.Appointment
 import hu.bme.aut.android.timetic.ui.calendar.CalendarViewModel
+import hu.bme.aut.android.timetic.ui.calendar.CalendarViewModelFactory
 
 
 class DayAndWeekCalendarFragment : Fragment() {
@@ -39,29 +41,13 @@ class DayAndWeekCalendarFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(CalendarViewModel::class.java)
+        viewModel = ViewModelProvider(requireActivity(), CalendarViewModelFactory()).get(CalendarViewModel::class.java)
         Log.d("EZAZ", "fragment")
 
         weekView = requireActivity().findViewById<WeekView<Appointment>>(R.id.weekView)
-        // TODO: Use the ViewModel
 
-
-        val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
-        val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
-
-        val secureSharedPreferences = EncryptedSharedPreferences.create(
-            "secure_shared_preferences",
-            masterKeyAlias,
-            requireContext(),
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
         viewModel.apps.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
             weekView.submit(it)
-            viewModel.clients.observe(viewLifecycleOwner, Observer {
-                viewModel.downloadAppointments(secureSharedPreferences.getString("OrganisationUrl", "").toString(),
-                    secureSharedPreferences.getString("Token", "").toString())
-            })
         })
 
         //set viewType

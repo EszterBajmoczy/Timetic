@@ -17,7 +17,6 @@
         android:layout_height="64dp"
         android:layout_marginStart="16dp"
         android:gravity="center_vertical"
-        android:text="Nagy Éva"
         android:textColor="@color/colorAccentDark"
         android:textSize="24sp"
         android:textStyle="bold" />
