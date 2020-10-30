@@ -14,6 +14,7 @@ import hu.bme.aut.android.timetic.dataManager.DBRepository
 import hu.bme.aut.android.timetic.network.models.ForEmployeeDataForAppointmentCreation
 import kotlinx.coroutines.launch
 import java.util.*
+import kotlin.collections.ArrayList
 
 class CalendarViewModel : ViewModel() {
     private lateinit var backend: NetworkOrganisationInteractor
@@ -59,8 +60,12 @@ class CalendarViewModel : ViewModel() {
         Log.d("EZAZ", "appontments success")
         _appointments.value = list
         appointments = _appointments
+        val appointmentIds = ArrayList<String>()
 
+        //check if it is already in the local database
         for (item in list){
+            appointmentIds.add(item.id!!)
+
             val start = Calendar.getInstance()
             start.timeInMillis = item.startTime!!
             val end = Calendar.getInstance()
@@ -74,6 +79,18 @@ class CalendarViewModel : ViewModel() {
                 if(newOrUpdatedClient(item.client)){
                     val c = Client(id = null, netId = item.client.id!!, name = item.client.name!!, email = item.client.email!!, phone = item.client.phone!!)
                     insert(c)
+                }
+            }
+        }
+        deleteCanceledAppointments(appointmentIds)
+    }
+
+    //delete if some Appointment was deleted at the server side
+    private fun deleteCanceledAppointments(ids: List<String>) {
+        apps.let {
+            for(item in apps.value!!){
+                if(!ids.contains(item.netId)){
+                    delete(item)
                 }
             }
         }

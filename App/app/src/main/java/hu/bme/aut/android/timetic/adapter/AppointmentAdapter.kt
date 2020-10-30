@@ -1,6 +1,5 @@
 package hu.bme.aut.android.timetic.adapter
 
-import android.location.Location
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup

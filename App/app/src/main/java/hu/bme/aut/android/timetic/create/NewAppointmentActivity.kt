@@ -68,18 +68,16 @@ class NewAppointmentActivity : AppCompatActivity() {
 
         //TODO viewmodelfactory?
         viewModel = ViewModelProviders.of(this).get(NewAppointmentViewModel::class.java)
+        viewModel.getDataForAppointmentCreation(secureSharedPreferences.getString("OrganisationUrl", "").toString(),
+            secureSharedPreferences.getString("Token", "").toString())
+
         if(appointmentId != null){
             //Details view
             viewModel.getAppointmentByNetId(appointmentId)
-            secureSharedPreferences.getString("OrganisationUrl", "").toString()
-            secureSharedPreferences.getString("Token", "").toString()
-            viewModel.appDetail.observe(this,  AppObserver(secureSharedPreferences.getString("OrganisationUrl", "").toString(), secureSharedPreferences.getString("Token", "").toString()))
+            viewModel.appDetail.observe(this,  AppObserver())
         }
         else{
             //Create view
-            viewModel.getDataForAppointmentCreation(secureSharedPreferences.getString("OrganisationUrl", "").toString(),
-                secureSharedPreferences.getString("Token", "").toString())
-
             viewModel.clients.observe(this, androidx.lifecycle.Observer {
                 clients = it
                 setClientSpinner(getStringClients(it))
@@ -124,12 +122,9 @@ class NewAppointmentActivity : AppCompatActivity() {
 
     }
 
-    private fun AppObserver(organisationUrl: String, token: String): Observer<Appointment> {
+    private fun AppObserver(): Observer<Appointment> {
         observer = androidx.lifecycle.Observer<Appointment> { app ->
             appointment = app
-
-            viewModel.getDataForAppointmentCreation(organisationUrl,
-                token)
 
             viewModel.clients.observe(this, androidx.lifecycle.Observer {
                 clients = it
@@ -157,10 +152,18 @@ class NewAppointmentActivity : AppCompatActivity() {
 
             btCancel.setText(R.string.tCancelAppointment)
             btCancel.setOnClickListener {
-                viewModel.appDetail.removeObserver(observer)
-                viewModel.cancelAppointment(app.netId)
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
+                val tomorrow = Calendar.getInstance()
+                tomorrow.add(Calendar.DAY_OF_MONTH, 1)
+
+                if(startTime != null && endTime != null && startTime!! < tomorrow.timeInMillis){
+                    Toast.makeText(this, "Holnapnál korábbi időpont lemondása nem lehetséges", Toast.LENGTH_LONG).show()
+                }
+                else{
+                    viewModel.appDetail.removeObserver(observer)
+                    viewModel.cancelAppointment(app.netId)
+                    val intent = Intent(this, MainActivity::class.java)
+                    startActivity(intent)
+                }
             }
 
             btSave.setText(R.string.tModify)
@@ -207,7 +210,19 @@ class NewAppointmentActivity : AppCompatActivity() {
     }
 
     private fun checkData(): Boolean {
+        if(startTime != null && endTime != null && startTime!! >= endTime!!){
+            Toast.makeText(this, "A kezdő időpont nem lehet hamarabb, mint az időpont vége.", Toast.LENGTH_LONG).show()
+            return false
+        }
         if(startTime != null && endTime != null && etPrice.text.toString() != ""){
+            //it is not possible to modify and add appointment before tomorrow
+            val tomorrow = Calendar.getInstance()
+            tomorrow.add(Calendar.DAY_OF_MONTH, 1)
+
+            if(startTime != null && endTime != null && startTime!! < tomorrow.timeInMillis){
+                Toast.makeText(this, "Holnapnál korábbi időpont megadása nem lehetséges", Toast.LENGTH_LONG).show()
+                return false
+            }
             return true
         }
         else if(startTime != null && endTime != null) {
@@ -242,7 +257,7 @@ class NewAppointmentActivity : AppCompatActivity() {
                             c.set(Calendar.MINUTE, minute)
                             startTime = c.timeInMillis
 
-                            val simpleFormat = SimpleDateFormat("MM.dd.yyyy\nhh:mm", Locale.getDefault())
+                            val simpleFormat = SimpleDateFormat("MM.dd.yyyy\nHH:mm", Locale.getDefault())
                             btChooseStartTime.text = simpleFormat.format(c.time)
 
                             val sp = PreferenceManager.getDefaultSharedPreferences (applicationContext)

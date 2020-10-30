@@ -51,6 +51,7 @@ class MonthCalendarFragment : Fragment(), AppointmentAdapter.AppointmentItemClic
 
         val calendarView = view?.findViewById(R.id.calendarMonthView) as MaterialCalendarView
         viewModel.apps.observe(viewLifecycleOwner, Observer {
+            calendarView.removeDecorators()
             for(appointment in it){
                 val date = CalendarDay.from(appointment.start_date.get(Calendar.YEAR),  appointment.start_date.get(Calendar.MONTH) + 1, appointment.start_date.get(Calendar.DAY_OF_MONTH))
                 calendarView.addDecorators(CurrentDayDecorator(requireActivity(), date))
