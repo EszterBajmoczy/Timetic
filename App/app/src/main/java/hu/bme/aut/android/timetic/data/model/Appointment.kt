@@ -17,7 +17,7 @@ class Appointment(
     val address: String?,
     val client: String?,
     val activity: String?
-) : WeekViewDisplayable<Appointment> {
+) : WeekViewDisplayable<Appointment>, Comparable<Appointment> {
 
     override fun toWeekViewEvent(): WeekViewEvent<Appointment> {
         // Build the styling of the event, for instance background color and strike-through
@@ -36,4 +36,7 @@ class Appointment(
 
     }
 
+    override fun compareTo(other: Appointment): Int {
+        return start_date.timeInMillis.compareTo(other.start_date.timeInMillis)
+    }
 }

@@ -23,13 +23,21 @@ class AppointmentAdapter(private val listener: AppointmentItemClickListener) :
 
     override fun onBindViewHolder(holder: AppointmentViewHolder, position: Int) {
         val item = items[position]
-        val time = "${item.start_date.get(Calendar.HOUR_OF_DAY)}:${item.start_date.get(Calendar.MINUTE)} " +
-                "- ${item.end_date.get(Calendar.HOUR_OF_DAY)}:${item.end_date.get(Calendar.MINUTE)}"
+
+        val time = "${format(item.start_date.get(Calendar.HOUR_OF_DAY))}:${format(item.start_date.get(Calendar.MINUTE))} " +
+                "- ${format(item.end_date.get(Calendar.HOUR_OF_DAY))}:${format(item.end_date.get(Calendar.MINUTE))}"
 
         holder.name.text = item.activity
         holder.time.text = time
 
         holder.item = item
+    }
+
+    private fun format(value: Int) : String{
+        if(value.toString().length == 1){
+            return "${0}${value}"
+        }
+        return value.toString()
     }
 
     override fun getItemCount(): Int {
@@ -61,6 +69,7 @@ class AppointmentAdapter(private val listener: AppointmentItemClickListener) :
 
     fun update(list: List<Appointment>) {
         items.clear()
+        Collections.sort(list)
         items.addAll(list)
         notifyDataSetChanged()
     }

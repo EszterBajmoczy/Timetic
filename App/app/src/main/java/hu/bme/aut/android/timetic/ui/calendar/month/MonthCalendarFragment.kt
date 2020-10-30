@@ -71,7 +71,6 @@ class MonthCalendarFragment : Fragment(), AppointmentAdapter.AppointmentItemClic
         })
 
         calendarView.setOnDateLongClickListener { widget, date ->
-            Log.e("Yesss", "onDateClick:" + date.toString())
             val intent = Intent(activity, NewAppointmentActivity::class.java)
             startActivity(intent)
         }
@@ -91,5 +90,9 @@ class MonthCalendarFragment : Fragment(), AppointmentAdapter.AppointmentItemClic
         intent.putExtra("NetId", appointment.netId)
         startActivity(intent)
     }
+
+}
+
+fun Appointment.compare() {
 
 }

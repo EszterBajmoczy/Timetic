@@ -218,6 +218,10 @@ class NewAppointmentActivity : AppCompatActivity() {
             //it is not possible to modify and add appointment before tomorrow
             val tomorrow = Calendar.getInstance()
             tomorrow.add(Calendar.DAY_OF_MONTH, 1)
+            tomorrow.set(Calendar.HOUR_OF_DAY, 0)
+            tomorrow.set(Calendar.MINUTE, 0)
+            tomorrow.set(Calendar.MILLISECOND, 0)
+            tomorrow.add(Calendar.MILLISECOND, -1)
 
             if(startTime != null && endTime != null && startTime!! < tomorrow.timeInMillis){
                 Toast.makeText(this, "Holnapnál korábbi időpont megadása nem lehetséges", Toast.LENGTH_LONG).show()
@@ -334,9 +338,12 @@ class NewAppointmentActivity : AppCompatActivity() {
         else{
             //setDefaultActivity from settings
             val sp = PreferenceManager.getDefaultSharedPreferences (applicationContext)
-            val defaultIndex = sp.getString("activityType", "0")
-            if(defaultIndex != null){
-                spActivity.setSelection(defaultIndex!!.toInt())
+            val defaultActivity = sp.getString("activityType", "")
+            defaultActivity?.let {
+                val index = activityList.indexOf(defaultActivity)
+                if(index != -1){
+                    spActivity.setSelection(index)
+                }
             }
         }
         spActivity.onItemSelectedListener = object : OnItemSelectedListener {

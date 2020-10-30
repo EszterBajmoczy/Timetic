@@ -52,14 +52,10 @@ class SettingsActivity : AppCompatActivity() {
             viewModel.activities.observe(this, androidx.lifecycle.Observer {
                 val entryValues = ArrayList<String>()
 
-                for ((index, value) in it.withIndex()) {
-                    entryValues.add(index.toString())
-                }
-
                 if (activityType != null) {
                     activityType.entries = it.toTypedArray()
-                    activityType.setDefaultValue("1")
-                    activityType.entryValues = entryValues.toTypedArray()
+                    activityType.setDefaultValue(it[0])
+                    activityType.entryValues = it.toTypedArray()
                 }
             })
         }
