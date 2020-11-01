@@ -43,6 +43,7 @@
 
 
             <TextView
+                android:id="@+id/tActivity"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:text="@string/tActivity"
@@ -87,6 +88,7 @@
 
 
             <TextView
+                android:id="@+id/tClient"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:text="@string/tClient"
@@ -104,6 +106,7 @@
                 android:padding="2dp"/>
 
             <TextView
+                android:id="@+id/tLocation"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:text="@string/tPlace"
@@ -121,6 +124,7 @@
                 android:padding="2dp"/>
 
             <TextView
+                android:id="@+id/tPrice"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:text="@string/tPrice_"
@@ -144,6 +148,7 @@
                     android:inputType="numberDecimal"/>
 
                 <TextView
+                    android:id="@+id/tFt"
                     android:layout_width="30dp"
                     android:layout_height="wrap_content"
                     android:text="@string/tFT"
@@ -154,6 +159,7 @@
             </LinearLayout>
 
             <TextView
+                android:id="@+id/tVideochat"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:text="@string/tVideoChat"

@@ -35,9 +35,6 @@ class NewAppointmentViewModel : ViewModel() {
 
     var appDetail: LiveData<Appointment>
 
-    private val _result = MutableLiveData<Boolean>()
-    val result: LiveData<Boolean> = _result
-
     private lateinit var id: String
 
     init{
@@ -53,8 +50,7 @@ class NewAppointmentViewModel : ViewModel() {
 
     fun getDataForAppointmentCreation(organisationUrl: String, token: String){
         backend =
-            NetworkOrganisationInteractor(
-                organisationUrl,
+            NetworkOrganisationInteractor(organisationUrl,
                 null,
                 HttpBearerAuth(
                     "bearer",
@@ -143,43 +139,32 @@ class NewAppointmentViewModel : ViewModel() {
 
         deleteById(appointment.id!!)
 
-        val start = Calendar.getInstance()
-        start.timeInMillis = appointment.startTime!!
-        val end = Calendar.getInstance()
-        end.timeInMillis = appointment.endTime!!
+        val a = appointment.getAppointment()
 
-        val a = Appointment(id = null, netId = appointment.id, note = appointment.note, start_date = start, end_date = end, price = appointment.price, private_appointment = appointment.isPrivate!!,
-            videochat = appointment.online!!, address = appointment.place, client = appointment.client!!.name, activity = appointment.activity!!.name)
-        insert(a)
-
-        val c = Client(id = null, netId = appointment.client.id!!, name = appointment.client.name!!, email = appointment.client.email!!, phone = appointment.client.phone!!)
-        if(newOrUpdatedClient(appointment.client, c)){
-            insert(c)
+        if(!appointment.isPrivate!!){
+            val c = appointment.getClient()
+            if(c != null && newOrUpdatedClient(appointment.client!!, c)){
+                insert(c)
+            }
         }
+        insert(a)
     }
 
     private fun deleteById(id: String)   = viewModelScope.launch {
         repo.deleteAppointmentByNetId(id)
-
-        _result.value = true
     }
 
     private fun successAddAppointment(appointment: CommonAppointment) {
         Log.d("EZAZ", "adding success")
 
-        val start = Calendar.getInstance()
-        start.timeInMillis = appointment.startTime!!
-        val end = Calendar.getInstance()
-        end.timeInMillis = appointment.endTime!!
-
-        val a = Appointment(id = null, netId = appointment.id!!, note = appointment.note, start_date = start, end_date = end, price = appointment.price, private_appointment = appointment.isPrivate!!,
-            videochat = appointment.online!!, address = appointment.place, client = appointment.client!!.name, activity = appointment.activity!!.name)
-        insert(a)
-
-        val c = Client(id = null, netId = appointment.client.id!!, name = appointment.client.name!!, email = appointment.client.email!!, phone = appointment.client.phone!!)
-        if(newOrUpdatedClient(appointment.client, c)){
-            insert(c)
+        val a = appointment.getAppointment()
+        if(!appointment.isPrivate!!){
+            val c = appointment.getClient()
+            if(c != null && newOrUpdatedClient(appointment.client!!, c)){
+                insert(c)
+            }
         }
+        insert(a)
     }
 
     private fun errorAddAppointment(e: Throwable) {
@@ -216,5 +201,40 @@ class NewAppointmentViewModel : ViewModel() {
 
     private fun delete(client: Client) = viewModelScope.launch {
         repo.deleteClient(client)
+    }
+}
+
+fun CommonAppointment.getAppointment(): Appointment{
+    val start = Calendar.getInstance()
+    start.timeInMillis = startTime!!
+    val end = Calendar.getInstance()
+    end.timeInMillis = endTime!!
+    return if(isPrivate!!){
+        Appointment(id = null, netId = id!!, note = note, start_date = start, end_date = end, price = null, private_appointment = isPrivate,
+            videochat = null, address = place, client = null, activity = null)
+    }
+    else {
+        Appointment(
+            id = null,
+            netId = id!!,
+            note = note,
+            start_date = start,
+            end_date = end,
+            price = price,
+            private_appointment = isPrivate,
+            videochat = online!!,
+            address = place,
+            client = client!!.name,
+            activity = activity!!.name
+        )
+    }
+}
+
+fun CommonAppointment.getClient(): Client? {
+    return if(isPrivate!!) {
+         null
+    }
+    else {
+        Client(id = null, netId = client!!.id!!, name = client.name!!, email = client.email!!, phone = client.phone!!)
     }
 }

@@ -8,11 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
 import com.alamkanak.weekview.WeekView
 import hu.bme.aut.android.timetic.R
 import hu.bme.aut.android.timetic.create.NewAppointmentActivity

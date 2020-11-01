@@ -4,8 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
+import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
 
 
@@ -16,22 +15,11 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.settings_activity)
 
-
-        val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
-        val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
-
-        val secureSharedPreferences = EncryptedSharedPreferences.create(
-            "secure_shared_preferences",
-            masterKeyAlias,
-            applicationContext,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
+        val secureSharedPreferences = MyApplication.secureSharedPreferences
 
         //TODO viewmodelfactory?
         viewModel = SettingsViewModel()
-        viewModel.getDataForAppointmentCreation(secureSharedPreferences.getString("OrganisationUrl", "").toString(),
-            secureSharedPreferences.getString("Token", "").toString())
+        viewModel.getDataForAppointmentCreation(secureSharedPreferences.getString("OrganisationUrl", "").toString(), secureSharedPreferences.getString("Token", "").toString())
 
         supportFragmentManager
             .beginTransaction()

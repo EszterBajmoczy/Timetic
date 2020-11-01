@@ -1,10 +1,14 @@
 package hu.bme.aut.android.timetic
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.app.AlertDialog
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
@@ -18,10 +22,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
-import hu.bme.aut.android.timetic.network.models.CommonOrganization
-import hu.bme.aut.android.timetic.network.models.CommonToken
+import hu.bme.aut.android.timetic.data.model.Appointment
+import hu.bme.aut.android.timetic.data.model.Client
 import hu.bme.aut.android.timetic.settings.SettingsActivity
 import hu.bme.aut.android.timetic.ui.calendar.CalendarViewModel
 import hu.bme.aut.android.timetic.ui.calendar.CalendarViewModelFactory
@@ -30,30 +32,56 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var viewModel: CalendarViewModel
+    private var initialized = false
+
+    private val logoutReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val secureSharedPreferences = MyApplication.secureSharedPreferences
+
+            val editor = secureSharedPreferences.edit()
+            editor.remove("OrganisationUrl")
+            editor.remove("RefreshToken")
+            editor.remove("Token")
+            editor.apply()
+
+            val intent = Intent(this@MainActivity, StartScreenActivity::class.java)
+            startActivity(intent)
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        registerReceiver(logoutReceiver, IntentFilter("Logout"))
+    }
+
+    override fun onPause() {
+        super.onPause()
+        unregisterReceiver(logoutReceiver)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
 
-        val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
-        val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
-
-        val secureSharedPreferences = EncryptedSharedPreferences.create(
-            "secure_shared_preferences",
-            masterKeyAlias,
-            applicationContext,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
+        val pref = MyApplication.secureSharedPreferences
 
         viewModel = ViewModelProvider(this, CalendarViewModelFactory()).get(CalendarViewModel::class.java)
 
+        val clientObserver = androidx.lifecycle.Observer<List<Client>> {
+            viewModel.downloadAppointments(pref.getString("OrganisationUrl", "").toString(),
+                pref.getString("Token", "").toString())
+        }
+
+        val appObserver = androidx.lifecycle.Observer<List<Appointment>> {
+            viewModel.clients.observe(this, clientObserver)
+        }
+
         //begin datafetch for calendarviews
-        viewModel.apps.observe(this, androidx.lifecycle.Observer {
-            viewModel.clients.observe(this, Observer {
-                viewModel.downloadAppointments(secureSharedPreferences.getString("OrganisationUrl", "").toString(),
-                    secureSharedPreferences.getString("Token", "").toString())
-            })
+        viewModel.apps.observe(this, appObserver)
+
+        viewModel.appointments.observe(this, Observer{
+            viewModel.apps.removeObserver(appObserver)
+            viewModel.clients.removeObserver(clientObserver)
         })
 
         Log.d("EZAZ", "mainactivity")
@@ -72,7 +100,7 @@ class MainActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.nav_calendar, R.id.nav_statistic, R.id.nav_client_operation
+                R.id.nav_calendar, R.id.nav_statistic, R.id.nav_client_operation, R.id.nav_log_out
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -102,6 +130,4 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
-
-
 }

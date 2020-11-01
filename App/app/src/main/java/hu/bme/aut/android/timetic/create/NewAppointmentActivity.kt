@@ -6,7 +6,6 @@ import android.app.TimePickerDialog
 import android.app.TimePickerDialog.OnTimeSetListener
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
@@ -16,9 +15,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.preference.PreferenceManager
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
 import hu.bme.aut.android.timetic.MainActivity
+import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
 import hu.bme.aut.android.timetic.data.model.Appointment
 import hu.bme.aut.android.timetic.network.models.CommonActivity
@@ -55,21 +53,43 @@ class NewAppointmentActivity : AppCompatActivity() {
 
         //TODO csak netkapcsolatkor lehessen újat létrehozni
 
-        val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
-        val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
-
-        val secureSharedPreferences = EncryptedSharedPreferences.create(
-            "secure_shared_preferences",
-            masterKeyAlias,
-            applicationContext,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
+        val secureSharedPreferences = MyApplication.secureSharedPreferences
 
         //TODO viewmodelfactory?
         viewModel = ViewModelProviders.of(this).get(NewAppointmentViewModel::class.java)
         viewModel.getDataForAppointmentCreation(secureSharedPreferences.getString("OrganisationUrl", "").toString(),
             secureSharedPreferences.getString("Token", "").toString())
+
+        swPrivate.setOnCheckedChangeListener { buttonView, isChecked ->
+            if(isChecked){
+                tActivity.visibility = View.GONE
+                spActivity.visibility = View.GONE
+
+                tClient.visibility = View.GONE
+                spClient.visibility = View.GONE
+
+                tPrice.visibility = View.GONE
+                etPrice.visibility = View.GONE
+                tFt.visibility = View.GONE
+
+                tVideochat.visibility = View.GONE
+                swVideochat.visibility = View.GONE
+            }
+            else{
+                tActivity.visibility = View.VISIBLE
+                spActivity.visibility = View.VISIBLE
+
+                tClient.visibility = View.VISIBLE
+                spClient.visibility = View.VISIBLE
+
+                tPrice.visibility = View.VISIBLE
+                etPrice.visibility = View.VISIBLE
+                tFt.visibility = View.VISIBLE
+
+                tVideochat.visibility = View.VISIBLE
+                swVideochat.visibility = View.VISIBLE
+            }
+        }
 
         if(appointmentId != null){
             //Details view
@@ -144,6 +164,8 @@ class NewAppointmentActivity : AppCompatActivity() {
             })
             setTitle(R.string.title_activity_new_appointment_Detail)
 
+            swPrivate.isChecked = app.private_appointment
+
             //TODO notificatiion
             setNotificationSpinner()
 
@@ -174,6 +196,7 @@ class NewAppointmentActivity : AppCompatActivity() {
                     app.private_appointment == a.isPrivate && app.client == a.client!!.name &&
                     app.activity == a.activity!!.name && app.address == a.place &&
                     app.price == a.price && app.videochat == a.online && app.note == a.note){
+
                     val intent = Intent(this, MainActivity::class.java)
                     startActivity(intent)
                 }
@@ -183,8 +206,13 @@ class NewAppointmentActivity : AppCompatActivity() {
                     startActivity(intent)
                 }
             }
+            if(app.videochat != null){
+                swVideochat.isChecked = app.videochat
+            }
+            else{
+                swVideochat.isChecked = false
+            }
 
-            swVideochat.isChecked = app.videochat
             etNote.setText(app.note)
 
             etPrice.setText(app.price.toString())
@@ -205,14 +233,27 @@ class NewAppointmentActivity : AppCompatActivity() {
     }
 
     private fun getAppointment() : CommonAppointment{
-        return CommonAppointment(id = appointment?.netId, isPrivate = swPrivate.isChecked, startTime = startTime, endTime = endTime, client = client, activity = activity, employee = employee, place = place,
-            price = etPrice.text.toString().toDouble(), online = swVideochat.isChecked, note = etNote.text.toString())
+        return if(swPrivate.isChecked){
+            CommonAppointment(id = appointment?.netId, isPrivate = swPrivate.isChecked, startTime = startTime, endTime = endTime, client = null, activity = null, employee = employee, place = place,
+                price = null, online = null, note = etNote.text.toString())
+        }
+        else{
+            CommonAppointment(id = appointment?.netId, isPrivate = swPrivate.isChecked, startTime = startTime, endTime = endTime, client = client, activity = activity, employee = employee, place = place,
+                price = etPrice.text.toString().toDouble(), online = swVideochat.isChecked, note = etNote.text.toString())
+        }
     }
 
     private fun checkData(): Boolean {
+        if(startTime == null || endTime == null ){
+            Toast.makeText(this, "Időpontot kötelező megadni", Toast.LENGTH_LONG).show()
+            return false
+        }
         if(startTime != null && endTime != null && startTime!! >= endTime!!){
             Toast.makeText(this, "A kezdő időpont nem lehet hamarabb, mint az időpont vége.", Toast.LENGTH_LONG).show()
             return false
+        }
+        if(swPrivate.isChecked){
+            return true
         }
         if(startTime != null && endTime != null && etPrice.text.toString() != ""){
             //it is not possible to modify and add appointment before tomorrow
@@ -233,10 +274,7 @@ class NewAppointmentActivity : AppCompatActivity() {
             Toast.makeText(this, "Árat kötelező megadni", Toast.LENGTH_LONG).show()
             return false
         }
-        else{
-            Toast.makeText(this, "Időpontot kötelező megadni", Toast.LENGTH_LONG).show()
-            return false
-        }
+        return false
     }
 
     private fun setDateChooseButtons(){

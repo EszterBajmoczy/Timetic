@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import android.util.Patterns
+import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.dataManager.NetworkDeveloperInteractor
 import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
 
@@ -33,6 +34,10 @@ class LoginViewModel : ViewModel() {
 
     fun login(email: String, password: String, organisationUrl: String?) {
         this.organisationUrl = organisationUrl
+        val pref = MyApplication.secureSharedPreferences
+        val editor = pref.edit()
+        editor.putString("Email", email)
+        editor.apply()
         if(organisationUrl != null){
             val backend =
                 NetworkOrganisationInteractor(
@@ -77,7 +82,7 @@ class LoginViewModel : ViewModel() {
     }
 
     private fun successRefreshToken(token: CommonToken) {
-        Log.d("EZAZ", "getToken succcccess")
+        Log.d("EZAZ", "getToken succcccess RRRRRRRRRR")
         _refreshToken.value = token.token
 
         if(organisationUrl != null){
@@ -89,7 +94,7 @@ class LoginViewModel : ViewModel() {
     }
 
     private fun errorRefreshToken(e: Throwable) {
-        Log.d("EZAZ", "getToken errrrrror")
+        Log.d("EZAZ", "getToken errrrrror RRRRRRRRRR")
         _loginResult.value = Result(success = null, error = R.string.login_failed)
         //TODO
     }

@@ -10,7 +10,6 @@ import hu.bme.aut.android.timetic.dataManager.DBRepository
 import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.network.models.CommonClient
-import hu.bme.aut.android.timetic.network.models.ForEmployeeReport
 
 class ClientOperationsViewModel : ViewModel() {
 

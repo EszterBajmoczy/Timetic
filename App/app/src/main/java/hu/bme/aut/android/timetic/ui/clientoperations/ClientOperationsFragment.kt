@@ -7,15 +7,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
 import hu.bme.aut.android.timetic.adapter.ClientAdapter
+import hu.bme.aut.android.timetic.create.NewAppointmentActivity
+import hu.bme.aut.android.timetic.create.NewClientActivity
 import hu.bme.aut.android.timetic.data.model.Client
 import kotlinx.android.synthetic.main.fragment_client_operations.*
 
@@ -41,20 +44,11 @@ class ClientOperationsFragment : Fragment(), ClientAdapter.ClientClickListener {
 
         //TODO check if filter works
         initRecyclerView()
+        setFloatingActionButton()
 
-        val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
-        val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
-
-        val secureSharedPreferences = EncryptedSharedPreferences.create(
-            "secure_shared_preferences",
-            masterKeyAlias,
-            requireContext(),
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
-
+        val secureSharedPreferences = MyApplication.secureSharedPreferences
         //TODO internetconnection? -> ui, local: true/false
-        viewModel.fetchData(true, secureSharedPreferences.getString("OrganisationUrl", "").toString(),
+        viewModel.fetchData(false, secureSharedPreferences.getString("OrganisationUrl", "").toString(),
             secureSharedPreferences.getString("Token", "").toString())
         viewModel.clients.observe(viewLifecycleOwner, Observer {
             adapter.update(it)
@@ -72,6 +66,12 @@ class ClientOperationsFragment : Fragment(), ClientAdapter.ClientClickListener {
         SearchClient.setOnItemClickListener { parent, view, position, id ->
             adapter.filter.filter(nameList[position])
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.fetchData(false, MyApplication.getOrganisationUrl()!!,
+            MyApplication.getToken()!!)
     }
 
     private fun getNameList(list: List<Client>): List<String> {
@@ -103,5 +103,14 @@ class ClientOperationsFragment : Fragment(), ClientAdapter.ClientClickListener {
     override fun onItemChanged(item: Client) {
         //TODO?
         //Do nothing
+    }
+
+    fun setFloatingActionButton(){
+        val fab = requireActivity().findViewById<FloatingActionButton>(R.id.fab)
+        fab.setOnClickListener {
+            //TODO
+            val intent = Intent(activity, NewClientActivity::class.java)
+            startActivity(intent)
+        }
     }
 }

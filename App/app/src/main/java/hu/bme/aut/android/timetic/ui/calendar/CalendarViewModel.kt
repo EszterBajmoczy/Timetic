@@ -2,8 +2,9 @@ package hu.bme.aut.android.timetic.ui.calendar
 
 import android.util.Log
 import androidx.lifecycle.*
-import androidx.lifecycle.Observer
 import hu.bme.aut.android.timetic.MyApplication
+import hu.bme.aut.android.timetic.create.getAppointment
+import hu.bme.aut.android.timetic.create.getClient
 import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
 import hu.bme.aut.android.timetic.data.model.Appointment
 import hu.bme.aut.android.timetic.data.model.Client
@@ -11,7 +12,6 @@ import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.network.models.CommonAppointment
 import hu.bme.aut.android.timetic.network.models.CommonClient
 import hu.bme.aut.android.timetic.dataManager.DBRepository
-import hu.bme.aut.android.timetic.network.models.ForEmployeeDataForAppointmentCreation
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
@@ -26,6 +26,8 @@ class CalendarViewModel : ViewModel() {
     private val _appointments = MutableLiveData<List<CommonAppointment>>()
     var appointments: LiveData<List<CommonAppointment>> = _appointments
 
+    private lateinit var organisationUrl: String
+
     init{
         val dao = MyApplication.myDatabase.roomDao()
         Log.d("EZAZ", "calendarvw")
@@ -37,8 +39,9 @@ class CalendarViewModel : ViewModel() {
     }
 
     fun downloadAppointments(organisationUrl: String, token: String) {
-        backend =
-            NetworkOrganisationInteractor(
+        Log.d("EZAZ", "appontments downloooooooood")
+        this.organisationUrl = organisationUrl
+        backend = NetworkOrganisationInteractor(
                 organisationUrl,
                 null,
                 HttpBearerAuth(
@@ -48,12 +51,6 @@ class CalendarViewModel : ViewModel() {
             )
 
         backend.getAppointments(onSuccess = this::successAppointmentList, onError = this::errorAppointmentList)
-
-    }
-
-    fun addAppointment(){
-        backend.getDataForAppointmentCreation(onSuccess = this::successDataForCreation, onError = this::errorDataForCreation)
-
     }
 
     private fun successAppointmentList(list: List<CommonAppointment>) {
@@ -61,6 +58,7 @@ class CalendarViewModel : ViewModel() {
         _appointments.value = list
         appointments = _appointments
         val appointmentIds = ArrayList<String>()
+        val checkedClients = ArrayList<CommonClient>()
 
         //check if it is already in the local database
         for (item in list){
@@ -72,14 +70,16 @@ class CalendarViewModel : ViewModel() {
             end.timeInMillis = item.endTime!!
 
             if(newOrUpdatedAppointment(item)){
-                val a = Appointment(id = null, netId = item.id!!, note = item.note, start_date = start, end_date = end, price = item.price, private_appointment = item.isPrivate!!,
-                    videochat = item.online!!, address = item.place, client = item.client!!.name, activity = item.activity!!.name)
-                insert(a)
 
-                if(newOrUpdatedClient(item.client)){
-                    val c = Client(id = null, netId = item.client.id!!, name = item.client.name!!, email = item.client.email!!, phone = item.client.phone!!)
-                    insert(c)
+                val a = item.getAppointment()
+                if(!item.isPrivate!!){
+                    val c = item.getClient()
+                    if(c != null && newOrUpdatedClient(item.client!!) && !checkedClients.contains(item.client)){
+                        checkedClients.add(item.client)
+                        insert(c)
+                    }
                 }
+                insert(a)
             }
         }
         deleteCanceledAppointments(appointmentIds)
@@ -105,6 +105,12 @@ class CalendarViewModel : ViewModel() {
                         item.end_date.timeInMillis == appointment.endTime && item.price == appointment.price &&
                         item.private_appointment == appointment.isPrivate && item.videochat == appointment.online &&
                         item.address == appointment.place && item.client == appointment.client!!.name && item.activity == appointment.activity!!.name){
+                        return false
+                    }
+                    else if(item.note == appointment.note && item.start_date.timeInMillis == appointment.startTime &&
+                        item.end_date.timeInMillis == appointment.endTime &&
+                        item.private_appointment == appointment.isPrivate &&
+                        item.address == appointment.place){
                         return false
                     }
                     delete(item)
@@ -149,29 +155,6 @@ class CalendarViewModel : ViewModel() {
 
     private fun errorAppointmentList(e: Throwable) {
         Log.d("EZAZ", "appontments errrrrror")
-
-        //TODO
-    }
-
-    private fun successDataForCreation(data: ForEmployeeDataForAppointmentCreation) {
-        Log.d("EZAZ", "data success")
-        //backend.addAppointment(a, onSuccess = this::successAppointment, onError = this::errorAppointment)
-
-    }
-
-    private fun errorDataForCreation(e: Throwable) {
-        Log.d("EZAZ", "data errrrrror")
-
-        //TODO
-    }
-
-    private fun successAppointment(token: CommonAppointment) {
-        Log.d("EZAZ", "appointments success")
-
-    }
-
-    private fun errorAppointment(e: Throwable) {
-        Log.d("EZAZ", "appointments errrrrror")
 
         //TODO
     }

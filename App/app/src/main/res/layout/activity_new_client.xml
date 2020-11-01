@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="6dp"
+            android:padding="16dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tClientName"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:text="@string/tName"
+                android:padding="4dp"
+                android:layout_marginTop="15dp"
+                android:textSize="18sp"
+                />
+
+            <EditText
+                android:id="@+id/etClientName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:background="@color/lightgrey"
+                android:padding="2dp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp"
+            android:padding="16dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tClientEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/tEmail"
+                android:padding="4dp"
+                android:layout_marginTop="15dp"
+                android:textSize="18sp"
+                />
+
+            <EditText
+                android:id="@+id/etClientEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:background="@color/lightgrey"
+                android:padding="2dp"
+                android:inputType="textEmailAddress"
+                android:selectAllOnFocus="true"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp"
+            android:padding="16dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tClientPhone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/tPhone"
+                android:padding="4dp"
+                android:layout_marginTop="15dp"
+                android:textSize="18sp"
+                />
+
+            <EditText
+                android:id="@+id/etClientPhone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:background="@color/lightgrey"
+                android:padding="2dp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/tableNewClient"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context=".create.NewClientActivity"
+            android:layout_gravity="center"
+            android:orientation="vertical">
+
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal"
+            android:layout_margin="20dp">
+
+            <Button
+                android:id="@+id/btCancelClient"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:text="@string/tCancel"/>
+
+            <Button
+                android:id="@+id/btSaveClient"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:text="@string/tSave"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
+

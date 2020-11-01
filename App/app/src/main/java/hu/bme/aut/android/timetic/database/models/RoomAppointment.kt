@@ -13,7 +13,7 @@ class RoomAppointment (
     val end_date: Long,
     val price: Double? = null,
     val private_appointment: Boolean,
-    val videochat: Boolean,
+    val videochat: Boolean?,
     val address: String?,
     val client: String?,
     val activity: String?

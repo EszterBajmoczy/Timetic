@@ -1,20 +1,12 @@
 package hu.bme.aut.android.timetic.settings
 
-import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.*
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
-import hu.bme.aut.android.timetic.data.model.Appointment
-import hu.bme.aut.android.timetic.data.model.Client
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
-import hu.bme.aut.android.timetic.network.models.CommonAppointment
-import hu.bme.aut.android.timetic.network.models.CommonClient
 import hu.bme.aut.android.timetic.dataManager.DBRepository
-import hu.bme.aut.android.timetic.network.models.CommonActivity
 import hu.bme.aut.android.timetic.network.models.ForEmployeeDataForAppointmentCreation
-import kotlinx.coroutines.launch
-import java.util.*
 import kotlin.collections.ArrayList
 
 class SettingsViewModel : ViewModel() {

@@ -13,7 +13,7 @@ class Appointment(
     val end_date: Calendar,
     val price: Double? = null,
     val private_appointment: Boolean,
-    val videochat: Boolean,
+    val videochat: Boolean?,
     val address: String?,
     val client: String?,
     val activity: String?
@@ -25,10 +25,20 @@ class Appointment(
             .setBackgroundColor(R.color.colorPrimaryLight)
             .build()
         // Build the WeekViewEvent via the Builder
-        //TODO id, title!
+        val title: String
+        if(activity != null){
+            title = activity
+        }
+        else if(note != null && note != ""){
+            title = note
+        }
+        else{
+            title = "Event"
+        }
+
         return WeekViewEvent.Builder<Appointment>(this)
             .setId(id!!)
-            .setTitle(activity!!)
+            .setTitle(title)
             .setStartTime(start_date)
             .setEndTime(end_date)
             .setStyle(style)

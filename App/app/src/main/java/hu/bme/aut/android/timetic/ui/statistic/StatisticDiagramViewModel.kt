@@ -4,11 +4,8 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import hu.bme.aut.android.timetic.data.model.Appointment
-import hu.bme.aut.android.timetic.data.model.Client
 import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
-import hu.bme.aut.android.timetic.network.models.CommonAppointment
 import hu.bme.aut.android.timetic.network.models.ForEmployeeReport
 
 class StatisticDiagramViewModel : ViewModel() {

@@ -17,9 +17,8 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
 import hu.bme.aut.android.timetic.MainActivity
+import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
 
 
@@ -34,17 +33,7 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
-        val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
-
-        secureSharedPreferences = EncryptedSharedPreferences.create(
-            "secure_shared_preferences",
-            masterKeyAlias,
-            applicationContext,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
-
+        secureSharedPreferences = MyApplication.secureSharedPreferences
         organisationURL = intent.getStringExtra("OrganisationUrl")
 
         val email = findViewById<EditText>(R.id.logEmail)
@@ -87,6 +76,7 @@ class LoginActivity : AppCompatActivity() {
         })
 
         loginViewModel.refreshToken.observe(this@LoginActivity, Observer {
+            MyApplication.refreshToken = it
             val editor = secureSharedPreferences.edit()
             editor.putString("RefreshToken", it)
             editor.apply()

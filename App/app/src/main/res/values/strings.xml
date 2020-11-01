@@ -81,6 +81,10 @@
     <string name="tCancelAppointment">Lemondás</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="tChooseTimeRange">Időtartam kiválasztása</string>
+    <string name="tName">Név</string>
+    <string name="tEmail">Email</string>
+    <string name="tPhone">Telefonszám</string>
 
 
 </resources>

@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
 import hu.bme.aut.android.timetic.dataManager.NetworkDeveloperInteractor
 import hu.bme.aut.android.timetic.network.models.CommonOrganization
 import hu.bme.aut.android.timetic.ui.loginAregistration.login.LoginActivity
@@ -43,16 +41,7 @@ class ChooseOrganisationActivity : AppCompatActivity() {
     }
 
     private fun saveOrganisationUrl(serverUrl: String?) {
-        val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
-        val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
-
-        val secureSharedPreferences = EncryptedSharedPreferences.create(
-            "secure_shared_preferences",
-            masterKeyAlias,
-            applicationContext,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
+        val secureSharedPreferences = MyApplication.secureSharedPreferences
 
         val editor = secureSharedPreferences.edit()
         editor.putString("OrganisationUrl", serverUrl)

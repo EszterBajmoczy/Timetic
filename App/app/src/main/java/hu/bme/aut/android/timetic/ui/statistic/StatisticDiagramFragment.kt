@@ -6,15 +6,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import hu.bme.aut.android.timetic.MainActivity
+import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
 import kotlinx.android.synthetic.main.statistic_diagram_fragment.*
 import org.eazegraph.lib.charts.PieChart
@@ -46,25 +44,15 @@ class StatisticDiagramFragment : Fragment() {
     override fun onDestroyView() {
         val fab = requireActivity().findViewById<FloatingActionButton>(R.id.fab)
         fab.isVisible = true
-
         super.onDestroyView()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(StatisticDiagramViewModel::class.java)
+        viewModel = ViewModelProviders.of(requireActivity()).get(StatisticDiagramViewModel::class.java)
         // TODO: Use the ViewModel
-        val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
-        val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
-
-        val secureSharedPreferences = EncryptedSharedPreferences.create(
-            "secure_shared_preferences",
-            masterKeyAlias,
-            requireContext(),
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
-
+        /*
+        val secureSharedPreferences = MyApplication.secureSharedPreferences
 
         val builder = MaterialDatePicker.Builder.dateRangePicker()
         val now = Calendar.getInstance()
@@ -81,6 +69,8 @@ class StatisticDiagramFragment : Fragment() {
         picker.addOnPositiveButtonClickListener {
             viewModel.fetchData(it.first!!, it.second!!, secureSharedPreferences.getString("OrganisationUrl", "").toString(), secureSharedPreferences.getString("Token", "").toString())
         }
+
+         */
         pieChart1 = piechart1
         pieChart2 = piechart2
 
