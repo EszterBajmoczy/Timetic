@@ -5,11 +5,11 @@
     android:orientation="vertical"
     android:gravity="center">
 
-    <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+    <EditText
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:id="@+id/SearchClient"
-        android:hint="Keresés"
+        android:hint="@string/tSearch"
         android:textColor="@color/colorDark"
         android:textColorHint="@color/colorAccent"
         android:layout_margin="20dp"/>

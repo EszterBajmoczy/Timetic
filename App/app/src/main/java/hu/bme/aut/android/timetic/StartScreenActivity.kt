@@ -13,12 +13,6 @@ class StartScreenActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_start_screen)
 
-        val secureSharedPreferences = MyApplication.secureSharedPreferences
-
-        if(secureSharedPreferences.contains("Token")){
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-        }
         btSignIn.setOnClickListener {
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)

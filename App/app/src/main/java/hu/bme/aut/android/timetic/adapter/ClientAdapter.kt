@@ -74,6 +74,9 @@ class ClientAdapter(
     }
 
     fun update(items: List<Client>) {
+        if(originalList.size == 0){
+            originalList.addAll(items)
+        }
         list.clear()
         list.addAll(items)
         notifyDataSetChanged()

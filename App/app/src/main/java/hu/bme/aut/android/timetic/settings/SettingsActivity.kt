@@ -15,11 +15,10 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.settings_activity)
 
-        val secureSharedPreferences = MyApplication.secureSharedPreferences
 
         //TODO viewmodelfactory?
         viewModel = SettingsViewModel()
-        viewModel.getDataForAppointmentCreation(secureSharedPreferences.getString("OrganisationUrl", "").toString(), secureSharedPreferences.getString("Token", "").toString())
+        viewModel.getDataForAppointmentCreation(MyApplication.getOrganisationUrl()!!, MyApplication.getToken()!!)
 
         supportFragmentManager
             .beginTransaction()

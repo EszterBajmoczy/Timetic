@@ -24,15 +24,27 @@ class MyApplication : Application() {
 	  		private set
 		var developerBaseUrl = "http://optipus.ddns.net:8080"
 
+		enum class ROLE{
+			EMPLOYEE,
+			CLIENT
+		}
+
 		lateinit var secureSharedPreferences: SharedPreferences
-		lateinit var refreshToken: String
 		lateinit var appContext: Context
 		fun getToken(): String? {
 			return secureSharedPreferences.getString("Token", "")
 		}
 
+		fun getRefreshToken(): String? {
+			return secureSharedPreferences.getString("RefreshToken", "")
+		}
+
 		fun getOrganisationUrl(): String? {
 			return secureSharedPreferences.getString("OrganisationUrl", "")
+		}
+
+		fun getEmail(): String? {
+			return secureSharedPreferences.getString("Email", "")
 		}
 
 		fun getOrganisationApiForRefresh(): EmployeeApi {
@@ -44,7 +56,7 @@ class MyApplication : Application() {
 			client =  OkHttpClient.Builder()
 				.addInterceptor(HttpBearerAuth(
 					"bearer",
-					refreshToken
+					getRefreshToken()!!
 				))
 				.build()
 
@@ -115,8 +127,6 @@ class MyApplication : Application() {
 			EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
 			EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
 		)
-
-		refreshToken = secureSharedPreferences.getString("RefreshToken", "")!!
 
 		appContext = applicationContext
 	}

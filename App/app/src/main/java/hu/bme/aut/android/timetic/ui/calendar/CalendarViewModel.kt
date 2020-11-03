@@ -102,6 +102,12 @@ class CalendarViewModel : ViewModel() {
             for(item in apps.value!!){
                 if(item.netId == appointment.id){
                     if(item.note == appointment.note && item.start_date.timeInMillis == appointment.startTime &&
+                        item.end_date.timeInMillis == appointment.endTime &&
+                        item.private_appointment == appointment.isPrivate &&
+                        item.address == appointment.place && appointment.isPrivate){
+                        return false
+                    }
+                    if(item.note == appointment.note && item.start_date.timeInMillis == appointment.startTime &&
                         item.end_date.timeInMillis == appointment.endTime && item.price == appointment.price &&
                         item.private_appointment == appointment.isPrivate && item.videochat == appointment.online &&
                         item.address == appointment.place && item.client == appointment.client!!.name && item.activity == appointment.activity!!.name){

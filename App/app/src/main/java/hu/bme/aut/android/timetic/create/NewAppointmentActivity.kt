@@ -5,6 +5,7 @@ import android.app.DatePickerDialog.OnDateSetListener
 import android.app.TimePickerDialog
 import android.app.TimePickerDialog.OnTimeSetListener
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
@@ -31,6 +32,7 @@ import kotlin.collections.ArrayList
 
 class NewAppointmentActivity : AppCompatActivity() {
     private lateinit var viewModel: NewAppointmentViewModel
+    private lateinit var defaultSharedPreferences: SharedPreferences
     private var startTime : Long? = null
     private var endTime: Long? = null
 
@@ -48,17 +50,14 @@ class NewAppointmentActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_new_appointment)
-
+        defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences (applicationContext)
         val appointmentId = intent.getStringExtra("NetId")
 
         //TODO csak netkapcsolatkor lehessen újat létrehozni
 
-        val secureSharedPreferences = MyApplication.secureSharedPreferences
-
-        //TODO viewmodelfactory?
         viewModel = ViewModelProviders.of(this).get(NewAppointmentViewModel::class.java)
-        viewModel.getDataForAppointmentCreation(secureSharedPreferences.getString("OrganisationUrl", "").toString(),
-            secureSharedPreferences.getString("Token", "").toString())
+        viewModel.getDataForAppointmentCreation(MyApplication.getOrganisationUrl()!!,
+            MyApplication.getToken()!!)
 
         swPrivate.setOnCheckedChangeListener { buttonView, isChecked ->
             if(isChecked){
@@ -133,10 +132,9 @@ class NewAppointmentActivity : AppCompatActivity() {
 
             }
 
-            val sp = PreferenceManager.getDefaultSharedPreferences (applicationContext)
-            swVideochat.isChecked = sp.getBoolean("defaultVideoChat",false)
+            swVideochat.isChecked = defaultSharedPreferences.getBoolean("defaultVideoChat",false)
 
-            etPrice.setText(sp.getString("price", ""))
+            etPrice.setText(defaultSharedPreferences.getString("price", ""))
             //TODO notifications
         }
 
@@ -193,9 +191,16 @@ class NewAppointmentActivity : AppCompatActivity() {
                 val a = getAppointment()
 
                 if(app.start_date.timeInMillis == a.startTime && app.end_date.timeInMillis == a.endTime &&
+                    app.private_appointment == a.isPrivate && app.address == a.place && app.note == a.note &&
+                        a.isPrivate){
+
+                    val intent = Intent(this, MainActivity::class.java)
+                    startActivity(intent)
+                }
+                else if (app.start_date.timeInMillis == a.startTime && app.end_date.timeInMillis == a.endTime &&
                     app.private_appointment == a.isPrivate && app.client == a.client!!.name &&
                     app.activity == a.activity!!.name && app.address == a.place &&
-                    app.price == a.price && app.videochat == a.online && app.note == a.note){
+                    app.price == a.price && app.videochat == a.online && app.note == a.note) {
 
                     val intent = Intent(this, MainActivity::class.java)
                     startActivity(intent)
@@ -302,8 +307,7 @@ class NewAppointmentActivity : AppCompatActivity() {
                             val simpleFormat = SimpleDateFormat("MM.dd.yyyy\nHH:mm", Locale.getDefault())
                             btChooseStartTime.text = simpleFormat.format(c.time)
 
-                            val sp = PreferenceManager.getDefaultSharedPreferences (applicationContext)
-                            val defaultTimeLength = sp.getString("timeRange", "60")?.toInt()
+                            val defaultTimeLength = defaultSharedPreferences.getString("timeRange", "60")?.toInt()
                             if (defaultTimeLength != null) {
                                 c.add(Calendar.MINUTE, defaultTimeLength)
                                 endTime = c.timeInMillis
@@ -324,8 +328,7 @@ class NewAppointmentActivity : AppCompatActivity() {
         btChooseEndTime.setOnClickListener {
             var c = Calendar.getInstance()
             c.timeInMillis = startTime ?: c.timeInMillis
-            val sp = PreferenceManager.getDefaultSharedPreferences (applicationContext)
-            val defaultTimeLength = sp.getString("timeRange", "60")?.toInt()
+            val defaultTimeLength = defaultSharedPreferences.getString("timeRange", "60")?.toInt()
             if(defaultTimeLength != null){
                 c.add(Calendar.MINUTE, defaultTimeLength)
             }
@@ -375,8 +378,7 @@ class NewAppointmentActivity : AppCompatActivity() {
         }
         else{
             //setDefaultActivity from settings
-            val sp = PreferenceManager.getDefaultSharedPreferences (applicationContext)
-            val defaultActivity = sp.getString("activityType", "")
+            val defaultActivity = defaultSharedPreferences.getString("activityType", "")
             defaultActivity?.let {
                 val index = activityList.indexOf(defaultActivity)
                 if(index != -1){

@@ -182,4 +182,21 @@ class NetworkOrganisationInteractor(organisationUrl: String, auth: HttpBasicAuth
         this.runCallOnBackgroundThread(getData, onSuccess, onError)
     }
 
+    fun sendPasswordReset(
+        email: String,
+        onSuccess: (Unit) -> Unit,
+        onError: (Throwable) -> Unit
+    ){
+        val getData = employeeApi.employeeForgottenPassword(email)
+        this.runCallOnBackgroundThread(getData, onSuccess, onError)
+    }
+
+    fun saveNewPassword(
+        commonPasswordReset: CommonPasswordReset,
+        onSuccess: (Unit) -> Unit,
+        onError: (Throwable) -> Unit
+    ){
+        val getData = employeeApi.employeeForgottenPassword(commonPasswordReset)
+        this.runCallOnBackgroundThread(getData, onSuccess, onError)
+    }
 }

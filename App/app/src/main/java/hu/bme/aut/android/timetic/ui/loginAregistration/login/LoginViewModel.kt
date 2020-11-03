@@ -32,12 +32,12 @@ class LoginViewModel : ViewModel() {
     private val _token = MutableLiveData<String>()
     val token: LiveData<String> = _token
 
+    private val _resetResult = MutableLiveData<Result>()
+    val resetResult: LiveData<Result> = _resetResult
+
     fun login(email: String, password: String, organisationUrl: String?) {
         this.organisationUrl = organisationUrl
-        val pref = MyApplication.secureSharedPreferences
-        val editor = pref.edit()
-        editor.putString("Email", email)
-        editor.apply()
+
         if(organisationUrl != null){
             val backend =
                 NetworkOrganisationInteractor(
@@ -124,6 +124,15 @@ class LoginViewModel : ViewModel() {
         }
     }
 
+    fun resetPassword(email: String, organisationURL: String){
+        val backend =  NetworkOrganisationInteractor(
+            organisationURL,
+            null,
+            null
+        )
+        backend.sendPasswordReset(email, onSuccess = this::onSuccesReset, onError = this::onErrorReset)
+    }
+
     private fun successToken(token: CommonToken) {
         Log.d("EZAZ", "getTokeeeeeeeeeeeeeeeeeeeeeeeeeeen succcccess")
         _token.value = token.token
@@ -134,6 +143,18 @@ class LoginViewModel : ViewModel() {
 
     private fun errorToken(e: Throwable) {
         Log.d("EZAZ", "getTokeeeeeeeeeeeeeeeeeeeeeeeeeeen errrrrror")
+        _loginResult.value = Result(success = true, error = R.string.login_failed)
+        //TODO
+    }
+
+    private fun onSuccesReset(unit: Unit) {
+        _resetResult.value = Result(success = true, error = null)
+        Log.d("EZAZ", "succcccess reseeeeeeeeeeet loginvm")
+    }
+
+    private fun onErrorReset(e: Throwable) {
+        _resetResult.value = Result(success = null, error = R.string.user_not_found)
+        Log.d("EZAZ", "errrrrror reseeeeeeeeeeet loginvm")
         //TODO
     }
 }

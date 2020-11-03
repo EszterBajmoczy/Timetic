@@ -17,6 +17,7 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import hu.bme.aut.android.timetic.ForgottenPasswordActivity
 import hu.bme.aut.android.timetic.MainActivity
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
@@ -26,18 +27,20 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var loginViewModel: LoginViewModel
     private var organisationURL: String? = null
+    private var emailAccount: String? = null
 
-    private lateinit var secureSharedPreferences: SharedPreferences
+    private lateinit var sharedPreferences: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+        sharedPreferences = MyApplication.secureSharedPreferences
 
-        secureSharedPreferences = MyApplication.secureSharedPreferences
         organisationURL = intent.getStringExtra("OrganisationUrl")
 
         val email = findViewById<EditText>(R.id.logEmail)
         val password = findViewById<EditText>(R.id.logPassword)
+        val passwordForgotten = findViewById<Button>(R.id.btPasswordForgotten)
         val login = findViewById<Button>(R.id.login)
         val loading = findViewById<ProgressBar>(R.id.logLoading)
 
@@ -76,17 +79,47 @@ class LoginActivity : AppCompatActivity() {
         })
 
         loginViewModel.refreshToken.observe(this@LoginActivity, Observer {
-            MyApplication.refreshToken = it
-            val editor = secureSharedPreferences.edit()
+            val editor = sharedPreferences.edit()
             editor.putString("RefreshToken", it)
             editor.apply()
         })
 
         loginViewModel.token.observe(this@LoginActivity, Observer {
-            val editor = secureSharedPreferences.edit()
+            val editor = sharedPreferences.edit()
             editor.putString("Token", it)
             editor.apply()
         })
+
+        loginViewModel.resetResult.observe(this@LoginActivity, Observer {
+            Log.d("EZAZ", "Resetresult" + it.error + " : "+ it.success)
+            val resetResult = it ?: return@Observer
+
+            loading.visibility = View.GONE
+            if (resetResult.error != null) {
+                showLoginFailed(resetResult.error)
+            }
+            if (resetResult.success != null) {
+                val intent = Intent(this, ForgottenPasswordActivity::class.java)
+                startActivity(intent)
+            }
+        })
+
+        //TODO
+        passwordForgotten.setOnClickListener {
+            if(email.text.toString() != ""){
+                val editor = sharedPreferences.edit()
+                editor.putString("Email", email.text.toString())
+                editor.apply()
+
+                loginViewModel.resetPassword(email.text.toString(), organisationURL!!)
+            } else {
+                Toast.makeText(
+                    applicationContext,
+                    "Adja meg az e-mail címét",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
 
         email.afterTextChanged {
             loginViewModel.loginDataChanged(
@@ -105,12 +138,15 @@ class LoginActivity : AppCompatActivity() {
 
             setOnEditorActionListener { _, actionId, _ ->
                 when (actionId) {
-                    EditorInfo.IME_ACTION_DONE ->
+
+                    EditorInfo.IME_ACTION_DONE ->{
                         loginViewModel.login(
-                                email.text.toString(),
-                                password.text.toString(),
-                                organisationURL
+                            email.text.toString(),
+                            password.text.toString(),
+                            organisationURL
                         )
+                        emailAccount = email.text.toString()
+                    }
                 }
                 false
             }
@@ -118,6 +154,7 @@ class LoginActivity : AppCompatActivity() {
             login.setOnClickListener {
                 loading.visibility = View.VISIBLE
                 loginViewModel.login(email.text.toString(), password.text.toString(), organisationURL)
+                emailAccount = email.text.toString()
             }
         }
     }
@@ -129,6 +166,10 @@ class LoginActivity : AppCompatActivity() {
                 welcome,
                 Toast.LENGTH_LONG
         ).show()
+
+        val editor = sharedPreferences.edit()
+        editor.putString("Email", emailAccount)
+        editor.apply()
 
         val intent = Intent(this@LoginActivity, MainActivity::class.java)
         startActivity(intent)

@@ -11,7 +11,8 @@
     <string name="invalid_name">Your whole name please</string>
     <string name="invalid_email">Not a valid email address</string>
     <string name="invalid_password">Password must be >5 characters</string>
-    <string name="login_failed">"Login failed"</string>
+    <string name="login_failed">"A bejelentkezés nem sikerült"</string>
+    <string name="user_not_found">"Nincs ilyen felhasználónk"</string>
     <string name="tSignIn">Bejelentkezés</string>
     <string name="tRegistration">Regisztráció</string>
     <string name="tOrganisationSignIn">Alkalmazottaknak</string>
@@ -19,12 +20,16 @@
     <string name="tWeekly">Heti</string>
     <string name="tMonthly">Havi</string>
 
+    <string name="invalid_code_reset">Érvénytelen kód</string>
+    <string name="invalid_code_reset_empty">Érvénytelen kód, 6 szám karakter</string>
+    <string name="invalid_password_reset">Érvénytelen jelszó, >6 karakter</string>
+    <string name="invalid_password2_reset">Nem egyeznek a jelszavak</string>
+
 
     <string name="title_activity_main">MainActivity</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_title">Timetic</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Beállítások</string>
 
@@ -85,6 +90,14 @@
     <string name="tName">Név</string>
     <string name="tEmail">Email</string>
     <string name="tPhone">Telefonszám</string>
+    <string name="tPasswordForgotten"><u>Elfelejtett jelszó</u></string>
+    <string name="tJoinJitsy">Csatlakozás az online időponthoz</string>
+    <string name="bSend">Küldés</string>
+    <string name="tNewPassword">Új jelszó</string>
+    <string name="tNewPasswordAgain">Új jelszó ismét</string>
+    <string name="tCode">Kód</string>
+    <string name="tResetMsg">Egy E-mail-ben elküldtük a kódot</string>
+    <string name="tSearch">Keresés</string>
 
 
 </resources>

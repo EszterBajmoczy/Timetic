@@ -8,25 +8,28 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import androidx.appcompat.app.AlertDialog
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.navigation.NavigationView
+import android.view.View
+import android.widget.LinearLayout
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import androidx.drawerlayout.widget.DrawerLayout
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.navigation.NavigationView
+import com.google.android.material.snackbar.Snackbar
 import hu.bme.aut.android.timetic.data.model.Appointment
 import hu.bme.aut.android.timetic.data.model.Client
 import hu.bme.aut.android.timetic.settings.SettingsActivity
 import hu.bme.aut.android.timetic.ui.calendar.CalendarViewModel
 import hu.bme.aut.android.timetic.ui.calendar.CalendarViewModelFactory
+import kotlinx.android.synthetic.main.nav_header_main.view.*
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -68,8 +71,8 @@ class MainActivity : AppCompatActivity() {
         viewModel = ViewModelProvider(this, CalendarViewModelFactory()).get(CalendarViewModel::class.java)
 
         val clientObserver = androidx.lifecycle.Observer<List<Client>> {
-            viewModel.downloadAppointments(pref.getString("OrganisationUrl", "").toString(),
-                pref.getString("Token", "").toString())
+        viewModel.downloadAppointments(MyApplication.getOrganisationUrl()!!,
+                MyApplication.getToken()!!)
         }
 
         val appObserver = androidx.lifecycle.Observer<List<Appointment>> {
@@ -106,6 +109,9 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
+        val header: View = navView.getHeaderView(0)
+        val email = pref.getString("Email", "")
+        header.tEmail.text = email
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

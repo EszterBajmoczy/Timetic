@@ -53,7 +53,6 @@ class DayAndWeekCalendarFragment : Fragment() {
             setCalendarType(type)
         }
 
-        //TODO
         //set listeners
         weekView.setOnEventClickListener { data, rect ->
             val intent = Intent(context, NewAppointmentActivity::class.java)
@@ -71,13 +70,6 @@ class DayAndWeekCalendarFragment : Fragment() {
             val intent = Intent(activity, NewAppointmentActivity::class.java)
             startActivity(intent)
         }
-
-
-        weekView.setOnRangeChangeListener { firstVisibleDate, lastVisibleDate ->
-            Toast.makeText(context, "weekchanged: ", Toast.LENGTH_SHORT).show()
-            //TODo
-        }
-
     }
 
     fun setCalendarType(type: String){

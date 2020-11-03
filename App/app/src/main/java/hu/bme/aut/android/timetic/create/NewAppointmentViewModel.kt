@@ -77,7 +77,6 @@ class NewAppointmentViewModel : ViewModel() {
         //TODO
     }
 
-
     fun saveAppointment(appointment: CommonAppointment){
         backend.addAppointment(appointment, onSuccess = this::successAddAppointment, onError = this::errorAddAppointment)
     }

@@ -132,8 +132,20 @@ interface EmployeeApi {
      * 
     * @return [Call]<[Unit]>
      */
-    @GET("employee/forgottenPassword")
-    fun employeeForgottenPasswordGet(): Call<Unit>
+    @GET("employee/forgottenPassword/")
+    fun employeeForgottenPassword(@Query("email") email: kotlin.String): Call<Unit>
+
+    /**
+     * Create new password
+     *
+     * Responses:
+     *  - 200: successful operation
+     *  - 404: account not found
+     *
+     * @return [Call]<[Unit]>
+     */
+    @POST("employee/forgottenPassword")
+    fun employeeForgottenPassword(@Body commonPasswordReset: CommonPasswordReset): Call<Unit>
 
     /**
      * Logs employee into the system

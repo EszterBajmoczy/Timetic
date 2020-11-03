@@ -24,15 +24,14 @@ class LogoutFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        val fab = requireActivity().findViewById<FloatingActionButton>(R.id.fab)
+        fab.isVisible = false
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_logout, container, false)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-
-        val fab = requireActivity().findViewById<FloatingActionButton>(R.id.fab)
-        fab.isVisible = false
 
         logoutYes.setOnClickListener {
             val secureSharedPreferences = MyApplication.secureSharedPreferences

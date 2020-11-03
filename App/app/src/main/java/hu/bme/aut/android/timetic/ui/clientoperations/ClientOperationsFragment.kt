@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -17,9 +16,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
 import hu.bme.aut.android.timetic.adapter.ClientAdapter
-import hu.bme.aut.android.timetic.create.NewAppointmentActivity
 import hu.bme.aut.android.timetic.create.NewClientActivity
 import hu.bme.aut.android.timetic.data.model.Client
+import hu.bme.aut.android.timetic.ui.loginAregistration.login.afterTextChanged
 import kotlinx.android.synthetic.main.fragment_client_operations.*
 
 
@@ -46,25 +45,14 @@ class ClientOperationsFragment : Fragment(), ClientAdapter.ClientClickListener {
         initRecyclerView()
         setFloatingActionButton()
 
-        val secureSharedPreferences = MyApplication.secureSharedPreferences
         //TODO internetconnection? -> ui, local: true/false
-        viewModel.fetchData(false, secureSharedPreferences.getString("OrganisationUrl", "").toString(),
-            secureSharedPreferences.getString("Token", "").toString())
+        viewModel.fetchData(false, MyApplication.getOrganisationUrl()!!,
+            MyApplication.getToken()!!)
         viewModel.clients.observe(viewLifecycleOwner, Observer {
             adapter.update(it)
-
-            nameList = getNameList(it)
-            val adapter: ArrayAdapter<String> =
-                ArrayAdapter(requireContext(), android.R.layout.select_dialog_item, nameList)
-
-            SearchClient.threshold = 1
-
-            SearchClient.setAdapter(adapter)
-
-
         })
-        SearchClient.setOnItemClickListener { parent, view, position, id ->
-            adapter.filter.filter(nameList[position])
+        SearchClient.afterTextChanged {
+            adapter.filter.filter(it)
         }
     }
 

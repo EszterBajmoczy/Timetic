@@ -17,6 +17,7 @@ import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.Toast
 import hu.bme.aut.android.timetic.MainActivity
+import hu.bme.aut.android.timetic.MyApplication
 
 import hu.bme.aut.android.timetic.R
 
@@ -72,9 +73,9 @@ class RegistrationActivity : AppCompatActivity() {
             //Complete and destroy login activity once successful
             finish()
         })
+        val sp = MyApplication.secureSharedPreferences
 
         registrationViewModel.refreshToken.observe(this@RegistrationActivity, Observer {
-            val sp = getSharedPreferences("my_prefs", Context.MODE_PRIVATE)
             val editor = sp.edit()
             editor.putString("RefreshToken", it)
             editor.apply()
@@ -82,7 +83,6 @@ class RegistrationActivity : AppCompatActivity() {
         })
 
         registrationViewModel.token.observe(this@RegistrationActivity, Observer {
-            val sp = getSharedPreferences("my_prefs", Context.MODE_PRIVATE)
             val editor = sp.edit()
             editor.putString("Token", it)
             editor.apply()

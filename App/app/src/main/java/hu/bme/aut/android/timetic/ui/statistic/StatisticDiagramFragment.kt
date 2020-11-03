@@ -50,27 +50,7 @@ class StatisticDiagramFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProviders.of(requireActivity()).get(StatisticDiagramViewModel::class.java)
-        // TODO: Use the ViewModel
-        /*
-        val secureSharedPreferences = MyApplication.secureSharedPreferences
 
-        val builder = MaterialDatePicker.Builder.dateRangePicker()
-        val now = Calendar.getInstance()
-        builder.setSelection(androidx.core.util.Pair(now.timeInMillis, now.timeInMillis))
-
-        val picker = builder.build()
-        picker.show(activity?.supportFragmentManager!!, picker.toString())
-
-        picker.addOnNegativeButtonClickListener {
-            //Todo do better
-            val intent = Intent(context, MainActivity::class.java)
-            startActivity(intent)
-            }
-        picker.addOnPositiveButtonClickListener {
-            viewModel.fetchData(it.first!!, it.second!!, secureSharedPreferences.getString("OrganisationUrl", "").toString(), secureSharedPreferences.getString("Token", "").toString())
-        }
-
-         */
         pieChart1 = piechart1
         pieChart2 = piechart2
 
