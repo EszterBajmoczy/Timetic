@@ -1,15 +1,13 @@
 package hu.bme.aut.android.timetic
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.*
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
@@ -25,17 +23,18 @@ import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 import hu.bme.aut.android.timetic.data.model.Appointment
 import hu.bme.aut.android.timetic.data.model.Client
+import hu.bme.aut.android.timetic.receiver.AlarmReceiver
 import hu.bme.aut.android.timetic.settings.SettingsActivity
 import hu.bme.aut.android.timetic.ui.calendar.CalendarViewModel
 import hu.bme.aut.android.timetic.ui.calendar.CalendarViewModelFactory
 import kotlinx.android.synthetic.main.nav_header_main.view.*
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var viewModel: CalendarViewModel
-    private var initialized = false
 
     private val logoutReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -47,14 +46,14 @@ class MainActivity : AppCompatActivity() {
             editor.remove("Token")
             editor.apply()
 
-            val intent = Intent(this@MainActivity, StartScreenActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this@MainActivity, StartScreenActivity::class.java))
         }
     }
 
     override fun onStart() {
         super.onStart()
         registerReceiver(logoutReceiver, IntentFilter("Logout"))
+
     }
 
     override fun onPause() {
@@ -67,6 +66,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.main_activity)
 
         val pref = MyApplication.secureSharedPreferences
+        setFirstRunAndSynchronizeReceiver(pref)
 
         viewModel = ViewModelProvider(this, CalendarViewModelFactory()).get(CalendarViewModel::class.java)
 
@@ -112,6 +112,43 @@ class MainActivity : AppCompatActivity() {
         val header: View = navView.getHeaderView(0)
         val email = pref.getString("Email", "")
         header.tEmail.text = email
+    }
+
+    private fun setFirstRunAndSynchronizeReceiver(pref: SharedPreferences) {
+        if(!pref.contains("NotFirst")){
+            val editor: SharedPreferences.Editor = pref.edit()
+            editor.putBoolean("NotFirst", false)
+            editor.apply()
+
+            val calAlarm = Calendar.getInstance()
+            calAlarm[Calendar.HOUR_OF_DAY] = 22
+            calAlarm[Calendar.MINUTE] = 30
+            calAlarm[Calendar.SECOND] = 0
+
+            val intent = Intent()
+            intent.setClass(applicationContext, AlarmReceiver::class.java)
+            intent.action = ".receiver.AlarmReceiver"
+            val pendingIntent = PendingIntent.getBroadcast(applicationContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+            val alarmManager =  getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, calAlarm.timeInMillis, pendingIntent)
+            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calAlarm.timeInMillis, AlarmManager.INTERVAL_DAY, pendingIntent)
+        }
+        //TODO
+        val calAlarm = Calendar.getInstance()
+        calAlarm[Calendar.HOUR_OF_DAY] = 11
+        calAlarm[Calendar.MINUTE] = 23
+        calAlarm[Calendar.SECOND] = 0
+
+        val intent = Intent()
+        intent.setClass(applicationContext, AlarmReceiver::class.java)
+        intent.action = ".receiver.AlarmReceiver"
+        val pendingIntent = PendingIntent.getBroadcast(applicationContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+        val alarmManager =  getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calAlarm.timeInMillis, pendingIntent)
+        //TODO one time or repeat?
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calAlarm.timeInMillis, AlarmManager.INTERVAL_DAY, pendingIntent)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

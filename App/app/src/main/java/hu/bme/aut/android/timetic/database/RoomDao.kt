@@ -17,6 +17,9 @@ interface RoomDao {
     @Query("SELECT * FROM appointment")
     fun getAllAppointments(): LiveData<List<RoomAppointment>>
 
+    @Query("SELECT * FROM appointment")
+    fun getAppointmentList(): List<RoomAppointment>
+
     @Query("SELECT * FROM appointment WHERE netId == :netId")
     fun getAppointmentByNetId(netId: String): LiveData<RoomAppointment>
 
@@ -35,6 +38,9 @@ interface RoomDao {
 
     @Query("SELECT * FROM client")
     fun getAllClients(): LiveData<List<RoomClient>>
+
+    @Query("SELECT * FROM client")
+    fun getClientList(): List<RoomClient>
 
     @Update
     fun updateClient(client: RoomClient): Int

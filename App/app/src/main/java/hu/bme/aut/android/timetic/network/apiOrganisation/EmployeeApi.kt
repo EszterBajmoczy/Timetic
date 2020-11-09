@@ -213,4 +213,18 @@ interface EmployeeApi {
     @GET("employee/report")
     fun employeeReportGet(@Query("startDate") startDate: kotlin.Long? = null, @Query("endDate") endDate: kotlin.Long? = null): Call<ForEmployeeReport>
 
+    /**
+     * Gets the url of the online consultation for the appointment if that is online
+     *
+     * Responses:
+     *  - 200: successful operation
+     *  - 404: resource not found
+     *  - 401: Not authenticated
+     *
+     * @param appointmentId
+     * @return [Call]<[kotlin.String]>
+     */
+    @GET("employee/consultation")
+    fun employeeConsultationGet(@Query("appointmentId") appointmentId: kotlin.String): Call<CommonConsultation>
+
 }

@@ -14,6 +14,138 @@
 
         <!-- First Pie chart -->
         <androidx.cardview.widget.CardView
+            android:id="@+id/ch1CardView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            app:contentPadding="20dp"
+            android:elevation="10dp"
+            app:cardCornerRadius="10dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:weightSum="2">
+
+                <!--Header-->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/ch1Title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="10dp"
+                        android:text="Tevékenységek:"
+                        android:layout_alignParentStart="true"/>
+
+                    <TextView
+                        android:id="@+id/ch1Sum"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:paddingLeft="10dp"/>
+                </RelativeLayout>
+
+
+                <!--Pie chart -->
+                <org.eazegraph.lib.charts.PieChart
+                    android:id="@+id/piechart1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="150dp"
+                    android:padding="6dp"
+                    android:layout_weight="1"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginBottom="15dp"
+
+                    />
+
+                <!-- Pie chart details -->
+                <LinearLayout
+                    android:id="@+id/ch1Container"
+                    android:layout_width="250dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_gravity="center"
+                    >
+
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Seond Pie chart -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/ch2CardView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            app:contentPadding="20dp"
+            android:elevation="10dp"
+            app:cardCornerRadius="10dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:weightSum="2">
+
+                <!--Header-->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/ch2Title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="10dp"
+                        android:text="Tevékenységek:"
+                        android:layout_alignParentStart="true"/>
+
+                    <TextView
+                        android:id="@+id/ch2Sum"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:paddingLeft="10dp"/>
+                </RelativeLayout>
+
+
+                <!--Pie chart -->
+                <org.eazegraph.lib.charts.PieChart
+                    android:id="@+id/piechart2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="150dp"
+                    android:padding="6dp"
+                    android:layout_weight="1"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginBottom="15dp"
+
+                    />
+
+                <!-- Pie chart details -->
+                <LinearLayout
+                    android:id="@+id/ch2Container"
+                    android:layout_width="250dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_gravity="center"
+                    >
+
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Third Pie chart -->
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="20dp"
@@ -41,7 +173,7 @@
                         android:layout_alignParentStart="true"/>
 
                     <TextView
-                        android:id="@+id/ch1Sum"
+                        android:id="@+id/ch3Sum"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
@@ -51,7 +183,7 @@
 
                 <!--Pie chart -->
                 <org.eazegraph.lib.charts.PieChart
-                    android:id="@+id/piechart1"
+                    android:id="@+id/piechart3"
                     android:layout_width="wrap_content"
                     android:layout_height="150dp"
                     android:padding="6dp"
@@ -93,7 +225,7 @@
 
 
                         <TextView
-                            android:id="@+id/ch1Local"
+                            android:id="@+id/ch3Local"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"/>
@@ -125,7 +257,7 @@
 
 
                         <TextView
-                            android:id="@+id/ch1Online"
+                            android:id="@+id/ch3Online"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"/>
@@ -135,7 +267,7 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Second Pie chart -->
+        <!-- Fourth Pie chart -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -164,7 +296,7 @@
                         android:layout_alignParentStart="true"/>
 
                     <TextView
-                        android:id="@+id/ch2Sum"
+                        android:id="@+id/ch4Sum"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
@@ -174,7 +306,7 @@
 
                 <!--Pie chart -->
                 <org.eazegraph.lib.charts.PieChart
-                    android:id="@+id/piechart2"
+                    android:id="@+id/piechart4"
                     android:layout_width="wrap_content"
                     android:layout_height="150dp"
                     android:padding="6dp"
@@ -216,7 +348,7 @@
 
 
                         <TextView
-                            android:id="@+id/ch2Local"
+                            android:id="@+id/ch4Local"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"/>
@@ -248,7 +380,7 @@
 
 
                         <TextView
-                            android:id="@+id/ch2Online"
+                            android:id="@+id/ch4Online"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"/>
@@ -257,8 +389,5 @@
                 </LinearLayout>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-
-
-
     </LinearLayout>
 </ScrollView>

@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import androidx.appcompat.app.AppCompatActivity
-import hu.bme.aut.android.timetic.ui.loginAregistration.login.LoginActivity
 
 class SplashScreen : AppCompatActivity() {
     private val Splash_Time_Out: Long = 1000

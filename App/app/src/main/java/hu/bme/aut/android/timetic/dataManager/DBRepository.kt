@@ -24,6 +24,15 @@ class DBRepository(private val roomDao: RoomDao) {
             }
     }
 
+    fun getAppointmentList(): List<Appointment> {
+        val result = ArrayList<Appointment>()
+        val list = roomDao.getAppointmentList()
+        for(item in list){
+            result.add(item.toDomainModel())
+        }
+        return result
+    }
+
     fun getAppointmentByNetId(netId: String): LiveData<Appointment> {
         return roomDao.getAppointmentByNetId(netId)
             .map {roomAppointments ->
@@ -88,6 +97,15 @@ class DBRepository(private val roomDao: RoomDao) {
                 roomClients.map {roomClient ->
                     roomClient.toDomainModel() }
             }
+    }
+
+    fun getClientList(): List<Client> {
+        val result = ArrayList<Client>()
+        val list = roomDao.getClientList()
+        for(item in list){
+            result.add(item.toDomainModel())
+        }
+        return result
     }
 
     suspend fun insert(client: Client) = withContext(Dispatchers.IO) {

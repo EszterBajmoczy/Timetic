@@ -11,6 +11,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
+import android.widget.CompoundButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -25,6 +26,7 @@ import hu.bme.aut.android.timetic.network.models.CommonAppointment
 import hu.bme.aut.android.timetic.network.models.CommonClient
 import hu.bme.aut.android.timetic.network.models.CommonEmployee
 import kotlinx.android.synthetic.main.activity_new_appointment.*
+import org.jitsi.meet.sdk.JitsiMeetActivity
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -115,8 +117,6 @@ class NewAppointmentActivity : AppCompatActivity() {
             })
             setTitle(R.string.title_activity_new_appointment)
 
-            setNotificationSpinner()
-
             setDateChooseButtons()
 
             btCancel.setOnClickListener {
@@ -138,6 +138,14 @@ class NewAppointmentActivity : AppCompatActivity() {
             //TODO notifications
         }
 
+        btConsultation.setOnClickListener {
+            viewModel.getMeetingUrl(appointmentId)
+        }
+
+        viewModel.meetingUrl.observe(this, Observer {
+            JitsiMeetActivity.launch(this, it)
+            finish()
+        })
     }
 
     private fun AppObserver(): Observer<Appointment> {
@@ -165,54 +173,62 @@ class NewAppointmentActivity : AppCompatActivity() {
             swPrivate.isChecked = app.private_appointment
 
             //TODO notificatiion
-            setNotificationSpinner()
 
             setDateChooseButtonValue()
             setDateChooseButtons()
 
-            btCancel.setText(R.string.tCancelAppointment)
-            btCancel.setOnClickListener {
-                val tomorrow = Calendar.getInstance()
-                tomorrow.add(Calendar.DAY_OF_MONTH, 1)
+            val tomorrow = Calendar.getInstance()
+            tomorrow.add(Calendar.DAY_OF_MONTH, 1)
+            tomorrow.set(Calendar.HOUR_OF_DAY, 0)
+            tomorrow.set(Calendar.MINUTE, 0)
+            tomorrow.set(Calendar.MILLISECOND, 0)
+            tomorrow.add(Calendar.MILLISECOND, -1)
 
-                if(startTime != null && endTime != null && startTime!! < tomorrow.timeInMillis){
-                    Toast.makeText(this, "Holnapnál korábbi időpont lemondása nem lehetséges", Toast.LENGTH_LONG).show()
-                }
-                else{
+            btCancel.setText(R.string.tCancelAppointment)
+
+            btSave.setText(R.string.tModify)
+            if(app.start_date.before(tomorrow)){
+                btSave.visibility = View.GONE
+                btCancel.visibility = View.GONE
+            } else {
+                btCancel.setOnClickListener {
                     viewModel.appDetail.removeObserver(observer)
                     viewModel.cancelAppointment(app.netId)
                     val intent = Intent(this, MainActivity::class.java)
                     startActivity(intent)
                 }
-            }
+                btSave.setOnClickListener {
+                    val a = getAppointment()
 
-            btSave.setText(R.string.tModify)
-            btSave.setOnClickListener {
-                val a = getAppointment()
-
-                if(app.start_date.timeInMillis == a.startTime && app.end_date.timeInMillis == a.endTime &&
-                    app.private_appointment == a.isPrivate && app.address == a.place && app.note == a.note &&
+                    if(app.start_date.timeInMillis == a.startTime && app.end_date.timeInMillis == a.endTime &&
+                        app.private_appointment == a.isPrivate && app.address == a.place && app.note == a.note &&
                         a.isPrivate){
 
-                    val intent = Intent(this, MainActivity::class.java)
-                    startActivity(intent)
-                }
-                else if (app.start_date.timeInMillis == a.startTime && app.end_date.timeInMillis == a.endTime &&
-                    app.private_appointment == a.isPrivate && app.client == a.client!!.name &&
-                    app.activity == a.activity!!.name && app.address == a.place &&
-                    app.price == a.price && app.videochat == a.online && app.note == a.note) {
+                        val intent = Intent(this, MainActivity::class.java)
+                        startActivity(intent)
+                    }
+                    else if (app.start_date.timeInMillis == a.startTime && app.end_date.timeInMillis == a.endTime &&
+                        app.private_appointment == a.isPrivate && app.client == a.client!!.name &&
+                        app.activity == a.activity!!.name && app.address == a.place &&
+                        app.price == a.price && app.videochat == a.online && app.note == a.note) {
 
-                    val intent = Intent(this, MainActivity::class.java)
-                    startActivity(intent)
-                }
-                else if(checkData()){
-                    viewModel.modifyAppointment(a)
-                    val intent = Intent(this, MainActivity::class.java)
-                    startActivity(intent)
+                        val intent = Intent(this, MainActivity::class.java)
+                        startActivity(intent)
+                    }
+                    else if(checkData()){
+                        viewModel.modifyAppointment(a)
+                        val intent = Intent(this, MainActivity::class.java)
+                        startActivity(intent)
+                    }
                 }
             }
+
             if(app.videochat != null){
                 swVideochat.isChecked = app.videochat
+                val c = Calendar.getInstance()
+                if(app.end_date.after(c) && app.videochat){
+                    btConsultation.visibility = View.VISIBLE
+                }
             }
             else{
                 swVideochat.isChecked = false
@@ -444,28 +460,6 @@ class NewAppointmentActivity : AppCompatActivity() {
             ) {
                 val selected = parent.getItemAtPosition(position).toString()
                 place = selected
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-        }
-    }
-
-    private fun setNotificationSpinner(){
-        val arrayList: ArrayList<String> = ArrayList()
-        arrayList.add("1 óra")
-        arrayList.add("fél óra")
-        val arrayAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayList)
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spNotification.adapter = arrayAdapter
-        spNotification.onItemSelectedListener = object : OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                val selected = parent.getItemAtPosition(position).toString()
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}

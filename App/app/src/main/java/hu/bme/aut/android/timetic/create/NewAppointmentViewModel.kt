@@ -35,6 +35,9 @@ class NewAppointmentViewModel : ViewModel() {
 
     var appDetail: LiveData<Appointment>
 
+    private val _meetingUrl = MutableLiveData<String>()
+    val meetingUrl: LiveData<String> = _meetingUrl
+
     private lateinit var id: String
 
     init{
@@ -91,22 +94,18 @@ class NewAppointmentViewModel : ViewModel() {
         backend.cancelAppointment(id, this::successCancelAppointment, this::errorCancelAppointment)
     }
 
-    private fun getActivity(name: String) : CommonActivity? {
-        for(item in _activities.value!!){
-            if(item.name == name){
-                return item
-            }
-        }
-        return null
+    fun getMeetingUrl(appointmentId: String) {
+        backend.getMeetingUrl(appointmentId, this::successMeetingUrl, this::errorMeetingUrl)
     }
 
-    private fun getClient(name: String) : CommonClient? {
-        for(item in _clients.value!!){
-            if(item.name == name){
-                return item
-            }
-        }
-        return null
+    private fun errorMeetingUrl(e: Throwable) {
+        Log.d("EZAZ", "url errrrrror")
+        //TODO
+    }
+
+    private fun successMeetingUrl(commonConsultation: CommonConsultation)  {
+        Log.d("EZAZ", "url success")
+        _meetingUrl.value = commonConsultation.url
     }
 
     private fun errorCancelAppointment(e: Throwable) {

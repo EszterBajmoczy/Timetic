@@ -12,47 +12,30 @@
         <item>@string/tMonthly</item>
     </string-array>
 
-    <!-- Default Time Range Preference -->
-    <string-array name="time_range_entries">
-        <item>@string/tHalfHour</item>
-        <item>@string/tOneHour</item>
-        <item>@string/tOneAndHalfHour</item>
+    <!-- Notification Preference -->
+    <string-array name="notification_entries">
+        <item>@string/eOffNotification</item>
+        <item>@string/eHalfHour</item>
+        <item>@string/eOneHour</item>
     </string-array>
 
-    <string-array name="time_range_values">
-        <item>@string/kHalfHour</item>
-        <item>@string/kOneHour</item>
-        <item>@string/kOneAndHalfHour</item>
+    <string-array name="notification_values">
+        <item>@string/vOffNotification</item>
+        <item>@string/vHalfHour</item>
+        <item>@string/vOneHour</item>
     </string-array>
 
-    <!-- Statistic Month Array -->
-    <string-array name="statistic_month_entries">
-        <item>Január</item>
-        <item>Február</item>
-        <item>Március</item>
-        <item>Április</item>
-        <item>Május</item>
-        <item>Június</item>
-        <item>Július</item>
-        <item>Augusztus</item>
-        <item>Szeptember</item>
-        <item>Október</item>
-        <item>November</item>
-        <item>December</item>
-    </string-array>
-
-    <string-array name="statistic_month_values">
-        <item>january</item>
-        <item>february</item>
-        <item>march</item>
-        <item>april</item>
-        <item>may</item>
-        <item>june</item>
-        <item>july</item>
-        <item>august</item>
-        <item>september</item>
-        <item>oktober</item>
-        <item>november</item>
-        <item>december</item>
+    <!-- Colors -->
+    <string-array name="color_values">
+        <item>#FF6B6B</item>
+        <item>#FF8A6C</item>
+        <item>#FFA96C</item>
+        <item>#FFE66D</item>
+        <item>#012A36</item>
+        <item>#254441</item>
+        <item>#048BA8</item>
+        <item>#349090</item>
+        <item>#1A535C</item>
+        <item>#4ECDC4</item>
     </string-array>
 </resources>

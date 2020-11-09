@@ -1,5 +1,6 @@
 package hu.bme.aut.android.timetic.database.models
 
+import android.media.MediaSession2Service
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 

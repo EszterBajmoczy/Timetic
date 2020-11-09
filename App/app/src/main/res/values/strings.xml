@@ -53,12 +53,13 @@
     <string name="tOff">Off</string>
     <string name="tDefaultTimeRange">Default időponthossz (perc)</string>
 
-    <string name="tHalfHour">Fél óra</string>
-    <string name="tOneHour">1 óra</string>
-    <string name="tOneAndHalfHour">Másfél óra</string>
-    <string name="kHalfHour">half_hour</string>
-    <string name="kOneHour">one_hour</string>
-    <string name="kOneAndHalfHour">one_and_half_hour</string>
+    <string name="eHalfHour">Fél óra</string>
+    <string name="eOneHour">1 óra</string>
+    <string name="eOffNotification">Kikapcsolás</string>
+    <string name="vHalfHour">half_hour</string>
+    <string name="vOneHour">one_hour</string>
+    <string name="vOffNotification">off</string>
+    
     <string name="tDefaultActivity">Default activity</string>
 
     <!-- Statistic Fragment -->

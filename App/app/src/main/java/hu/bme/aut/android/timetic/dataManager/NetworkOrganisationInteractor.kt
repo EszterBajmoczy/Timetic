@@ -45,7 +45,7 @@ class NetworkOrganisationInteractor(organisationUrl: String, auth: HttpBasicAuth
         val retrofit = Retrofit.Builder()
             .baseUrl(organisationUrl)
             .client(client)
-            .addConverterFactory(MoshiConverterFactory.create(m))
+            .addConverterFactory(MoshiConverterFactory.create(m).asLenient())
             .build()
 
         this.employeeApi = retrofit.create(EmployeeApi::class.java)
@@ -197,6 +197,15 @@ class NetworkOrganisationInteractor(organisationUrl: String, auth: HttpBasicAuth
         onError: (Throwable) -> Unit
     ){
         val getData = employeeApi.employeeForgottenPassword(commonPasswordReset)
+        this.runCallOnBackgroundThread(getData, onSuccess, onError)
+    }
+
+    fun getMeetingUrl(
+        appointmentId: String,
+        onSuccess: (CommonConsultation) -> Unit,
+        onError: (Throwable) -> Unit
+    ){
+        val getData = employeeApi.employeeConsultationGet(appointmentId)
         this.runCallOnBackgroundThread(getData, onSuccess, onError)
     }
 }
