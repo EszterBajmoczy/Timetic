@@ -1,34 +1,34 @@
 {
   "project_info": {
-    "project_number": "64311634366",
-    "firebase_url": "https://timetic-9b446.firebaseio.com",
-    "project_id": "timetic-9b446",
-    "storage_bucket": "timetic-9b446.appspot.com"
+    "project_number": "611787499180",
+    "firebase_url": "https://timeticclient.firebaseio.com",
+    "project_id": "timeticclient",
+    "storage_bucket": "timeticclient.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:64311634366:android:ab20e01cb91bfac3ff31ef",
+        "mobilesdk_app_id": "1:611787499180:android:dcb74e93f0617715986109",
         "android_client_info": {
           "package_name": "hu.bme.aut.android.timetic"
         }
       },
       "oauth_client": [
         {
-          "client_id": "64311634366-nq8ehu3m1m0ot7h2sk166dhif963bmv1.apps.googleusercontent.com",
+          "client_id": "611787499180-l3qu8tegna8upibber9803082rgo6p3j.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyD9mLNmUh73lWXNiCiO7DTrQphBeFhJcaI"
+          "current_key": "AIzaSyBGVTq-AK3HYVU6xZDxVIUuNaaD1pUmDhc"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "64311634366-nq8ehu3m1m0ot7h2sk166dhif963bmv1.apps.googleusercontent.com",
+              "client_id": "611787499180-l3qu8tegna8upibber9803082rgo6p3j.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

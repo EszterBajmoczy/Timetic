@@ -5,8 +5,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import hu.bme.aut.android.timetic.MyApplication
-import hu.bme.aut.android.timetic.data.model.Appointment
 import hu.bme.aut.android.timetic.data.model.Client
 import hu.bme.aut.android.timetic.dataManager.DBRepository
 import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
@@ -17,8 +17,8 @@ import kotlinx.coroutines.launch
 
 
 class NewClientViewModel : ViewModel() {
-    private lateinit var backend: NetworkOrganisationInteractor
-    private lateinit var repo: DBRepository
+    private var backend: NetworkOrganisationInteractor
+    private var repo: DBRepository
 
     private val _data = MutableLiveData<ForEmployeeOrganization>()
     val data: LiveData<ForEmployeeOrganization> = _data
@@ -39,15 +39,22 @@ class NewClientViewModel : ViewModel() {
                     MyApplication.getToken()!!
                 )
             )
-        backend.getOrganisationData(onSuccess = this::onSuccess, onError = this::onError)
+        backend.getOrganisationData(onSuccess = this::onSuccess, onError = this::error)
     }
 
     fun onSuccess(data: ForEmployeeOrganization){
         _data.value = data
     }
 
-    fun onError(e: Throwable){
-        //TODO
+    private fun error(e: Throwable, code: Int?, call: String) {
+        when(code) {
+            400 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "400 - Bad Request")
+            401 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "401 - Unauthorized ")
+            403 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "403 - Forbidden")
+            404 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "404 - Not Found")
+        }
+        FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
+        FirebaseCrashlytics.getInstance().recordException(e)
     }
 
     fun addClient(c: CommonClient) {
@@ -62,11 +69,9 @@ class NewClientViewModel : ViewModel() {
         insert(c)
     }
 
-    private fun onErrorClientAdd(e: Throwable){
-        Log.d("EZAZ", "add clienttttttttttt fail")
-
+    private fun onErrorClientAdd(e: Throwable, code: Int?, call: String){
         _success.value = false
-        //TODO
+        error(e, code, call)
     }
 
     private fun insert(client: Client) = viewModelScope.launch {

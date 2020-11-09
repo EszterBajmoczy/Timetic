@@ -7,9 +7,11 @@ import android.app.NotificationManager
 import android.content.*
 import android.os.Build
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.facebook.react.bridge.UiThreadUtil
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
 import hu.bme.aut.android.timetic.create.getAppointment
@@ -44,15 +46,12 @@ class SyncAdapter @JvmOverloads constructor(
     ) {
         notification( "SyncAdapter ;)")
         Log.d( "EZAZ", "syncadapter")
-        if(MyApplication.getToken() == null){
+        if(MyApplication.getToken() == null && MyApplication.getOrganisationUrl() == null){
             notification( "Unable to synchronize, please log in")
-        }
-
-        //TODO Main thread?
-        GlobalScope.launch(Dispatchers.Main) {
+        } else {
+            Looper.prepare()
             synchronize()
         }
-
     }
 
     private fun synchronize() {
@@ -232,8 +231,16 @@ class SyncAdapter @JvmOverloads constructor(
         repo.deleteClient(client)
     }
 
-    private fun errorAppointmentList(e: Throwable) {
+    private fun errorAppointmentList(e: Throwable, code: Int?, call: String) {
         notification("Unable to synchronize, please log in")
-        //TODO
+
+        when(code) {
+            400 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "400 - Bad Request")
+            401 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "401 - Unauthorized ")
+            403 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "403 - Forbidden")
+            404 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "404 - Not Found")
+        }
+        FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
+        FirebaseCrashlytics.getInstance().recordException(e)
     }
 }

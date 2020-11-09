@@ -81,7 +81,7 @@ class ForgottenPasswordViewModel : ViewModel() {
         //TODO
     }
 
-    private fun errorToken(e: Throwable) {
+    private fun errorToken(e: Throwable, code: Int?, call: String) {
         Log.d("EZAZ", "getTokeeeeeeeeeeeeeeeeeeeeeeeeeeen errrrrror reset")
         _loginResult.value = Result(success = null, error = R.string.login_failed)
         //TODO
@@ -94,7 +94,7 @@ class ForgottenPasswordViewModel : ViewModel() {
         getTokenOrganisation(token)
     }
 
-    private fun errorRefreshToken(e: Throwable) {
+    private fun errorRefreshToken(e: Throwable, code: Int?, call: String) {
         Log.d("EZAZ", "getToken errrrrror reset")
         //TODO
     }
@@ -104,7 +104,7 @@ class ForgottenPasswordViewModel : ViewModel() {
         Log.d("EZAZ", "succcccess reset password")
     }
 
-    private fun onErrorReset(e: Throwable) {
+    private fun onErrorReset(e: Throwable, code: Int?, call: String) {
         _resetResult.value = Result(success = null, error = R.string.user_not_found)
         Log.d("EZAZ", "errrrrror reset password")
         //TODO

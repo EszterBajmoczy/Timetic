@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
 
         val clientObserver = androidx.lifecycle.Observer<List<Client>> {
         viewModel.downloadAppointments(MyApplication.getOrganisationUrl()!!,
-                MyApplication.getToken()!!)
+                "MyApplication.getToken()!!")
         }
 
         val appObserver = androidx.lifecycle.Observer<List<Appointment>> {
@@ -136,8 +136,8 @@ class MainActivity : AppCompatActivity() {
         }
         //TODO
         val calAlarm = Calendar.getInstance()
-        calAlarm[Calendar.HOUR_OF_DAY] = 11
-        calAlarm[Calendar.MINUTE] = 23
+        calAlarm[Calendar.HOUR_OF_DAY] = 9
+        calAlarm[Calendar.MINUTE] = 35
         calAlarm[Calendar.SECOND] = 0
 
         val intent = Intent()

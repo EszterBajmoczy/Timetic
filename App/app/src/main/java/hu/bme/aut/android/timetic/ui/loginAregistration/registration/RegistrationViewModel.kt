@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import android.util.Patterns
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import hu.bme.aut.android.timetic.dataManager.NetworkDeveloperInteractor
 
 import hu.bme.aut.android.timetic.R
@@ -103,14 +104,14 @@ class RegistrationViewModel() : ViewModel() {
         //TODO
     }
 
-    private fun errorRefreshToken(e: Throwable) {
+    private fun errorRefreshToken(e: Throwable, code: Int?, call: String) {
         Log.d("EZAZ", "login errrrrror")
         _loginResult.value =
             Result(
                 success = null,
                 error = R.string.login_failed
             )
-        //TODO
+        error(e, code, call)
     }
 
     private fun getToken(refreshToken: CommonToken){
@@ -132,32 +133,37 @@ class RegistrationViewModel() : ViewModel() {
         //TODO
     }
 
-    private fun errorToken(e: Throwable) {
+    private fun errorToken(e: Throwable, code: Int?, call: String) {
         Log.d("EZAZ", "getTokeeeeeeeeeeeeeeeeeeeeeeeeeeen errrrrror")
-        //TODO
+        //TODO inform view
+        error(e, code, call)
     }
 
     private fun successReg(u: Unit) {
         Log.d("EZAZ", "Registration succcccess")
-        try {
-            user?.let {
-                val n =
-                    NetworkDeveloperInteractor(
-                        HttpBasicAuth(user!!.email!!, user!!.password!!),
-                        null
-                    )
-                Log.d("EZAZ", "login")
+        val n =
+            NetworkDeveloperInteractor(
+                HttpBasicAuth(user!!.email!!, user!!.password!!),
+                null
+            )
+        Log.d("EZAZ", "login")
 
-                n.login(onSuccess = this::successRefreshToken, onError = this::errorRefreshToken)
-
-            }
-        }catch (e: Throwable){
-            errorRefreshToken(e)
-        }
+        n.login(onSuccess = this::successRefreshToken, onError = this::errorRefreshToken)
     }
 
-    private fun errorReg(e: Throwable) {
-        Log.d("EZAZ", "Registration failed")
-        //TODO
+    private fun errorReg(e: Throwable, code: Int?, call: String) {
+        //TODO inform view
+        error(e, code, call)
+    }
+
+    private fun error(e: Throwable, code: Int?, call: String) {
+        when(code) {
+            400 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "400 - Bad Request")
+            401 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "401 - Unauthorized ")
+            403 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "403 - Forbidden")
+            404 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "404 - Not Found")
+        }
+        FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
+        FirebaseCrashlytics.getInstance().recordException(e)
     }
 }

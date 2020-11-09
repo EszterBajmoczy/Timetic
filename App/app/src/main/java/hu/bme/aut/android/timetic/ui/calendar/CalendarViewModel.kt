@@ -2,6 +2,7 @@ package hu.bme.aut.android.timetic.ui.calendar
 
 import android.util.Log
 import androidx.lifecycle.*
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.create.getAppointment
 import hu.bme.aut.android.timetic.create.getClient
@@ -50,7 +51,7 @@ class CalendarViewModel : ViewModel() {
                 )
             )
 
-        backend.getAppointments(onSuccess = this::successAppointmentList, onError = this::errorAppointmentList)
+        backend.getAppointments(onSuccess = this::successAppointmentList, onError = this::error)
     }
 
     private fun successAppointmentList(list: List<CommonAppointment>) {
@@ -159,9 +160,14 @@ class CalendarViewModel : ViewModel() {
         repo.deleteClient(client)
     }
 
-    private fun errorAppointmentList(e: Throwable) {
-        Log.d("EZAZ", "appontments errrrrror")
-
-        //TODO
+    private fun error(e: Throwable, code: Int?, call: String) {
+        when(code) {
+            400 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "400 - Bad Request")
+            401 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "401 - Unauthorized ")
+            403 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "403 - Forbidden")
+            404 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "404 - Not Found")
+        }
+        FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
+        FirebaseCrashlytics.getInstance().recordException(e)
     }
 }

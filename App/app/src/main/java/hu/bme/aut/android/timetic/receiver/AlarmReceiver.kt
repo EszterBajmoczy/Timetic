@@ -31,21 +31,22 @@ class AlarmReceiver : BroadcastReceiver() {
         Log.d( "EZAZ", "alarm")
         // Get the content resolver for your app
         val mResolver = context.contentResolver
-/*
+
         val settingsBundle = Bundle().apply {
             putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true)
             putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true)
         }
-        ContentResolver.setIsSyncable(mAccount, AUTHORITY, 1);
         ContentResolver.requestSync(mAccount, AUTHORITY, settingsBundle)
 
- */
 
+/*
         ContentResolver.addPeriodicSync(
             mAccount,
             AUTHORITY,
             Bundle.EMPTY,
             86400)
+            */
+
     }
 
     private fun createSyncAccount(context: Context): Account {

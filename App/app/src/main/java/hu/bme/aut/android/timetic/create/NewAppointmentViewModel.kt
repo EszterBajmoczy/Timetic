@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.data.model.Appointment
 import hu.bme.aut.android.timetic.data.model.Client
@@ -60,7 +61,7 @@ class NewAppointmentViewModel : ViewModel() {
                     token
                 )
             )
-        backend.getDataForAppointmentCreation(onSuccess = this::successDataForCreation, onError = this::errorDataForCreation)
+        backend.getDataForAppointmentCreation(onSuccess = this::successDataForCreation, onError = this::error)
     }
 
     private fun successDataForCreation(data: ForEmployeeDataForAppointmentCreation) {
@@ -74,33 +75,33 @@ class NewAppointmentViewModel : ViewModel() {
         _employee.value = data.employees?.get(0)
     }
 
-    private fun errorDataForCreation(e: Throwable) {
-        Log.d("EZAZ", "data errrrrror")
-
-        //TODO
+    private fun error(e: Throwable, code: Int?, call: String) {
+        when(code) {
+            400 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "400 - Bad Request")
+            401 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "401 - Unauthorized ")
+            403 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "403 - Forbidden")
+            404 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "404 - Not Found")
+        }
+        FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
+        FirebaseCrashlytics.getInstance().recordException(e)
     }
 
     fun saveAppointment(appointment: CommonAppointment){
-        backend.addAppointment(appointment, onSuccess = this::successAddAppointment, onError = this::errorAddAppointment)
+        backend.addAppointment(appointment, onSuccess = this::successAddAppointment, onError = this::error)
     }
 
     fun modifyAppointment(appointment: CommonAppointment){
-        backend.modifyAppointment(appointment, this::successModifyAppointment, this::errorModifyAppointment)
+        backend.modifyAppointment(appointment, this::successModifyAppointment, this::error)
     }
 
     fun cancelAppointment(id: String){
 
         this.id = id
-        backend.cancelAppointment(id, this::successCancelAppointment, this::errorCancelAppointment)
+        backend.cancelAppointment(id, this::successCancelAppointment, this::error)
     }
 
     fun getMeetingUrl(appointmentId: String) {
-        backend.getMeetingUrl(appointmentId, this::successMeetingUrl, this::errorMeetingUrl)
-    }
-
-    private fun errorMeetingUrl(e: Throwable) {
-        Log.d("EZAZ", "url errrrrror")
-        //TODO
+        backend.getMeetingUrl(appointmentId, this::successMeetingUrl, this::error)
     }
 
     private fun successMeetingUrl(commonConsultation: CommonConsultation)  {
@@ -108,10 +109,6 @@ class NewAppointmentViewModel : ViewModel() {
         _meetingUrl.value = commonConsultation.url
     }
 
-    private fun errorCancelAppointment(e: Throwable) {
-        Log.d("EZAZ", "cancel errrrrror")
-        //TODO
-    }
 
     private fun successCancelAppointment(u: Unit)  {
         Log.d("EZAZ", "cancel success")
@@ -124,12 +121,6 @@ class NewAppointmentViewModel : ViewModel() {
         if (appDetail.value != null) {
             repo.deleteAppointment(appDetail.value!!)
         }
-    }
-
-
-    private fun errorModifyAppointment(e: Throwable) {
-        Log.d("EZAZ", "modify errrrrror")
-        //TODO
     }
 
     private fun successModifyAppointment(appointment: CommonAppointment)  {
@@ -163,11 +154,6 @@ class NewAppointmentViewModel : ViewModel() {
             }
         }
         insert(a)
-    }
-
-    private fun errorAddAppointment(e: Throwable) {
-        Log.d("EZAZ", "adding errrrrror")
-        //TODO
     }
 
     //checks if the client already saved

@@ -1,11 +1,10 @@
 package hu.bme.aut.android.timetic.ui.loginAregistration.login
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import android.util.Patterns
-import hu.bme.aut.android.timetic.MyApplication
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import hu.bme.aut.android.timetic.dataManager.NetworkDeveloperInteractor
 import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
 
@@ -82,7 +81,6 @@ class LoginViewModel : ViewModel() {
     }
 
     private fun successRefreshToken(token: CommonToken) {
-        Log.d("EZAZ", "getToken succcccess RRRRRRRRRR")
         _refreshToken.value = token.token
 
         if(organisationUrl != null){
@@ -93,13 +91,12 @@ class LoginViewModel : ViewModel() {
         }
     }
 
-    private fun errorRefreshToken(e: Throwable) {
-        Log.d("EZAZ", "getToken errrrrror RRRRRRRRRR")
+    private fun errorRefreshToken(e: Throwable, code: Int?, call: String) {
         _loginResult.value = Result(success = null, error = R.string.login_failed)
-        //TODO
+        error(e, code, call)
     }
 
-    fun getTokenOrganisation(refreshToken: CommonToken){
+    private fun getTokenOrganisation(refreshToken: CommonToken){
         if(refreshToken.token != null){
             val n = organisationUrl?.let {
                 NetworkOrganisationInteractor(
@@ -111,15 +108,13 @@ class LoginViewModel : ViewModel() {
         }
     }
 
-    fun getTokenDeveloper(refreshToken: CommonToken){
+    private fun getTokenDeveloper(refreshToken: CommonToken){
         if(refreshToken.token != null){
             val n =
                 NetworkDeveloperInteractor(
                     null,
                     HttpBearerAuth("bearer", refreshToken.token)
                 )
-            Log.d("EZAZ", "getToken")
-
             n.getToken(onSuccess = this::successToken, onError = this::errorToken)
         }
     }
@@ -134,27 +129,32 @@ class LoginViewModel : ViewModel() {
     }
 
     private fun successToken(token: CommonToken) {
-        Log.d("EZAZ", "getTokeeeeeeeeeeeeeeeeeeeeeeeeeeen succcccess")
         _token.value = token.token
         _loginResult.value = Result(success = true, error = null)
-
-        //TODO
     }
 
-    private fun errorToken(e: Throwable) {
-        Log.d("EZAZ", "getTokeeeeeeeeeeeeeeeeeeeeeeeeeeen errrrrror")
+    private fun errorToken(e: Throwable, code: Int?, call: String) {
         _loginResult.value = Result(success = true, error = R.string.login_failed)
-        //TODO
+        error(e, code, call)
     }
 
     private fun onSuccesReset(unit: Unit) {
         _resetResult.value = Result(success = true, error = null)
-        Log.d("EZAZ", "succcccess reseeeeeeeeeeet loginvm")
     }
 
-    private fun onErrorReset(e: Throwable) {
+    private fun onErrorReset(e: Throwable, code: Int?, call: String) {
         _resetResult.value = Result(success = null, error = R.string.user_not_found)
-        Log.d("EZAZ", "errrrrror reseeeeeeeeeeet loginvm")
-        //TODO
+        error(e, code, call)
+    }
+
+    private fun error(e: Throwable, code: Int?, call: String) {
+        when(code) {
+            400 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "400 - Bad Request")
+            401 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "401 - Unauthorized ")
+            403 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "403 - Forbidden")
+            404 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "404 - Not Found")
+        }
+        FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
+        FirebaseCrashlytics.getInstance().recordException(e)
     }
 }
