@@ -26,7 +26,6 @@ class StatisticDiagramFragment : Fragment() {
     var chart4: PieChart? = null
 
     private lateinit var mInflater: LayoutInflater
-    private lateinit var linearContainer: LinearLayout
 
     companion object {
         fun newInstance() = StatisticDiagramFragment()
@@ -43,7 +42,6 @@ class StatisticDiagramFragment : Fragment() {
 
         val rootView = inflater.inflate(R.layout.statistic_diagram_fragment, container, false)
         mInflater = LayoutInflater.from(context)
-        linearContainer = rootView.findViewById(R.id.ch1Container)
         return rootView
     }
 
@@ -68,7 +66,7 @@ class StatisticDiagramFragment : Fragment() {
                 piechart2.visibility = View.GONE
             } else{
                 setDataPieChart1(it.activities!!)
-                setDataPieChart2(it.activities!!)
+                setDataPieChart2(it.activities)
             }
             setDataPieChart3(it.sumLocalHours!!, it.sumOnlineHours!!)
             setDataPieChart4(it.sumLocalIncome!!, it.sumOnlineIncome!!)
@@ -77,6 +75,7 @@ class StatisticDiagramFragment : Fragment() {
 
     //sumhours of activities
     private fun setDataPieChart1(list: List<ForEmployeeActivityForReport>) {
+        ch1Container.removeAllViewsInLayout()
         var sum = 0
 
         val colors = resources.getStringArray(R.array.color_values)
@@ -105,6 +104,7 @@ class StatisticDiagramFragment : Fragment() {
 
     //sumIncome of activities
     private fun setDataPieChart2(list: List<ForEmployeeActivityForReport>) {
+        ch2Container.removeAllViewsInLayout()
         var sum = 0
 
         val colors = resources.getStringArray(R.array.color_values)

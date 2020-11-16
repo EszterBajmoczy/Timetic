@@ -4,7 +4,7 @@ import hu.bme.aut.android.timetic.network.models.*
 import retrofit2.http.*
 import retrofit2.Call
 
-interface MobileApi {
+interface OrganisationApi {
     /**
      * Cancel appointment
      * 
@@ -55,7 +55,18 @@ interface MobileApi {
     * @return [Call]<[ForClientOrganization]>
      */
     @GET("client/organization")
-    fun clientOrganizationGet(): Call<ForClientOrganization>
+    fun clientOrganizationGet(@Query("email") email: String): Call<ForClientOrganization>
+
+    /**
+     * Sets client's refresh token
+     *
+     * Responses:
+     *  - 200: successful operation
+     *
+     * @return [Call]<[CommonToken]>
+     */
+    @POST("client/refresh")
+    fun clientRefreshPost(@Body commonPostRefresh: CommonPostRefresh): Call<CommonToken>
 
     /**
      * Refresh client&#39;s token
@@ -84,7 +95,7 @@ interface MobileApi {
     * @return [Call]<[CommonClient]>
      */
     @POST("client/register")
-    fun clientRegisterPost(@Body commonClient: CommonClient): Call<CommonClient>
+    fun clientRegisterPost(@Body commonClient: CommonClient): Call<Unit>
 
     /**
      * Share their personal/client data with the organization //client is registered by employee
@@ -98,6 +109,20 @@ interface MobileApi {
     fun clientShareDataWithOrganizationGet(): Call<Unit>
 
     /**
+     * Gets the url of the online consultation for the appointment if that is online
+     *
+     * Responses:
+     *  - 200: successful operation
+     *  - 404: resource not found
+     *  - 401: Not authenticated
+     *
+     * @param appointmentId
+     * @return [Call]<[kotlin.String]>
+     */
+    @GET("client/consultation")
+    fun clientConsultationGet(@Query("appointmentId") appointmentId: kotlin.String): Call<CommonConsultation>
+
+/**
      * Gets the data so as to create and appointment
      * 
      * Responses:
@@ -217,15 +242,27 @@ interface MobileApi {
 
     /**
      * Asks for new password
-     * 
+     *
      * Responses:
      *  - 200: successful operation
      *  - 404: account not found
-     * 
-    * @return [Call]<[Unit]>
+     *
+     * @return [Call]<[Unit]>
      */
-    @GET("employee/forgottenPassword")
-    fun employeeForgottenPasswordGet(): Call<Unit>
+    @GET("employee/forgottenPassword/")
+    fun employeeForgottenPasswordGet(@Query("email") email: kotlin.String): Call<Unit>
+
+    /**
+     * Create new password
+     *
+     * Responses:
+     *  - 200: successful operation
+     *  - 404: account not found
+     *
+     * @return [Call]<[Unit]>
+     */
+    @POST("employee/forgottenPassword")
+    fun employeeForgottenPasswordPost(@Body commonPasswordReset: CommonPasswordReset): Call<Unit>
 
     /**
      * Logs employee into the system
@@ -293,4 +330,17 @@ interface MobileApi {
     @GET("employee/report")
     fun employeeReportGet(@Query("startDate") startDate: kotlin.Long? = null, @Query("endDate") endDate: kotlin.Long? = null): Call<ForEmployeeReport>
 
+    /**
+     * Gets the url of the online consultation for the appointment if that is online
+     *
+     * Responses:
+     *  - 200: successful operation
+     *  - 404: resource not found
+     *  - 401: Not authenticated
+     *
+     * @param appointmentId
+     * @return [Call]<[kotlin.String]>
+     */
+    @GET("employee/consultation")
+    fun employeeConsultationGet(@Query("appointmentId") appointmentId: kotlin.String): Call<CommonConsultation>
 }

@@ -3,11 +3,14 @@ package hu.bme.aut.android.timetic.ui.calendar
 import android.R.attr.fragment
 import android.R.attr.key
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.preference.PreferenceManager
@@ -106,11 +109,18 @@ class CalendarMainFragment : Fragment() {
 
     }
 
-    fun setFloatingActionButton(){
+    private fun setFloatingActionButton(){
         val fab = requireActivity().findViewById<FloatingActionButton>(R.id.fab)
         fab.setOnClickListener {
-            val intent = Intent(activity, NewAppointmentActivity::class.java)
-            startActivity(intent)
+            val connectivityManager = context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val activeNetworkInfo = connectivityManager.activeNetworkInfo
+            val isNetworkAvailable = activeNetworkInfo != null && activeNetworkInfo.isConnected
+            if(isNetworkAvailable) {
+                val intent = Intent(activity, NewAppointmentActivity::class.java)
+                startActivity(intent)
+            } else {
+                Toast.makeText(context, "Internetkapcsolat szükséges új időpont létrehozásához", Toast.LENGTH_LONG).show()
+            }
         }
     }
 

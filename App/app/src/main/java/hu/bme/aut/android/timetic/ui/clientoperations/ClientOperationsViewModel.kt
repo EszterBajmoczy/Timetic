@@ -6,7 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import hu.bme.aut.android.timetic.MyApplication
-import hu.bme.aut.android.timetic.data.model.Client
+import hu.bme.aut.android.timetic.data.model.Person
 import hu.bme.aut.android.timetic.dataManager.DBRepository
 import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
@@ -16,8 +16,8 @@ class ClientOperationsViewModel : ViewModel() {
 
     private lateinit var backend: NetworkOrganisationInteractor
 
-    private val _clients = MutableLiveData<List<Client>>()
-    var clients: LiveData<List<Client>> = _clients
+    val _persons = MutableLiveData<List<Person>>()
+    var persons: LiveData<List<Person>> = _persons
 
     fun fetchData(local: Boolean,
         OrganisationUrl: String,
@@ -27,7 +27,7 @@ class ClientOperationsViewModel : ViewModel() {
         if(local){
             val dao = MyApplication.myDatabase.roomDao()
             val repo = DBRepository(dao)
-            clients = repo.getAllClients()
+            persons = repo.getAllPersons()
 
         }
         else{
@@ -45,13 +45,13 @@ class ClientOperationsViewModel : ViewModel() {
     }
 
     private fun success(data: List<CommonClient>) {
-        Log.d("EZAZ", "data success")
-        val list = ArrayList<Client>()
+        Log.d("EZAZ", "data client success")
+        val list = ArrayList<Person>()
         for(item in data){
-            val c = Client(id = null, netId = item.id!!, name = item.name!!, email = item.email!!, phone = item.phone!!)
+            val c = Person(id = null, netId = item.id!!, name = item.name!!, email = item.email!!, phone = item.phone!!)
             list.add(c)
         }
-        _clients.value = list
+        _persons.value = list
     }
 
     private fun error(e: Throwable, code: Int?, call: String) {

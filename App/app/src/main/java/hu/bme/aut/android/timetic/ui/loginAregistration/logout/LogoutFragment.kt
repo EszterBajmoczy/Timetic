@@ -34,14 +34,7 @@ class LogoutFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
         logoutYes.setOnClickListener {
-            val secureSharedPreferences = MyApplication.secureSharedPreferences
-
-            val edit = secureSharedPreferences.edit()
-            edit.clear()
-            edit.apply()
-
-            val intent = Intent(activity, StartScreenActivity::class.java)
-            startActivity(intent)
+            context?.sendBroadcast(Intent("Logout"))
         }
 
         logoutNo.setOnClickListener {

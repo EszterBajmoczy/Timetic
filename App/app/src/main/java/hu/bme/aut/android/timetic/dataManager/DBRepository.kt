@@ -1,19 +1,23 @@
 package hu.bme.aut.android.timetic.dataManager
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import hu.bme.aut.android.timetic.data.model.Appointment
-import hu.bme.aut.android.timetic.data.model.Client
+import hu.bme.aut.android.timetic.data.model.Person
 import hu.bme.aut.android.timetic.database.CalendarTypeConverter
 import hu.bme.aut.android.timetic.database.RoomDao
 import hu.bme.aut.android.timetic.database.models.RoomAppointment
-import hu.bme.aut.android.timetic.database.models.RoomClient
+import hu.bme.aut.android.timetic.database.models.RoomPerson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class DBRepository(private val roomDao: RoomDao) {
     private val calendarTypeConverter = CalendarTypeConverter()
+
+    suspend fun deleteAllTables() = withContext(Dispatchers.IO) {
+        roomDao.deletePersonTable()
+        roomDao.deleteAppointmentTable()
+    }
 
     //Appointment
     fun getAllAppointments(): LiveData<List<Appointment>> {
@@ -55,7 +59,6 @@ class DBRepository(private val roomDao: RoomDao) {
 
     suspend fun deleteAppointment(appointment: Appointment) = withContext(Dispatchers.IO) {
         roomDao.deleteAppointment(appointment.toRoomModel())
-        Log.d("EZAZ", "delete success")
     }
 
     private fun RoomAppointment.toDomainModel(): Appointment {
@@ -69,8 +72,11 @@ class DBRepository(private val roomDao: RoomDao) {
             private_appointment = private_appointment,
             videochat = videochat,
             address = address,
-            client = client,
-            activity = activity
+            person = person,
+            personPhone = personPhone,
+            personEmail = personEmail,
+            activity = activity,
+            organisationUrl = organisationUrl
         )
     }
 
@@ -85,44 +91,47 @@ class DBRepository(private val roomDao: RoomDao) {
             private_appointment = private_appointment,
             videochat = videochat,
             address = address,
-            client = client,
-            activity = activity
+            person = person,
+            personPhone = personPhone,
+            personEmail = personEmail,
+            activity = activity,
+            organisationUrl = organisationUrl
         )
     }
 
-    //Client
-    fun getAllClients(): LiveData<List<Client>> {
-        return roomDao.getAllClients()
-            .map {roomClients ->
-                roomClients.map {roomClient ->
-                    roomClient.toDomainModel() }
+    //Person
+    fun getAllPersons(): LiveData<List<Person>> {
+        return roomDao.getAllPersons()
+            .map {roomPersons ->
+                roomPersons.map {roomPerson ->
+                    roomPerson.toDomainModel() }
             }
     }
 
-    fun getClientList(): List<Client> {
-        val result = ArrayList<Client>()
-        val list = roomDao.getClientList()
+    fun getPersonList(): List<Person> {
+        val result = ArrayList<Person>()
+        val list = roomDao.getPersonList()
         for(item in list){
             result.add(item.toDomainModel())
         }
         return result
     }
 
-    suspend fun insert(client: Client) = withContext(Dispatchers.IO) {
-        roomDao.insertClient(client.toRoomModel())
+    suspend fun insert(person: Person) = withContext(Dispatchers.IO) {
+        roomDao.insertPerson(person.toRoomModel())
     }
 
-    suspend fun updateClient(client: Client)  = withContext(Dispatchers.IO){
-        roomDao.updateClient(client.toRoomModel())
+    suspend fun updatePerson(person: Person)  = withContext(Dispatchers.IO){
+        roomDao.updatePerson(person.toRoomModel())
 
     }
 
-    suspend fun deleteClient(client: Client) = withContext(Dispatchers.IO) {
-        roomDao.deleteClient(client.toRoomModel())
+    suspend fun deletePerson(person: Person) = withContext(Dispatchers.IO) {
+        roomDao.deletePerson(person.toRoomModel())
     }
 
-    private fun RoomClient.toDomainModel(): Client {
-        return Client(
+    private fun RoomPerson.toDomainModel(): Person {
+        return Person(
             id = id,
             netId = netId,
             name = name,
@@ -131,8 +140,8 @@ class DBRepository(private val roomDao: RoomDao) {
         )
     }
 
-    private fun Client.toRoomModel(): RoomClient {
-        return RoomClient(
+    private fun Person.toRoomModel(): RoomPerson {
+        return RoomPerson(
             id = id,
             netId = netId,
             name = name,

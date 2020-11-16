@@ -29,6 +29,7 @@
             >
 
             <TextView
+                android:id="@+id/tPrivate"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:text="@string/tPrivate"
@@ -94,9 +95,6 @@
 
             </Button>
 
-
-
-
             <TextView
                 android:id="@+id/tClient"
                 android:layout_width="150dp"
@@ -108,13 +106,46 @@
                 />
 
             <Spinner
-                android:id="@+id/spClient"
+                android:id="@+id/spPerson"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
                 android:background="@color/lightgrey"
                 android:padding="2dp"/>
 
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <LinearLayout
+                android:id="@+id/clientContacts"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="center">
+
+                <ImageButton
+                    android:id="@+id/clientCall"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center_vertical"
+                    android:scaleType="fitXY"
+                    android:src="@android:drawable/sym_action_call"
+                    android:layout_margin="6dp"/>
+
+                <ImageButton
+                    android:id="@+id/clientEmail"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center_vertical"
+                    android:scaleType="fitXY"
+                    android:src="@android:drawable/sym_action_email"
+                    android:layout_margin="6dp"/>
+
+            </LinearLayout>
             <TextView
                 android:id="@+id/tLocation"
                 android:layout_width="150dp"

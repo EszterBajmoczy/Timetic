@@ -7,17 +7,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import hu.bme.aut.android.timetic.MyApplication
-import hu.bme.aut.android.timetic.data.model.Client
+import hu.bme.aut.android.timetic.data.model.Person
 import hu.bme.aut.android.timetic.dataManager.DBRepository
+import hu.bme.aut.android.timetic.dataManager.NetworkDeveloperInteractor
 import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
-import hu.bme.aut.android.timetic.network.models.CommonClient
-import hu.bme.aut.android.timetic.network.models.ForEmployeeOrganization
+import hu.bme.aut.android.timetic.network.models.*
 import kotlinx.coroutines.launch
 
 
 class NewClientViewModel : ViewModel() {
-    private var backend: NetworkOrganisationInteractor
+    private lateinit var backend: NetworkOrganisationInteractor
     private var repo: DBRepository
 
     private val _data = MutableLiveData<ForEmployeeOrganization>()
@@ -26,20 +26,59 @@ class NewClientViewModel : ViewModel() {
     private val _success = MutableLiveData<Boolean>()
     val success: LiveData<Boolean> = _success
 
+    private val _tokenForClient = MutableLiveData<String>()
+    val tokenForClient: LiveData<String> = _tokenForClient
+
+    private val _clientRegistered = MutableLiveData<Boolean>()
+    val clientRegistered: LiveData<Boolean> = _clientRegistered
+
     init {
         val dao = MyApplication.myDatabase.roomDao()
         repo = DBRepository(dao)
+    }
 
-        backend =
-            NetworkOrganisationInteractor(
-                MyApplication.getOrganisationUrl()!!,
-                null,
-                HttpBearerAuth(
-                    "bearer",
-                    MyApplication.getToken()!!
+    fun initialize(organisationUrl: String, token: String? = null){
+        if(token == null){
+            backend =
+                NetworkOrganisationInteractor(
+                    organisationUrl,
+                    null,
+                    null
                 )
-            )
-        backend.getOrganisationData(onSuccess = this::onSuccess, onError = this::error)
+        } else {
+            backend =
+                NetworkOrganisationInteractor(
+                    organisationUrl,
+                    null,
+                    HttpBearerAuth(
+                        "bearer",
+                        token
+                    )
+                )
+            backend.getOrganisationDataForEmployee(onSuccess = this::onSuccess, onError = this::error)
+        }
+    }
+
+    fun sendOrganisationIdToDev(devToken: String, organisationId: String) {
+        val devBackend =
+            NetworkDeveloperInteractor(
+                null,
+                    HttpBearerAuth(
+                        "bearer",
+                        devToken
+                    )
+                )
+        devBackend.patchRegisteredOrganisationById(organisationId = organisationId,
+            onSuccess = this::onSuccessAddOrganisationIdToDev, onError = this::onErrorAddOrganisationIdToDev)
+    }
+
+    fun onSuccessAddOrganisationIdToDev(unit: Unit){
+        _clientRegistered.value = true
+    }
+
+    fun onErrorAddOrganisationIdToDev(e: Throwable, code: Int?, call: String){
+        _clientRegistered.value = false
+        error(e, code, call)
     }
 
     fun onSuccess(data: ForEmployeeOrganization){
@@ -57,6 +96,27 @@ class NewClientViewModel : ViewModel() {
         FirebaseCrashlytics.getInstance().recordException(e)
     }
 
+    fun getTokenForClient(organisationUrl: String, email: String, refreshToken: String) {
+        val backendWithoutAuth =
+            NetworkOrganisationInteractor(
+                organisationUrl,
+                null,
+                null
+            )
+        backendWithoutAuth.postRefreshTokenForClient(CommonPostRefresh(email, refreshToken), onSuccess = this::onSuccessPutRefreshToken, onError = this::onErrorClientAdd)
+    }
+    private fun onSuccessPutRefreshToken(token: CommonToken, url:String){
+        _tokenForClient.value = token.token
+    }
+
+    fun registerClient(c: CommonClient) {
+        backend.registerClient(client = c, onSuccess = this::onSuccessClientAddByClient, onError = this::onErrorClientAdd)
+    }
+
+    private fun onSuccessClientAddByClient(unit: Unit){
+        _success.value = true
+    }
+
     fun addClient(c: CommonClient) {
         backend.addClient(client = c, onSuccess = this::onSuccessClientAdd, onError = this::onErrorClientAdd)
     }
@@ -64,7 +124,7 @@ class NewClientViewModel : ViewModel() {
     private fun onSuccessClientAdd(client: CommonClient){
         Log.d("EZAZ", "add clienttttttttttt")
         _success.value = true
-        val c = Client(netId = client.id!!, name = client.name!!, email = client.email!!, phone = client.phone!!)
+        val c = Person(netId = client.id!!, name = client.name!!, email = client.email!!, phone = client.phone!!)
 
         insert(c)
     }
@@ -74,7 +134,7 @@ class NewClientViewModel : ViewModel() {
         error(e, code, call)
     }
 
-    private fun insert(client: Client) = viewModelScope.launch {
-        repo.insert(client)
+    private fun insert(person: Person) = viewModelScope.launch {
+        repo.insert(person)
     }
 }

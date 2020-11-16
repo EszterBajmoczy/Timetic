@@ -1,6 +1,5 @@
 package hu.bme.aut.android.timetic.database.models
 
-import android.media.MediaSession2Service
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -16,6 +15,9 @@ class RoomAppointment (
     val private_appointment: Boolean,
     val videochat: Boolean?,
     val address: String?,
-    val client: String?,
-    val activity: String?
+    val person: String?,
+    val personPhone: String?,
+    val personEmail: String?,
+    val activity: String?,
+    val organisationUrl: String?
 )

@@ -10,20 +10,22 @@ import android.os.Bundle
 import android.os.Looper
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import com.facebook.react.bridge.UiThreadUtil
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
+import hu.bme.aut.android.timetic.Role
 import hu.bme.aut.android.timetic.create.getAppointment
 import hu.bme.aut.android.timetic.create.getClient
+import hu.bme.aut.android.timetic.create.getEmployee
+import hu.bme.aut.android.timetic.create.toHashMap
 import hu.bme.aut.android.timetic.data.model.Appointment
-import hu.bme.aut.android.timetic.data.model.Client
+import hu.bme.aut.android.timetic.data.model.Person
 import hu.bme.aut.android.timetic.dataManager.DBRepository
 import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.network.models.CommonAppointment
 import hu.bme.aut.android.timetic.network.models.CommonClient
-import kotlinx.coroutines.Dispatchers
+import hu.bme.aut.android.timetic.network.models.ForClientAppointment
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
@@ -34,8 +36,12 @@ class SyncAdapter @JvmOverloads constructor(
     allowParallelSyncs: Boolean = false,
     val mContentResolver: ContentResolver = context.contentResolver
 ) : AbstractThreadedSyncAdapter(context, autoInitialize, allowParallelSyncs) {
-    private var notificationCount = 0
+    private var mapSize: Int = 0
+    private var appointments = ArrayList<Appointment>()
+    private var persons = ArrayList<Person>()
+    private var notificationCount = 1
     private lateinit var repo: DBRepository
+    private lateinit var role: Role
 
     override fun onPerformSync(
         account: Account,
@@ -45,21 +51,76 @@ class SyncAdapter @JvmOverloads constructor(
         syncResult: SyncResult
     ) {
         notification( "SyncAdapter ;)")
-        Log.d( "EZAZ", "syncadapter")
-        if(MyApplication.getToken() == null && MyApplication.getOrganisationUrl() == null){
-            notification( "Unable to synchronize, please log in")
-        } else {
+
+        if(MyApplication.getToken().isNullOrEmpty() || MyApplication.getDevToken().isNullOrEmpty() ){
+            role = if(MyApplication.getToken() != null && MyApplication.getToken()!!.isNotEmpty()){
+                Role.EMPLOYEE
+            } else {
+                Role.CLIENT
+            }
             Looper.prepare()
             synchronize()
+        } else {
+            notification( "Unable to synchronize, please log in")
         }
+
+
     }
 
     private fun synchronize() {
-        //TODO role
-        val backend =  NetworkOrganisationInteractor(MyApplication.getOrganisationUrl()!!, null, HttpBearerAuth("bearer", MyApplication.getToken()!!))
-        backend.getAppointments(onSuccess = this::successAppointmentList, onError = this::errorAppointmentList)
+        when(role) {
+            Role.EMPLOYEE -> {
+                val backend =  NetworkOrganisationInteractor(MyApplication.getOrganisationUrl()!!, null, HttpBearerAuth("bearer", MyApplication.getToken()!!))
+                backend.getEmployeeAppointments(onSuccess = this::successAppointmentList, onError = this::errorAppointmentList)
+            }
+            Role.CLIENT -> {
+                val organisationsMapString = MyApplication.secureSharedPreferences.getString("OrganisationsMap", "")
+                val organisationMap = organisationsMapString!!.toHashMap()
+                mapSize = organisationMap.size
+                for((url,token) in organisationMap){
+                    val backend = NetworkOrganisationInteractor(
+                        url,
+                        null,
+                        HttpBearerAuth(
+                            "bearer",
+                            token
+                        )
+                    )
+                    backend.getClientAppointments(onSuccess = this::successClientAppointmentList, onError = this::errorAppointmentList)
+                }
+            }
+
+        }
+
     }
 
+    private fun successClientAppointmentList(list: List<ForClientAppointment>, organisationUrl: String) {
+        mapSize -= 1
+        for(item in list){
+            val a = item.getAppointment(organisationUrl)
+            appointments.add(a)
+            val c = item.getEmployee()
+            if(!persons.contains(c)){
+                persons.add(c)
+            }
+        }
+        if(mapSize < 1){
+            appointments()
+            clients()
+        }
+    }
+
+    private fun successAppointmentList(list: List<CommonAppointment>) {
+        for(item in list){
+            appointments.add(item.getAppointment())
+            val c = item.getClient()
+            if(c != null && !persons.contains(c)) {
+                persons.add(c)
+            }
+        }
+        appointments()
+        clients()
+    }
 
     private fun notification(title: String, text: String? = null) {
         val manager =
@@ -81,54 +142,56 @@ class SyncAdapter @JvmOverloads constructor(
         manager.notify(notificationCount++, notification)
     }
 
-    private fun successAppointmentList(list: List<CommonAppointment>) {
+    private fun appointments() {
         Log.d("EZAZ", "appontments success")
+        val dao = MyApplication.myDatabase.roomDao()
+        repo = DBRepository(dao)
+        val apps = repo.getAppointmentList()
 
-        GlobalScope.launch {
-            val dao = MyApplication.myDatabase.roomDao()
-            repo = DBRepository(dao)
-            val apps = repo.getAppointmentList()
-            val clients = repo.getClientList()
+        val appointmentIds = ArrayList<String>()
 
-            val appointmentIds = ArrayList<String>()
-            val checkedClients = ArrayList<CommonClient>()
+        //check if it is already in the local database
+        for (item in appointments){
+            //make a unique id in the list
+            appointmentIds.add(item.netId + item.organisationUrl)
 
-            //check if it is already in the local database
-            for (item in list){
-                appointmentIds.add(item.id!!)
+            if(newOrUpdatedAppointment(item, apps)){
 
-                val start = Calendar.getInstance()
-                start.timeInMillis = item.startTime!!
-                val end = Calendar.getInstance()
-                end.timeInMillis = item.endTime!!
-
-                if(newOrUpdatedAppointment(item, apps)){
-                    val a = item.getAppointment()
-                    if(!item.isPrivate!!){
-                        val c = item.getClient()
-                        if(c != null && newOrUpdatedClient(item.client!!, clients) && !checkedClients.contains(item.client)){
-                            checkedClients.add(item.client)
-                            insert(c)
-                        }
-                    }
-                    insert(a)
-                }
-                val todayStart = Calendar.getInstance()
-                todayStart.set(Calendar.HOUR_OF_DAY, 0)
-                todayStart.set(Calendar.MINUTE, 0)
-                todayStart.set(Calendar.SECOND, 0)
-                val todayEnd = Calendar.getInstance()
-                todayEnd.set(Calendar.HOUR_OF_DAY, 23)
-                todayEnd.set(Calendar.MINUTE, 59)
-                todayEnd.set(Calendar.SECOND, 59)
-
-                if(item.startTime > todayStart.timeInMillis && item.startTime < todayEnd.timeInMillis){
-                    val title = getTitle(item.getAppointment())
-                    val text = getText(item.getAppointment())
-                    notification(title, text)
-                }
+                insert(item)
             }
-            deleteCanceledAppointments(appointmentIds, apps)
+
+            val todayStart = Calendar.getInstance()
+            todayStart.set(Calendar.HOUR_OF_DAY, 0)
+            todayStart.set(Calendar.MINUTE, 0)
+            todayStart.set(Calendar.SECOND, 0)
+            val todayEnd = Calendar.getInstance()
+            todayEnd.set(Calendar.HOUR_OF_DAY, 23)
+            todayEnd.set(Calendar.MINUTE, 59)
+            todayEnd.set(Calendar.SECOND, 59)
+
+            if(item.start_date > todayStart && item.start_date < todayEnd){
+                val title = getTitle(item)
+                val text = getText(item)
+                notification(title, text)
+            }
+        }
+        deleteCanceledAppointments(appointmentIds, apps)
+    }
+
+    private fun clients() {
+        val dao = MyApplication.myDatabase.roomDao()
+        repo = DBRepository(dao)
+        val personsFromDB = repo.getPersonList()
+
+        val checkedPersons = ArrayList<String>()
+
+        //check if it is already in the local database
+        for (item in persons) {
+            if (newOrUpdatedPerson(item, personsFromDB) && !checkedPersons.contains(item.netId + item.email)) {
+                //make a unique id in the list
+                checkedPersons.add(item.netId + item.email)
+                insert(item)
+            }
         }
     }
 
@@ -160,7 +223,7 @@ class SyncAdapter @JvmOverloads constructor(
         apps: List<Appointment>
     ) {
         for(item in apps){
-            if(!ids.contains(item.netId)){
+            if(!ids.contains(item.netId + item.organisationUrl)){
                 delete(item)
             }
         }
@@ -168,27 +231,27 @@ class SyncAdapter @JvmOverloads constructor(
 
     //checks if the appointment already saved
     private fun newOrUpdatedAppointment(
-        appointment: CommonAppointment,
+        appointment: Appointment,
         apps: List<Appointment>
     ) : Boolean {
         for(item in apps){
-            if(item.netId == appointment.id){
-                if(item.note == appointment.note && item.start_date.timeInMillis == appointment.startTime &&
-                    item.end_date.timeInMillis == appointment.endTime &&
-                    item.private_appointment == appointment.isPrivate &&
-                    item.address == appointment.place && appointment.isPrivate){
+            if(item.netId == appointment.netId){
+                if(item.note == appointment.note && item.start_date == appointment.start_date &&
+                    item.end_date == appointment.end_date &&
+                    item.private_appointment == appointment.private_appointment &&
+                    item.address == appointment.address && appointment.private_appointment){
                     return false
                 }
-                if(item.note == appointment.note && item.start_date.timeInMillis == appointment.startTime &&
-                    item.end_date.timeInMillis == appointment.endTime && item.price == appointment.price &&
-                    item.private_appointment == appointment.isPrivate && item.videochat == appointment.online &&
-                    item.address == appointment.place && item.client == appointment.client!!.name && item.activity == appointment.activity!!.name){
+                if(item.note == appointment.note && item.start_date == appointment.start_date &&
+                    item.end_date == appointment.end_date && item.price == appointment.price &&
+                    item.private_appointment == appointment.private_appointment && item.videochat == appointment.videochat &&
+                    item.address == appointment.address && item.person == appointment.person && item.activity == appointment.activity){
                     return false
                 }
-                else if(item.note == appointment.note && item.start_date.timeInMillis == appointment.startTime &&
-                    item.end_date.timeInMillis == appointment.endTime &&
-                    item.private_appointment == appointment.isPrivate &&
-                    item.address == appointment.place){
+                else if(item.note == appointment.note && item.start_date == appointment.start_date &&
+                    item.end_date == appointment.end_date &&
+                    item.private_appointment == appointment.private_appointment &&
+                    item.address == appointment.address){
                     return false
                 }
                 delete(item)
@@ -198,14 +261,14 @@ class SyncAdapter @JvmOverloads constructor(
         return true
     }
 
-    //checks if the client already saved
-    private fun newOrUpdatedClient(
-        client: CommonClient,
-        clients: List<Client>
+    //checks if the person already saved
+    private fun newOrUpdatedPerson(
+        person: Person,
+        people: List<Person>
     ) : Boolean {
-        for(item in clients){
-            if(item.netId == client.id){
-                if(item.name == client.name && item.email == client.email && item.phone == client.phone ){
+        for(item in people){
+            if(item.netId == person.netId){
+                if(item.name == person.name && item.email == person.email && item.phone == person.phone ){
                     return false
                 }
                 delete(item)
@@ -219,16 +282,16 @@ class SyncAdapter @JvmOverloads constructor(
         repo.insert(appointment)
     }
 
-    private fun insert(client: Client) = GlobalScope.launch {
-        repo.insert(client)
+    private fun insert(person: Person) = GlobalScope.launch {
+        repo.insert(person)
     }
 
     private fun delete(appointment: Appointment) = GlobalScope.launch {
         repo.deleteAppointment(appointment)
     }
 
-    private fun delete(client: Client) = GlobalScope.launch {
-        repo.deleteClient(client)
+    private fun delete(person: Person) = GlobalScope.launch {
+        repo.deletePerson(person)
     }
 
     private fun errorAppointmentList(e: Throwable, code: Int?, call: String) {

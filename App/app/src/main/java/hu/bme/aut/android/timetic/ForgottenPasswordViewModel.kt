@@ -4,17 +4,25 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import hu.bme.aut.android.timetic.dataManager.NetworkDeveloperInteractor
 import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
 import hu.bme.aut.android.timetic.network.auth.HttpBasicAuth
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
+import hu.bme.aut.android.timetic.network.models.CommonOrganization
 import hu.bme.aut.android.timetic.network.models.CommonPasswordReset
+import hu.bme.aut.android.timetic.network.models.CommonPostRefresh
 import hu.bme.aut.android.timetic.network.models.CommonToken
 import hu.bme.aut.android.timetic.ui.loginAregistration.Result
 
 class ForgottenPasswordViewModel : ViewModel() {
-    private lateinit var backendOrganisation: NetworkOrganisationInteractor
-    private lateinit var backendDeveloper: NetworkDeveloperInteractor
+    private lateinit var backendOrg: NetworkOrganisationInteractor
+    private lateinit var backendDev: NetworkDeveloperInteractor
+    private lateinit var email: String
+    private var organisationUrl: String? = null
+    private lateinit var role: Role
+    private var tmpMap = HashMap<String, String>()
+    private var mapSize = 0
 
     private val _resetForm = MutableLiveData<ResetFormState>()
     val resetForm: LiveData<ResetFormState> = _resetForm
@@ -31,39 +39,59 @@ class ForgottenPasswordViewModel : ViewModel() {
     private val _token = MutableLiveData<String>()
     val token: LiveData<String> = _token
 
-    fun reset(role: MyApplication.Companion.ROLE, email: String, code: Int, password: String){
+    private val _organisations = MutableLiveData<HashMap<String, String>>()
+    val organisations: LiveData<HashMap<String, String>> = _organisations
+
+    fun reset(role: Role, email: String, code: Int, password: String, organisationUrl: String?){
         when (role) {
-            MyApplication.Companion.ROLE.EMPLOYEE -> {
-                backendOrganisation =  NetworkOrganisationInteractor(
-                    MyApplication.getOrganisationUrl()!!,
+            Role.EMPLOYEE -> {
+                val backend =  NetworkOrganisationInteractor(
+                    organisationUrl!!,
                     null,
                     null
                 )
                 val data = CommonPasswordReset(email, password, code)
-                backendOrganisation.saveNewPassword(data, onSuccess = this::onSuccesReset, onError = this::onErrorReset)
+                backend.saveNewPassword(data, onSuccess = this::onSuccesReset, onError = this::onErrorReset)
             }
-            MyApplication.Companion.ROLE.CLIENT -> {
-                backendDeveloper = NetworkDeveloperInteractor(
+            Role.CLIENT -> {
+                val backend = NetworkDeveloperInteractor(
                     null,
                     null
                 )
+                val data = CommonPasswordReset(email, password, code)
+                backend.saveNewPassword(data, onSuccess = this::onSuccesReset, onError = this::onErrorReset)
             }
         }
 
     }
 
-    fun login(email: String, password: String) {
-        //TODO role
-        val backend =
-            NetworkOrganisationInteractor(
-                MyApplication.getOrganisationUrl()!!,
-                HttpBasicAuth(email, password),
-                null
-            )
-        backend.login(onSuccess = this::successRefreshToken, onError = this::errorRefreshToken)
+    fun login(email: String, password: String, organisationUrl: String?) {
+        this.organisationUrl = organisationUrl
+        this.email = email
+
+        if(organisationUrl.isNullOrEmpty()){
+            role = Role.CLIENT
+            val backend =
+                NetworkDeveloperInteractor(
+                    HttpBasicAuth(email, password),
+                    null
+                )
+            backend.login(onSuccess = this::successRefreshToken, onError = this::errorRefreshToken)
+        }
+        else{
+
+            role = Role.EMPLOYEE
+            val backend =
+                NetworkOrganisationInteractor(
+                    organisationUrl,
+                    HttpBasicAuth(email, password),
+                    null
+                )
+            backend.login(onSuccess = this::successRefreshToken, onError = this::errorRefreshToken)
+        }
     }
 
-    fun getTokenOrganisation(refreshToken: CommonToken){
+    private fun getTokenOrganisation(refreshToken: CommonToken){
         if(refreshToken.token != null){
             NetworkOrganisationInteractor(
                 MyApplication.getOrganisationUrl()!!,
@@ -73,12 +101,61 @@ class ForgottenPasswordViewModel : ViewModel() {
         }
     }
 
+    private fun getTokenDeveloper(refreshToken: CommonToken){
+        if(refreshToken.token != null){
+            val n =
+                NetworkDeveloperInteractor(
+                    null,
+                    HttpBearerAuth("bearer", refreshToken.token)
+                )
+            n.getToken(onSuccess = this::successToken, onError = this::errorToken)
+        }
+    }
+
     private fun successToken(token: CommonToken) {
         Log.d("EZAZ", "getTokeeeeeeeeeeeeeeeeeeeeeeeeeeen succcccess reset")
         _token.value = token.token
-        _loginResult.value = Result(success = true, error = null)
+        if(role == Role.CLIENT){
+            val n =
+                NetworkDeveloperInteractor(
+                    null,
+                    HttpBearerAuth("bearer", token.token!!)
+                )
+            n.getRegisteredOrganisations(onSuccess = this::successOrganisations, onError = this::error)
+        } else {
+            _loginResult.value = Result(success = true, error = null)
+        }
+    }
 
-        //TODO
+    private fun successOrganisations(organisations: List<CommonOrganization>) {
+        _refreshToken.value?.let {token: String ->
+            if(organisations.isEmpty()){
+                _organisations.value = tmpMap
+            }
+            mapSize = organisations.size
+            //get token for every organisation
+            for(item in organisations) {
+                val network =
+                    NetworkOrganisationInteractor(
+                        item.serverUrl!!,
+                        null,
+                        null
+                    )
+                network.postRefreshTokenForClient(CommonPostRefresh(email, token), onSuccess = this::successRefreshTokenForClient, onError = this::errorRefreshTokenForClient)
+            }
+        }
+    }
+
+    private fun successRefreshTokenForClient(token: CommonToken, url: String) {
+        tmpMap[url] = token.token!!
+        if(tmpMap.size == mapSize) {
+            _organisations.value = tmpMap
+        }
+    }
+
+    private fun errorRefreshTokenForClient(e: Throwable, code: Int?, call: String) {
+        _loginResult.value = Result(success = true, error = R.string.login_failed)
+        error(e, code, call)
     }
 
     private fun errorToken(e: Throwable, code: Int?, call: String) {
@@ -90,8 +167,10 @@ class ForgottenPasswordViewModel : ViewModel() {
     private fun successRefreshToken(token: CommonToken) {
         Log.d("EZAZ", "getToken succcccess reset")
         _refreshToken.value = token.token
-        //TODO role
-        getTokenOrganisation(token)
+        when(role) {
+            Role.EMPLOYEE -> getTokenOrganisation(token)
+            Role.CLIENT -> getTokenDeveloper(token)
+        }
     }
 
     private fun errorRefreshToken(e: Throwable, code: Int?, call: String) {
@@ -149,5 +228,16 @@ class ForgottenPasswordViewModel : ViewModel() {
     // Code validation check
     private fun isCodeValid(password: String): Boolean {
         return password.length == 6
+    }
+
+    private fun error(e: Throwable, code: Int?, call: String) {
+        when(code) {
+            400 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "400 - Bad Request")
+            401 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "401 - Unauthorized ")
+            403 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "403 - Forbidden")
+            404 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "404 - Not Found")
+        }
+        FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
+        FirebaseCrashlytics.getInstance().recordException(e)
     }
 }

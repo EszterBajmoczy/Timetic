@@ -4,23 +4,26 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import hu.bme.aut.android.timetic.MyApplication
+import hu.bme.aut.android.timetic.R
 import hu.bme.aut.android.timetic.data.model.Appointment
-import hu.bme.aut.android.timetic.data.model.Client
+import hu.bme.aut.android.timetic.data.model.Person
 import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.dataManager.DBRepository
 import hu.bme.aut.android.timetic.network.models.*
-import kotlinx.coroutines.launch
+import hu.bme.aut.android.timetic.ui.loginAregistration.Result
 import java.util.*
 
-class NewAppointmentViewModel : ViewModel() {
+class NewAppointmentViewModel: ViewModel() {
     private lateinit var backend: NetworkOrganisationInteractor
     private var repo: DBRepository
 
     private lateinit var data: ForEmployeeDataForAppointmentCreation
+
+    private val _result = MutableLiveData<Result>()
+    val result: LiveData<Result> = _result
 
     private val _activities = MutableLiveData<List<CommonActivity>>()
     val activities: LiveData<List<CommonActivity>> = _activities
@@ -76,6 +79,8 @@ class NewAppointmentViewModel : ViewModel() {
     }
 
     private fun error(e: Throwable, code: Int?, call: String) {
+        _result.value = Result(false, R.string.errorCreateAppointment)
+
         when(code) {
             400 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "400 - Bad Request")
             401 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "401 - Unauthorized ")
@@ -95,13 +100,36 @@ class NewAppointmentViewModel : ViewModel() {
     }
 
     fun cancelAppointment(id: String){
-
         this.id = id
-        backend.cancelAppointment(id, this::successCancelAppointment, this::error)
+        backend.cancelAppointmentByEmployee(id, onSuccess = this::successCancelAppointment, onError = this::error)
+    }
+
+    fun cancelAppointmentByClient(organisationUrl: String, token: String, id: String){
+        val interactor =
+            NetworkOrganisationInteractor(organisationUrl,
+                null,
+                HttpBearerAuth(
+                    "bearer",
+                    token
+                )
+            )
+        interactor.cancelAppointmentByClient(id, onSuccess = this::successCancelAppointment, onError = this::error)
     }
 
     fun getMeetingUrl(appointmentId: String) {
         backend.getMeetingUrl(appointmentId, this::successMeetingUrl, this::error)
+    }
+
+    fun getMeetingUrlByClient(organisationUrl: String, token: String, appointmentId: String) {
+        val interactor =
+            NetworkOrganisationInteractor(organisationUrl,
+                null,
+                HttpBearerAuth(
+                    "bearer",
+                    token
+                )
+            )
+        interactor.getMeetingUrlForClient(appointmentId, this::successMeetingUrl, this::error)
     }
 
     private fun successMeetingUrl(commonConsultation: CommonConsultation)  {
@@ -111,80 +139,17 @@ class NewAppointmentViewModel : ViewModel() {
 
 
     private fun successCancelAppointment(u: Unit)  {
-        Log.d("EZAZ", "cancel success")
-        Log.d("EZAZ", "id ${appDetail.value!!.netId}")
-
-        delete()
-    }
-
-    private fun delete()  = viewModelScope.launch {
-        if (appDetail.value != null) {
-            repo.deleteAppointment(appDetail.value!!)
-        }
+        _result.value = Result(true, null)
     }
 
     private fun successModifyAppointment(appointment: CommonAppointment)  {
         Log.d("EZAZ", "modifying success")
-
-        deleteById(appointment.id!!)
-
-        val a = appointment.getAppointment()
-
-        if(!appointment.isPrivate!!){
-            val c = appointment.getClient()
-            if(c != null && newOrUpdatedClient(appointment.client!!, c)){
-                insert(c)
-            }
-        }
-        insert(a)
-    }
-
-    private fun deleteById(id: String)   = viewModelScope.launch {
-        repo.deleteAppointmentByNetId(id)
+        _result.value = Result(true, null)
     }
 
     private fun successAddAppointment(appointment: CommonAppointment) {
         Log.d("EZAZ", "adding success")
-
-        val a = appointment.getAppointment()
-        if(!appointment.isPrivate!!){
-            val c = appointment.getClient()
-            if(c != null && newOrUpdatedClient(appointment.client!!, c)){
-                insert(c)
-            }
-        }
-        insert(a)
-    }
-
-    //checks if the client already saved
-    private fun newOrUpdatedClient(
-        client: CommonClient,
-        c: Client
-    ) : Boolean {
-        clients.let {
-            for(item in clients.value!!){
-                if(item.id == client.id){
-                    if(item.name == client.name && item.email == client.email && item.phone == client.phone ){
-                        return false
-                    }
-                    delete(c)
-                    return true
-                }
-            }
-            return true
-        }
-    }
-
-    private fun insert(appointment: Appointment) = viewModelScope.launch {
-        repo.insert(appointment)
-    }
-
-    private fun insert(client: Client) = viewModelScope.launch {
-        repo.insert(client)
-    }
-
-    private fun delete(client: Client) = viewModelScope.launch {
-        repo.deleteClient(client)
+        _result.value = Result(true, null)
     }
 }
 
@@ -195,7 +160,7 @@ fun CommonAppointment.getAppointment(): Appointment{
     end.timeInMillis = endTime!!
     return if(isPrivate!!){
         Appointment(id = null, netId = id!!, note = note, start_date = start, end_date = end, price = null, private_appointment = isPrivate,
-            videochat = null, address = place, client = null, activity = null)
+            videochat = null, address = place, person = null, personPhone = null, personEmail = null, activity = null)
     }
     else {
         Appointment(
@@ -208,17 +173,46 @@ fun CommonAppointment.getAppointment(): Appointment{
             private_appointment = isPrivate,
             videochat = online!!,
             address = place,
-            client = client!!.name,
+            person = client!!.name,
+            personPhone = client.phone,
+            personEmail = client.email,
             activity = activity!!.name
         )
     }
 }
 
-fun CommonAppointment.getClient(): Client? {
+fun CommonAppointment.getClient(): Person? {
     return if(isPrivate!!) {
          null
     }
     else {
-        Client(id = null, netId = client!!.id!!, name = client.name!!, email = client.email!!, phone = client.phone!!)
+        Person(id = null, netId = client!!.id!!, name = client.name!!, email = client.email!!, phone = client.phone!!)
     }
+}
+
+fun ForClientAppointment.getAppointment(url: String): Appointment{
+    val start = Calendar.getInstance()
+    start.timeInMillis = startTime!!
+    val end = Calendar.getInstance()
+    end.timeInMillis = endTime!!
+    return Appointment(
+        id = null,
+        netId = id!!,
+        note = note,
+        start_date = start,
+        end_date = end,
+        price = price,
+        private_appointment = false,
+        videochat = online!!,
+        address = place,
+        person = employee!!.name,
+        personPhone = employee.phone,
+        personEmail = employee.email,
+        activity = activity!!.name,
+        organisationUrl = url
+    )
+}
+
+fun ForClientAppointment.getEmployee(): Person {
+    return Person(id = null, netId = employee!!.id!!, name = employee.name!!, email = employee.email!!, phone = employee.phone!!)
 }

@@ -34,6 +34,8 @@ data class ForClientOrganization (
     @Json(name = "isClientRegistered")
     val isClientRegistered: kotlin.Boolean? = null,
     @Json(name = "employees")
-    val employees: kotlin.collections.List<CommonEmployee>? = null
+    val employees: kotlin.collections.List<CommonEmployee>? = null,
+    @Json(name = "clientPersonalInfoFields")
+    val clientPersonalInfoFields: kotlin.collections.List<kotlin.String>? = null
 )
 

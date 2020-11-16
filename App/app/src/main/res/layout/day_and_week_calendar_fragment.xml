@@ -36,7 +36,6 @@
         app:todayHeaderTextColor="@color/colorPrimaryLight"
         app:firstDayOfWeek="monday"
         app:showFirstDayOfWeekFirst="true"
-
         />
 
 

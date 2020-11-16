@@ -1,5 +1,6 @@
 package hu.bme.aut.android.timetic.ui.loginAregistration.login
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,15 +10,20 @@ import hu.bme.aut.android.timetic.dataManager.NetworkDeveloperInteractor
 import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
 
 import hu.bme.aut.android.timetic.R
-import hu.bme.aut.android.timetic.network.models.ForMobileUserRegistration
+import hu.bme.aut.android.timetic.Role
 import hu.bme.aut.android.timetic.network.auth.HttpBasicAuth
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
+import hu.bme.aut.android.timetic.network.models.CommonOrganization
+import hu.bme.aut.android.timetic.network.models.CommonPostRefresh
 import hu.bme.aut.android.timetic.network.models.CommonToken
 import hu.bme.aut.android.timetic.ui.loginAregistration.Result
 
 class LoginViewModel : ViewModel() {
-    private var user: ForMobileUserRegistration? = null
+    private lateinit var email: String
     private var organisationUrl: String? = null
+    private lateinit var role: Role
+    private var tmpMap = HashMap<String, String>()
+    private var mapSize = 0
 
     private val _loginForm = MutableLiveData<LoginFormState>()
     val loginFormState: LiveData<LoginFormState> = _loginForm
@@ -34,21 +40,27 @@ class LoginViewModel : ViewModel() {
     private val _resetResult = MutableLiveData<Result>()
     val resetResult: LiveData<Result> = _resetResult
 
+    private val _organisations = MutableLiveData<HashMap<String, String>>()
+    val organisations: LiveData<HashMap<String, String>> = _organisations
+
     fun login(email: String, password: String, organisationUrl: String?) {
         this.organisationUrl = organisationUrl
+        this.email = email
 
-        if(organisationUrl != null){
+        if(organisationUrl.isNullOrEmpty()){
+            role = Role.CLIENT
             val backend =
-                NetworkOrganisationInteractor(
-                    organisationUrl,
+                NetworkDeveloperInteractor(
                     HttpBasicAuth(email, password),
                     null
                 )
             backend.login(onSuccess = this::successRefreshToken, onError = this::errorRefreshToken)
         }
         else{
+            role = Role.EMPLOYEE
             val backend =
-                NetworkDeveloperInteractor(
+                NetworkOrganisationInteractor(
+                    organisationUrl,
                     HttpBasicAuth(email, password),
                     null
                 )
@@ -83,12 +95,11 @@ class LoginViewModel : ViewModel() {
     private fun successRefreshToken(token: CommonToken) {
         _refreshToken.value = token.token
 
-        if(organisationUrl != null){
-            getTokenOrganisation(token)
+        when(role) {
+            Role.EMPLOYEE -> getTokenOrganisation(token)
+            Role.CLIENT -> getTokenDeveloper(token)
         }
-        else{
-            getTokenDeveloper(token)
-        }
+        Log.d("EZAZ", _refreshToken.value)
     }
 
     private fun errorRefreshToken(e: Throwable, code: Int?, call: String) {
@@ -119,18 +130,70 @@ class LoginViewModel : ViewModel() {
         }
     }
 
-    fun resetPassword(email: String, organisationURL: String){
-        val backend =  NetworkOrganisationInteractor(
-            organisationURL,
-            null,
-            null
-        )
-        backend.sendPasswordReset(email, onSuccess = this::onSuccesReset, onError = this::onErrorReset)
+    fun resetPassword(role: Role, email: String, organisationURL: String?){
+        if(role == Role.EMPLOYEE){
+            val backend =
+                NetworkOrganisationInteractor(
+                    organisationURL!!,
+                    null,
+                    null
+                )
+            backend.sendPasswordReset(email, onSuccess = this::onSuccesReset, onError = this::onErrorReset)
+        }
+        else {
+            val backend =
+                NetworkDeveloperInteractor(
+                    null,
+                    null
+                )
+            backend.sendPasswordReset(email, onSuccess = this::onSuccesReset, onError = this::onErrorReset)
+        }
     }
 
     private fun successToken(token: CommonToken) {
+        Log.d("EZAZ", token.token)
         _token.value = token.token
-        _loginResult.value = Result(success = true, error = null)
+        if(role == Role.CLIENT){
+            val n =
+                NetworkDeveloperInteractor(
+                    null,
+                    HttpBearerAuth("bearer", token.token!!)
+                )
+            n.getRegisteredOrganisations(onSuccess = this::successOrganisations, onError = this::error)
+        } else {
+            _loginResult.value = Result(success = true, error = null)
+        }
+    }
+
+    private fun successOrganisations(organisations: List<CommonOrganization>) {
+        _refreshToken.value?.let {token: String ->
+            if(organisations.isEmpty()){
+                _organisations.value = tmpMap
+            }
+            mapSize = organisations.size
+            //get token for every organisation
+            for(item in organisations) {
+                val network =
+                    NetworkOrganisationInteractor(
+                        item.serverUrl!!,
+                        null,
+                        null
+                    )
+                network.postRefreshTokenForClient(CommonPostRefresh(email, token), onSuccess = this::successRefreshTokenForClient, onError = this::errorRefreshTokenForClient)
+            }
+        }
+    }
+
+    private fun successRefreshTokenForClient(token: CommonToken, url: String) {
+        tmpMap[url] = token.token!!
+        if(tmpMap.size == mapSize) {
+            _organisations.value = tmpMap
+        }
+    }
+
+    private fun errorRefreshTokenForClient(e: Throwable, code: Int?, call: String) {
+        _loginResult.value = Result(success = true, error = R.string.login_failed)
+        error(e, code, call)
     }
 
     private fun errorToken(e: Throwable, code: Int?, call: String) {

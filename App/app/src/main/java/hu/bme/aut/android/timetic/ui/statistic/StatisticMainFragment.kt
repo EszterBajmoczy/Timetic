@@ -1,10 +1,16 @@
 package hu.bme.aut.android.timetic.ui.statistic
 
 import android.app.Activity
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -14,12 +20,27 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
 import kotlinx.android.synthetic.main.fragment_statistic_main.*
+import java.lang.Exception
 import java.util.*
 
 
 class StatisticMainFragment : Fragment() {
     private var myContext: FragmentActivity? = null
     private lateinit var viewModel: StatisticDiagramViewModel
+
+    private val internetStateChangedReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val activeNetworkInfo = connectivityManager.activeNetworkInfo
+            val isNetworkAvailable = activeNetworkInfo != null && activeNetworkInfo.isConnected
+            if(isNetworkAvailable) {
+                tNoInternetConnectionStatistic.visibility = View.GONE
+                btChooseTimeRangeContainer.visibility = View.VISIBLE
+                initialize()
+                context.unregisterReceiver(this)
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,6 +61,22 @@ class StatisticMainFragment : Fragment() {
         val fab = requireActivity().findViewById<FloatingActionButton>(R.id.fab)
         fab.isVisible = false
 
+        //check internet connection
+        val connectivityManager = context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetworkInfo = connectivityManager.activeNetworkInfo
+        val isNetworkAvailable = activeNetworkInfo != null && activeNetworkInfo.isConnected
+        if(isNetworkAvailable){
+            initialize()
+        } else {
+            tNoInternetConnectionStatistic.visibility = View.VISIBLE
+            btChooseTimeRangeContainer.visibility = View.GONE
+            val intentFilter = IntentFilter()
+            intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION)
+            context?.registerReceiver(internetStateChangedReceiver, intentFilter)
+        }
+    }
+
+    fun initialize() {
         viewModel = ViewModelProviders.of(requireActivity()).get(StatisticDiagramViewModel::class.java)
 
         btChooseTimeRange.setOnClickListener {
@@ -63,6 +100,15 @@ class StatisticMainFragment : Fragment() {
                     .commit()
             }
         }
+    }
+
+    override fun onPause() {
+        try {
+            context?.unregisterReceiver(internetStateChangedReceiver)
+        } catch (e: Exception) {
+
+        }
+        super.onPause()
     }
 
     override fun onDestroyView() {

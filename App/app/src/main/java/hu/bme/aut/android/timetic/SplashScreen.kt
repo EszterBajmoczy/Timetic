@@ -16,7 +16,7 @@ class SplashScreen : AppCompatActivity() {
         val thread = Runnable {
             val secureSharedPreferences = MyApplication.secureSharedPreferences
 
-            if(secureSharedPreferences.contains("Token")){
+            if(secureSharedPreferences.contains("Token") || secureSharedPreferences.contains("DevToken")){
                 val intent = Intent(this, MainActivity::class.java)
                 startActivity(intent)
             } else{

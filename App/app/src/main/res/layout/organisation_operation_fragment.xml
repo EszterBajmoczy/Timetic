@@ -6,11 +6,11 @@
     android:gravity="center">
 
     <TextView
-        android:id="@+id/tNoInternetConnectionClientOperations"
+        android:id="@+id/tNoInternetConnectionOrganisationOperations"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="6dp"
-        android:text="Nincs internet kapcsolat, csak azokat az ügyfeleket láthatja, akiknek időpontjaik vannak a naptárban."
+        android:text="Internetkapcsolat szükséges."
         android:background="@color/colorAccentLight"
         android:gravity="center_horizontal"
         android:visibility="gone"
@@ -19,7 +19,7 @@
     <EditText
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:id="@+id/SearchClient"
+        android:id="@+id/SearchOrganisation"
         android:hint="@string/tSearch"
         android:textColor="@color/colorDark"
         android:textColorHint="@color/colorAccent"
@@ -27,9 +27,9 @@
 
     <androidx.recyclerview.widget.RecyclerView xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/ClientRecyclerView"
+        android:id="@+id/OrganisationRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:listitem="@layout/item_client_list" />
+        tools:listitem="@layout/item_organisation_list" />
 </LinearLayout>

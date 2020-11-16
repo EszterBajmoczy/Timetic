@@ -2,14 +2,16 @@ package hu.bme.aut.android.timetic.settings
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SwitchPreference
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
 
 
 class SettingsActivity : AppCompatActivity() {
-    private lateinit var viewModel: SettingsViewModel
+    private var viewModel: SettingsViewModel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -17,8 +19,10 @@ class SettingsActivity : AppCompatActivity() {
 
 
         //TODO viewmodelfactory?
-        viewModel = SettingsViewModel()
-        viewModel.getDataForAppointmentCreation(MyApplication.getOrganisationUrl()!!, MyApplication.getToken()!!)
+        if(!MyApplication.getOrganisationUrl().isNullOrEmpty() && MyApplication.getOrganisationUrl() != "") {
+            viewModel = SettingsViewModel()
+            viewModel!!.getDataForAppointmentCreation(MyApplication.getOrganisationUrl()!!, MyApplication.getToken()!!)
+        }
 
         supportFragmentManager
             .beginTransaction()
@@ -30,22 +34,34 @@ class SettingsActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
-    class SettingsFragment(private val viewModel: SettingsViewModel) : PreferenceFragmentCompat() {
+    class SettingsFragment(private val viewModel: SettingsViewModel?) : PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
 
-            val activityType = findPreference<ListPreference>("activityType")
+            if(viewModel == null){
+                val defaultVideoChat = findPreference<SwitchPreference>("defaultVideoChat")
+                defaultVideoChat?.isVisible = false
 
-            viewModel.activities.observe(this, androidx.lifecycle.Observer {
-                val entryValues = ArrayList<String>()
+                val timeRange = findPreference<EditTextPreference>("timeRange")
+                timeRange?.isVisible = false
 
-                if (activityType != null) {
-                    activityType.entries = it.toTypedArray()
-                    activityType.setDefaultValue(it[0])
-                    activityType.entryValues = it.toTypedArray()
-                }
-            })
+                val price = findPreference<EditTextPreference>("price")
+                price?.isVisible = false
+
+                val activityType = findPreference<ListPreference>("activityType")
+                activityType?.isVisible = false
+
+            } else {
+                val activityType = findPreference<ListPreference>("activityType")
+
+                viewModel.activities.observe(this, androidx.lifecycle.Observer {
+                    if (activityType != null) {
+                        activityType.entries = it.toTypedArray()
+                        activityType.setDefaultValue(it[0])
+                        activityType.entryValues = it.toTypedArray()
+                    }
+                })
+            }
         }
     }
-
 }

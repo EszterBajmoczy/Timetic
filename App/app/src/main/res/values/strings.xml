@@ -38,7 +38,8 @@
     <string name="title_activity_registration">Registration</string>
     <string name="menuCalendar">Naptár</string>
     <string name="menuStatistic">Kimutatások</string>
-    <string name="menuClientOperations">Ügyfélek kezelés</string>
+    <string name="menuClientOperations">Kontaktok</string>
+    <string name="menuOrganisationOperations">Szervezetek kezelése</string>
     <string name="menuLogout">Kijelentkezés</string>
     <string name="title_activity_settings">Settings</string>
 
@@ -59,7 +60,7 @@
     <string name="vHalfHour">half_hour</string>
     <string name="vOneHour">one_hour</string>
     <string name="vOffNotification">off</string>
-    
+
     <string name="tDefaultActivity">Default activity</string>
 
     <!-- Statistic Fragment -->
@@ -99,6 +100,11 @@
     <string name="tCode">Kód</string>
     <string name="tResetMsg">Egy E-mail-ben elküldtük a kódot</string>
     <string name="tSearch">Keresés</string>
+
+    <string name="btActivateOrganisation">Szervezethez való regisztráció aktiválása</string>
+
+    <string name="errorCreateAppointment">A művelet nem sikerült</string>
+
 
 
 </resources>

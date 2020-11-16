@@ -4,12 +4,12 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import hu.bme.aut.android.timetic.database.models.RoomAppointment
-import hu.bme.aut.android.timetic.database.models.RoomClient
+import hu.bme.aut.android.timetic.database.models.RoomPerson
 
 @Database(
     version = 1,
     exportSchema = false,
-    entities = [RoomClient::class, RoomAppointment::class]
+    entities = [RoomPerson::class, RoomAppointment::class]
 )
 @TypeConverters(
     CalendarTypeConverter::class

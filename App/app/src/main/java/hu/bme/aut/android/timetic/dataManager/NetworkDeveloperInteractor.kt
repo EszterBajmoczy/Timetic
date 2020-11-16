@@ -6,9 +6,9 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import hu.bme.aut.android.timetic.network.auth.HttpBasicAuth
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
-import hu.bme.aut.android.timetic.network.infrastructure.Serializer
-import hu.bme.aut.android.timetic.network.apiDeveloper.MobileApi
+import hu.bme.aut.android.timetic.network.apiDeveloper.DeveloperApi
 import hu.bme.aut.android.timetic.network.models.CommonOrganization
+import hu.bme.aut.android.timetic.network.models.CommonPasswordReset
 import hu.bme.aut.android.timetic.network.models.CommonToken
 import hu.bme.aut.android.timetic.network.models.ForMobileUserRegistration
 import okhttp3.OkHttpClient
@@ -18,7 +18,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
 class NetworkDeveloperInteractor(auth: HttpBasicAuth?, autb: HttpBearerAuth?) {
-    private val mobileApi: MobileApi
+    private val developerApi: DeveloperApi
 
     init {
         val m = Moshi.Builder()
@@ -43,12 +43,12 @@ class NetworkDeveloperInteractor(auth: HttpBasicAuth?, autb: HttpBearerAuth?) {
         }
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://optipus.ddns.net:8080")
+            .baseUrl("https://optipus.ddns.net:8080")
             .client(client)
             .addConverterFactory(MoshiConverterFactory.create(m))
             .build()
 
-        this.mobileApi = retrofit.create(MobileApi::class.java)
+        this.developerApi = retrofit.create(DeveloperApi::class.java)
     }
 
     private fun <T> runCallOnBackgroundThread(
@@ -60,10 +60,8 @@ class NetworkDeveloperInteractor(auth: HttpBasicAuth?, autb: HttpBearerAuth?) {
         Thread {
             var response: Response<T>? = null
             try {
-                Log.d("EZAZ", "response before")
                 response = call.execute()
                 val body = response.body()!!
-                Log.d("EZAZ", "response after")
                 handler.post {
                     onSuccess(body)
                 }
@@ -86,7 +84,7 @@ class NetworkDeveloperInteractor(auth: HttpBasicAuth?, autb: HttpBearerAuth?) {
         onSuccess: (List<CommonOrganization>) -> Unit,
         onError: (Throwable, code: Int?, call: String) -> Unit
     ) {
-        val getImagesRequest = mobileApi.mobileOrganizationsGet()
+        val getImagesRequest = developerApi.mobileOrganizationsGet()
         this.runCallOnBackgroundThread(getImagesRequest, onSuccess, onError)
     }
 
@@ -94,7 +92,7 @@ class NetworkDeveloperInteractor(auth: HttpBasicAuth?, autb: HttpBearerAuth?) {
                      onSuccess: (Unit) -> Unit,
                      onError: (Throwable, code: Int?, call: String) -> Unit
     ) {
-        val getImagesRequest = mobileApi.mobileRegisterPost(user)
+        val getImagesRequest = developerApi.mobileRegisterPost(user)
         this.runCallOnBackgroundThread(getImagesRequest, onSuccess, onError)
     }
 
@@ -102,7 +100,7 @@ class NetworkDeveloperInteractor(auth: HttpBasicAuth?, autb: HttpBearerAuth?) {
         onSuccess: (CommonToken) -> Unit,
         onError: (Throwable, code: Int?, call: String) -> Unit
     ) {
-        val getRefreshToken = mobileApi.mobileLoginGet()
+        val getRefreshToken = developerApi.mobileLoginGet()
         this.runCallOnBackgroundThread(getRefreshToken, onSuccess, onError)
     }
 
@@ -110,7 +108,42 @@ class NetworkDeveloperInteractor(auth: HttpBasicAuth?, autb: HttpBearerAuth?) {
         onSuccess: (CommonToken) -> Unit,
         onError: (Throwable, code: Int?, call: String) -> Unit
     ) {
-        val getToken = mobileApi.mobileRefreshGet()
+        val getToken = developerApi.mobileRefreshGet()
         this.runCallOnBackgroundThread(getToken, onSuccess, onError)
+    }
+
+    fun getRegisteredOrganisations(
+        onSuccess: (List<CommonOrganization>) -> Unit,
+        onError: (Throwable, code: Int?, call: String) -> Unit
+    ) {
+        val getToken = developerApi.mobileRegisteredOrganizationsGet()
+        this.runCallOnBackgroundThread(getToken, onSuccess, onError)
+    }
+
+    fun patchRegisteredOrganisationById(
+        organisationId: String,
+        onSuccess: (Unit) -> Unit,
+        onError: (Throwable, code: Int?, call: String) -> Unit
+    ) {
+        val getToken = developerApi.mobileRegisteredOrganizationsIdPatch(organisationId)
+        this.runCallOnBackgroundThread(getToken, onSuccess, onError)
+    }
+
+    fun sendPasswordReset(
+        email: String,
+        onSuccess: (Unit) -> Unit,
+        onError: (Throwable, Int?, String) -> Unit
+    ){
+        val getData = developerApi.mobileForgottenPassword(email)
+        this.runCallOnBackgroundThread(getData, onSuccess, onError)
+    }
+
+    fun saveNewPassword(
+        commonPasswordReset: CommonPasswordReset,
+        onSuccess: (Unit) -> Unit,
+        onError: (Throwable, Int?, String) -> Unit
+    ){
+        val getData = developerApi.mobileForgottenPassword(commonPasswordReset)
+        this.runCallOnBackgroundThread(getData, onSuccess, onError)
     }
 }

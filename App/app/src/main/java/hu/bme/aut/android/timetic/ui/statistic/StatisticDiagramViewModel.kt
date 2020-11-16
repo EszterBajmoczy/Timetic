@@ -1,6 +1,5 @@
 package hu.bme.aut.android.timetic.ui.statistic
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -35,7 +34,6 @@ class StatisticDiagramViewModel : ViewModel() {
     }
 
     private fun success(data: ForEmployeeReport) {
-        Log.d("EZAZ", "data success")
         _data.value = data
     }
 

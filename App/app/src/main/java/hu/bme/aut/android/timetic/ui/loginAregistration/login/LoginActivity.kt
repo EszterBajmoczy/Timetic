@@ -17,17 +17,14 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import hu.bme.aut.android.timetic.ForgottenPasswordActivity
-import hu.bme.aut.android.timetic.MainActivity
-import hu.bme.aut.android.timetic.MyApplication
-import hu.bme.aut.android.timetic.R
+import hu.bme.aut.android.timetic.*
 
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var loginViewModel: LoginViewModel
-    private var organisationURL: String? = null
     private var emailAccount: String? = null
+    private lateinit var role: Role
 
     private lateinit var sharedPreferences: SharedPreferences
 
@@ -36,7 +33,13 @@ class LoginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
         sharedPreferences = MyApplication.secureSharedPreferences
 
-        organisationURL = intent.getStringExtra("OrganisationUrl")
+        val organisationURL = intent.getStringExtra("OrganisationUrl")
+
+        role = if(organisationURL == null){
+            Role.CLIENT
+        } else {
+            Role.EMPLOYEE
+        }
 
         val email = findViewById<EditText>(R.id.logEmail)
         val password = findViewById<EditText>(R.id.logPassword)
@@ -85,9 +88,15 @@ class LoginActivity : AppCompatActivity() {
         })
 
         loginViewModel.token.observe(this@LoginActivity, Observer {
-            val editor = sharedPreferences.edit()
-            editor.putString("Token", it)
-            editor.apply()
+            if(role == Role.CLIENT){
+                val editor = sharedPreferences.edit()
+                editor.putString("DevToken", it)
+                editor.apply()
+            } else {
+                val editor = sharedPreferences.edit()
+                editor.putString("Token", it)
+                editor.apply()
+            }
         })
 
         loginViewModel.resetResult.observe(this@LoginActivity, Observer {
@@ -100,18 +109,34 @@ class LoginActivity : AppCompatActivity() {
             }
             if (resetResult.success != null) {
                 val intent = Intent(this, ForgottenPasswordActivity::class.java)
+                if(organisationURL != null) {
+                    intent.putExtra("OrganisationUrl", organisationURL)
+                } else {
+                    intent.putExtra("OrganisationUrl", "")
+                }
                 startActivity(intent)
             }
         })
 
-        //TODO
+        loginViewModel.organisations.observe(this, Observer {map ->
+            val editor = MyApplication.secureSharedPreferences.edit()
+            editor.putString("OrganisationsMap", map.toString())
+            editor.apply()
+
+            updateUiWithUser()
+            setResult(Activity.RESULT_OK)
+
+            //Complete and destroy login activity once successful
+            finish()
+        })
+
         passwordForgotten.setOnClickListener {
             if(email.text.toString() != ""){
                 val editor = sharedPreferences.edit()
                 editor.putString("Email", email.text.toString())
                 editor.apply()
 
-                loginViewModel.resetPassword(email.text.toString(), organisationURL!!)
+                loginViewModel.resetPassword(role, email.text.toString(), organisationURL)
             } else {
                 Toast.makeText(
                     applicationContext,
@@ -172,6 +197,7 @@ class LoginActivity : AppCompatActivity() {
         editor.apply()
 
         val intent = Intent(this@LoginActivity, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
     }
 

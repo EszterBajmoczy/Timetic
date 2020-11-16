@@ -1,12 +1,16 @@
 package hu.bme.aut.android.timetic.ui.clientoperations
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
+import android.widget.Button
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -17,17 +21,37 @@ import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
 import hu.bme.aut.android.timetic.adapter.ClientAdapter
 import hu.bme.aut.android.timetic.create.NewClientActivity
-import hu.bme.aut.android.timetic.data.model.Client
 import hu.bme.aut.android.timetic.ui.loginAregistration.login.afterTextChanged
 import kotlinx.android.synthetic.main.fragment_client_operations.*
+import kotlinx.android.synthetic.main.fragment_statistic_main.*
+import java.lang.Exception
 
 
-class ClientOperationsFragment : Fragment(), ClientAdapter.ClientClickListener {
+class ClientOperationsFragment : Fragment(){
 
     private lateinit var viewModel: ClientOperationsViewModel
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ClientAdapter
-    private lateinit var nameList: List<String>
+
+    private val internetStateChangedReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val activeNetworkInfo = connectivityManager.activeNetworkInfo
+            val isNetworkAvailable = activeNetworkInfo != null && activeNetworkInfo.isConnected
+            if(isNetworkAvailable) {
+                tNoInternetConnectionClientOperations.visibility = View.GONE
+
+                viewModel.fetchData(false, MyApplication.getOrganisationUrl()!!,
+                    MyApplication.getToken()!!)
+
+                viewModel._persons.observe(viewLifecycleOwner, Observer {
+                    adapter.update(it)
+                })
+                context.unregisterReceiver(this)
+            }
+        }
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,38 +65,63 @@ class ClientOperationsFragment : Fragment(), ClientAdapter.ClientClickListener {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProviders.of(this).get(ClientOperationsViewModel::class.java)
 
-        //TODO check if filter works
         initRecyclerView()
         setFloatingActionButton()
 
-        //TODO internetconnection? -> ui, local: true/false
-        viewModel.fetchData(false, MyApplication.getOrganisationUrl()!!,
-            MyApplication.getToken()!!)
-        viewModel.clients.observe(viewLifecycleOwner, Observer {
-            adapter.update(it)
-        })
+        if(!MyApplication.getOrganisationUrl()!!.isNullOrEmpty()) {
+            initialize(false)
+        } else {
+            initialize(true)
+        }
+
         SearchClient.afterTextChanged {
             adapter.filter.filter(it)
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.fetchData(false, MyApplication.getOrganisationUrl()!!,
-            MyApplication.getToken()!!)
+    private fun initialize(local: Boolean) {
+        //check internet connection
+        val connectivityManager = context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetworkInfo = connectivityManager.activeNetworkInfo
+        val isNetworkAvailable = activeNetworkInfo != null && activeNetworkInfo.isConnected
+        if(isNetworkAvailable){
+            viewModel.fetchData(local, MyApplication.getOrganisationUrl()!!,
+                MyApplication.getToken()!!)
+        } else {
+            tNoInternetConnectionClientOperations.visibility = View.VISIBLE
+
+            viewModel.fetchData(true, MyApplication.getOrganisationUrl()!!,
+                MyApplication.getToken()!!)
+
+            val intentFilter = IntentFilter()
+            intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION)
+            context?.registerReceiver(internetStateChangedReceiver, intentFilter)
+        }
+
+        viewModel.persons.observe(viewLifecycleOwner, Observer {
+            adapter.update(it)
+        })
     }
 
-    private fun getNameList(list: List<Client>): List<String> {
-        val stringList = ArrayList<String>()
-        for(item in list){
-            stringList.add(item.name)
+    override fun onPause() {
+        try {
+            context?.unregisterReceiver(internetStateChangedReceiver)
+        } catch (e: Exception) {
+
         }
-        return stringList
+        super.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if(!MyApplication.getOrganisationUrl()!!.isNullOrEmpty()){
+            initialize(true)
+        }
     }
 
     private fun initRecyclerView() {
         recyclerView = ClientRecyclerView
-        adapter = ClientAdapter(this, this::callCallBack, this::emailCallBack)
+        adapter = ClientAdapter(this::callCallBack, this::emailCallBack)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter
     }
@@ -88,17 +137,16 @@ class ClientOperationsFragment : Fragment(), ClientAdapter.ClientClickListener {
         startActivity(Intent.createChooser(intent, "Choose an Email client :"))
     }
 
-    override fun onItemChanged(item: Client) {
-        //TODO?
-        //Do nothing
-    }
-
-    fun setFloatingActionButton(){
-        val fab = requireActivity().findViewById<FloatingActionButton>(R.id.fab)
-        fab.setOnClickListener {
-            //TODO
-            val intent = Intent(activity, NewClientActivity::class.java)
-            startActivity(intent)
+    private fun setFloatingActionButton(){
+        if(MyApplication.getOrganisationUrl().isNullOrEmpty() || MyApplication.getOrganisationUrl() == ""){
+            val fab = requireActivity().findViewById<FloatingActionButton>(R.id.fab)
+            fab.visibility = View.GONE
+        } else {
+            val fab = requireActivity().findViewById<FloatingActionButton>(R.id.fab)
+            fab.setOnClickListener {
+                val intent = Intent(activity, NewClientActivity::class.java)
+                startActivity(intent)
+            }
         }
     }
 }

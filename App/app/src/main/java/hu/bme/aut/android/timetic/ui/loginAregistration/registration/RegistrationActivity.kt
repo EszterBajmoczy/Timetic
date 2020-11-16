@@ -1,8 +1,8 @@
 package hu.bme.aut.android.timetic.ui.loginAregistration.registration
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
@@ -20,11 +20,13 @@ import hu.bme.aut.android.timetic.MainActivity
 import hu.bme.aut.android.timetic.MyApplication
 
 import hu.bme.aut.android.timetic.R
+import kotlinx.android.synthetic.main.activity_registration.*
 
 class RegistrationActivity : AppCompatActivity() {
 
     private lateinit var registrationViewModel: RegistrationViewModel
     private var organisationURL: String? = null
+    private lateinit var sharedPreferences: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,20 +75,19 @@ class RegistrationActivity : AppCompatActivity() {
             //Complete and destroy login activity once successful
             finish()
         })
-        val sp = MyApplication.secureSharedPreferences
+        sharedPreferences = MyApplication.secureSharedPreferences
 
         registrationViewModel.refreshToken.observe(this@RegistrationActivity, Observer {
-            val editor = sp.edit()
+            val editor = sharedPreferences.edit()
             editor.putString("RefreshToken", it)
             editor.apply()
 
         })
 
         registrationViewModel.token.observe(this@RegistrationActivity, Observer {
-            val editor = sp.edit()
-            editor.putString("Token", it)
+            val editor = sharedPreferences.edit()
+            editor.putString("DevToken", it)
             editor.apply()
-            editor.commit()
         })
 
         name.afterTextChanged {
@@ -140,7 +141,12 @@ class RegistrationActivity : AppCompatActivity() {
                 Toast.LENGTH_LONG
         ).show()
 
+        val editor = sharedPreferences.edit()
+        editor.putString("Email", regEmail.text.toString())
+        editor.apply()
+
         val intent = Intent(this@RegistrationActivity, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
     }
 

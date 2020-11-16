@@ -1,18 +1,22 @@
 package hu.bme.aut.android.timetic.create
 
+import android.content.Context
+import android.content.Intent
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.EditText
-import android.widget.GridLayout
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.google.gson.Gson
+import hu.bme.aut.android.timetic.MainActivity
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
-import hu.bme.aut.android.timetic.data.model.Client
+import hu.bme.aut.android.timetic.Role
 import hu.bme.aut.android.timetic.network.models.CommonClient
 import kotlinx.android.synthetic.main.activity_new_client.*
 import kotlinx.android.synthetic.main.item_new_client.view.*
@@ -20,6 +24,7 @@ import kotlinx.android.synthetic.main.item_new_client.view.*
 
 class NewClientActivity : AppCompatActivity() {
     private lateinit var viewModel: NewClientViewModel
+    private lateinit var role: Role
     private var ids = ArrayList<Int>()
     private var infos = ArrayList<String>()
 
@@ -27,20 +32,26 @@ class NewClientActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_new_client)
 
-        title = "Új ügyfél felvétele"
-
-        val pref = MyApplication.secureSharedPreferences
-        etClientEmail.setText(pref.getString("Email", ""))
+        val personalInfo = intent.getStringArrayExtra("PersonalInfos")
+        val organisationUrl = intent.getStringExtra("OrganisationUrl")
+        val organisationId = intent.getStringExtra("OrganisationId")
 
         viewModel = ViewModelProviders.of(this).get(NewClientViewModel::class.java)
-        viewModel.data.observe(this, Observer { list ->
-            val infoList = list.clientPersonalInfoFields
 
-            infoList?.let {
-                val mInflater = LayoutInflater.from(applicationContext)
-                val mDynamicLayoutsContainer = findViewById<LinearLayout>(R.id.tableNewClient)
+        if(organisationId != null && organisationUrl != null) {
+            role = Role.CLIENT
+            title = "Regisztrálás"
 
-                for((i, item) in it.withIndex()){
+            viewModel.initialize(organisationUrl)
+
+            val pref = MyApplication.secureSharedPreferences
+            etClientEmail.setText(pref.getString("Email", ""))
+
+            val mInflater = LayoutInflater.from(applicationContext)
+            val mDynamicLayoutsContainer = findViewById<LinearLayout>(R.id.tableNewClient)
+
+            personalInfo?.let {
+                for((i, item) in personalInfo.withIndex()){
                     val firstI = View.generateViewId()
                     val secondI = View.generateViewId()
 
@@ -57,22 +68,92 @@ class NewClientActivity : AppCompatActivity() {
                     mDynamicLayoutsContainer.addView(itemRow)
                 }
             }
-        })
+        } else {
+            role = Role.EMPLOYEE
+            title = "Új ügyfél felvétele"
+
+            viewModel.initialize(MyApplication.getOrganisationUrl()!!, MyApplication.getToken()!!)
+
+            viewModel.data.observe(this, Observer { list ->
+                val infoList = list.clientPersonalInfoFields
+
+                infoList?.let {
+                    val mInflater = LayoutInflater.from(applicationContext)
+                    val mDynamicLayoutsContainer = findViewById<LinearLayout>(R.id.tableNewClient)
+
+                    for((i, item) in it.withIndex()){
+                        val firstI = View.generateViewId()
+                        val secondI = View.generateViewId()
+
+                        infos.add(item)
+                        ids.add(secondI)
+
+                        val itemRow = mInflater.inflate(R.layout.item_new_client, null, false)
+                        //text field
+                        itemRow.textNewClient.text = item
+                        itemRow.textNewClient.id = firstI
+                        //editText field
+                        itemRow.editTextNewClient.id = secondI
+
+                        mDynamicLayoutsContainer.addView(itemRow)
+                    }
+                }
+            })
+        }
+
         btSaveClient.setOnClickListener {
             if(check()){
                 val c = getClient()
-                viewModel.addClient(c)
-                finish()
+                if(isNetworkAvailable()){
+                    when(role) {
+                        Role.EMPLOYEE -> viewModel.addClient(c)
+                        Role.CLIENT -> viewModel.registerClient(c)
+                    }
+                } else {
+                    Toast.makeText(this, "Internetkapcsolat szükséges.", Toast.LENGTH_LONG).show()
+                }
             }
             else{
                 Toast.makeText(this, "Kérem töltse ki az összes mezőt", Toast.LENGTH_LONG).show()
             }
-
         }
 
         btCancelClient.setOnClickListener {
             finish()
         }
+
+        viewModel.success.observe(this, Observer {
+            when(role) {
+                Role.EMPLOYEE -> finish()
+                Role.CLIENT -> {
+                    viewModel.getTokenForClient(organisationUrl, MyApplication.getEmail()!!, MyApplication.getRefreshToken()!!)
+                }
+            }
+        })
+
+        viewModel.tokenForClient.observe(this, Observer {
+            val mapString = MyApplication.secureSharedPreferences.getString("OrganisationsMap", "")
+            val map = mapString!!.toHashMap()
+            map[organisationUrl!!] = it
+
+            val editor = MyApplication.secureSharedPreferences.edit()
+            editor.putString("OrganisationsMap", map.toString())
+            editor.apply()
+
+            viewModel.sendOrganisationIdToDev(MyApplication.getDevToken()!!, organisationId!!)
+        })
+
+        viewModel.clientRegistered.observe(this, Observer {
+            when(it) {
+                true -> {
+                    val intent = Intent(this, MainActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                    finish()
+                }
+                false -> Toast.makeText(applicationContext, "Unable to register", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
     private fun check() : Boolean {
@@ -101,4 +182,29 @@ class NewClientActivity : AppCompatActivity() {
             personalInfos = personalInfos
         )
     }
+
+    private fun isNetworkAvailable(): Boolean {
+        val connectivityManager = applicationContext?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetworkInfo = connectivityManager.activeNetworkInfo
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected
+    }
+}
+
+fun String.toHashMap(): HashMap<String, String> {
+    val map = HashMap<String, String>()
+    var tmp = this.substringAfter('{').substringBefore('}')
+    while(tmp.contains(", ") || tmp.isNotEmpty()) {
+        val key = tmp.substringBefore('=')
+        tmp = tmp.substringAfter('=')
+        val value: String
+        if(tmp.contains(", ")){
+            value = tmp.substringBefore(", ")
+            tmp = tmp.substringAfter(", ")
+        } else{
+            value = tmp
+            tmp = ""
+        }
+        map[key] = value
+    }
+    return map
 }

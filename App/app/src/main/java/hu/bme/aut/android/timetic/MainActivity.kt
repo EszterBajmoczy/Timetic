@@ -20,9 +20,9 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
-import com.google.android.material.snackbar.Snackbar
+import hu.bme.aut.android.timetic.create.toHashMap
 import hu.bme.aut.android.timetic.data.model.Appointment
-import hu.bme.aut.android.timetic.data.model.Client
+import hu.bme.aut.android.timetic.data.model.Person
 import hu.bme.aut.android.timetic.receiver.AlarmReceiver
 import hu.bme.aut.android.timetic.settings.SettingsActivity
 import hu.bme.aut.android.timetic.ui.calendar.CalendarViewModel
@@ -30,23 +30,24 @@ import hu.bme.aut.android.timetic.ui.calendar.CalendarViewModelFactory
 import kotlinx.android.synthetic.main.nav_header_main.view.*
 import java.util.*
 
-
 class MainActivity : AppCompatActivity() {
-
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var viewModel: CalendarViewModel
+    private lateinit var role: Role
 
     private val logoutReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
+            viewModel.deleteAllFromProject()
+
             val secureSharedPreferences = MyApplication.secureSharedPreferences
 
             val editor = secureSharedPreferences.edit()
-            editor.remove("OrganisationUrl")
-            editor.remove("RefreshToken")
-            editor.remove("Token")
+            editor.clear()
             editor.apply()
 
-            startActivity(Intent(this@MainActivity, StartScreenActivity::class.java))
+            val intent = Intent(this@MainActivity, StartScreenActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
         }
     }
 
@@ -58,7 +59,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        unregisterReceiver(logoutReceiver)
+        try {
+            unregisterReceiver(logoutReceiver)
+        } catch (e: Exception){
+
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,40 +75,44 @@ class MainActivity : AppCompatActivity() {
 
         viewModel = ViewModelProvider(this, CalendarViewModelFactory()).get(CalendarViewModel::class.java)
 
-        val clientObserver = androidx.lifecycle.Observer<List<Client>> {
-        viewModel.downloadAppointments(MyApplication.getOrganisationUrl()!!,
-                "MyApplication.getToken()!!")
+        if(!MyApplication.getOrganisationUrl().isNullOrEmpty() || MyApplication.getOrganisationUrl() != ""){
+            role = Role.EMPLOYEE
+            viewModel.downloadAppointments(role, MyApplication.getOrganisationUrl()!!,
+                MyApplication.getToken()!!)
+        } else {
+            role = Role.CLIENT
+            val fab: FloatingActionButton = findViewById(R.id.fab)
+            fab.visibility = View.GONE
+
+            val organisationsMapString = MyApplication.secureSharedPreferences.getString("OrganisationsMap", "")
+            val organisationMap = organisationsMapString!!.toHashMap()
+            for((url,token) in organisationMap){
+                viewModel.downloadAppointments(
+                    role,
+                    url,
+                    token
+                )
+            }
         }
 
-        val appObserver = androidx.lifecycle.Observer<List<Appointment>> {
-            viewModel.clients.observe(this, clientObserver)
-        }
-
-        //begin datafetch for calendarviews
-        viewModel.apps.observe(this, appObserver)
-
-        viewModel.appointments.observe(this, Observer{
-            viewModel.apps.removeObserver(appObserver)
-            viewModel.clients.removeObserver(clientObserver)
-        })
-
-        Log.d("EZAZ", "mainactivity")
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        val fab: FloatingActionButton = findViewById(R.id.fab)
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
-        }
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
         val navView: NavigationView = findViewById(R.id.nav_view)
         val navController = findNavController(R.id.nav_host_fragment)
+        val menu = navView.menu
+        //Customize menu to role
+        if(MyApplication.getOrganisationUrl().isNullOrEmpty() || MyApplication.getOrganisationUrl() == ""){
+            menu.removeItem(R.id.nav_statistic)
+        } else {
+            menu.removeItem(R.id.nav_organisation_operation)
+        }
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.nav_calendar, R.id.nav_statistic, R.id.nav_client_operation, R.id.nav_log_out
+                R.id.nav_calendar, R.id.nav_statistic, R.id.nav_client_operation, R.id.nav_organisation_operation, R.id.nav_log_out
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -115,14 +124,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setFirstRunAndSynchronizeReceiver(pref: SharedPreferences) {
-        if(!pref.contains("NotFirst")){
+        //if(!pref.contains("NotFirst")){
             val editor: SharedPreferences.Editor = pref.edit()
             editor.putBoolean("NotFirst", false)
             editor.apply()
 
             val calAlarm = Calendar.getInstance()
-            calAlarm[Calendar.HOUR_OF_DAY] = 22
-            calAlarm[Calendar.MINUTE] = 30
+            calAlarm[Calendar.HOUR_OF_DAY] = 15
+            calAlarm[Calendar.MINUTE] = 32
             calAlarm[Calendar.SECOND] = 0
 
             val intent = Intent()
@@ -133,22 +142,8 @@ class MainActivity : AppCompatActivity() {
             val alarmManager =  getSystemService(Context.ALARM_SERVICE) as AlarmManager
             alarmManager.setExact(AlarmManager.RTC_WAKEUP, calAlarm.timeInMillis, pendingIntent)
             alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calAlarm.timeInMillis, AlarmManager.INTERVAL_DAY, pendingIntent)
-        }
-        //TODO
-        val calAlarm = Calendar.getInstance()
-        calAlarm[Calendar.HOUR_OF_DAY] = 9
-        calAlarm[Calendar.MINUTE] = 35
-        calAlarm[Calendar.SECOND] = 0
-
-        val intent = Intent()
-        intent.setClass(applicationContext, AlarmReceiver::class.java)
-        intent.action = ".receiver.AlarmReceiver"
-        val pendingIntent = PendingIntent.getBroadcast(applicationContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-
-        val alarmManager =  getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calAlarm.timeInMillis, pendingIntent)
-        //TODO one time or repeat?
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calAlarm.timeInMillis, AlarmManager.INTERVAL_DAY, pendingIntent)
+        Log.d( "EZAZ", "register alarm")
+       // }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

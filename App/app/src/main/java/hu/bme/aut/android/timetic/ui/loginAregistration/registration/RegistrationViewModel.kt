@@ -9,8 +9,12 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import hu.bme.aut.android.timetic.dataManager.NetworkDeveloperInteractor
 
 import hu.bme.aut.android.timetic.R
+import hu.bme.aut.android.timetic.Role
+import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
 import hu.bme.aut.android.timetic.network.auth.HttpBasicAuth
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
+import hu.bme.aut.android.timetic.network.models.CommonOrganization
+import hu.bme.aut.android.timetic.network.models.CommonPostRefresh
 import hu.bme.aut.android.timetic.network.models.CommonToken
 import hu.bme.aut.android.timetic.network.models.ForMobileUserRegistration
 import hu.bme.aut.android.timetic.ui.loginAregistration.Result
@@ -93,15 +97,8 @@ class RegistrationViewModel() : ViewModel() {
     }
 
     private fun successRefreshToken(token: CommonToken) {
-        Log.d("EZAZ", "login succcccess")
-        _loginResult.value =
-            Result(
-                success = true,
-                error = null
-            )
         _refreshToken.value = token.token
         getToken(token)
-        //TODO
     }
 
     private fun errorRefreshToken(e: Throwable, code: Int?, call: String) {
@@ -128,14 +125,21 @@ class RegistrationViewModel() : ViewModel() {
     }
 
     private fun successToken(token: CommonToken) {
-        Log.d("EZAZ", "getTokeeeeeeeeeeeeeeeeeeeeeeeeeeen succcccess")
         _token.value = token.token
-        //TODO
+        //no need to check the registered organisations, because it's a registration!
+        _loginResult.value =
+            Result(
+                success = true,
+                error = null
+            )
     }
 
     private fun errorToken(e: Throwable, code: Int?, call: String) {
-        Log.d("EZAZ", "getTokeeeeeeeeeeeeeeeeeeeeeeeeeeen errrrrror")
-        //TODO inform view
+        _loginResult.value =
+            Result(
+                success = null,
+                error = R.string.login_failed
+            )
         error(e, code, call)
     }
 

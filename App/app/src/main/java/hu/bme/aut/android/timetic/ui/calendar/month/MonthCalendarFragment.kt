@@ -50,7 +50,7 @@ class MonthCalendarFragment : Fragment(), AppointmentAdapter.AppointmentItemClic
         // TODO: Use the ViewModel
 
         val calendarView = view?.findViewById(R.id.calendarMonthView) as MaterialCalendarView
-        viewModel.apps.observe(viewLifecycleOwner, Observer {
+        viewModel.result.observe(viewLifecycleOwner, Observer {
             calendarView.removeDecorators()
             for(appointment in it){
                 val date = CalendarDay.from(appointment.start_date.get(Calendar.YEAR),  appointment.start_date.get(Calendar.MONTH) + 1, appointment.start_date.get(Calendar.DAY_OF_MONTH))
@@ -68,6 +68,9 @@ class MonthCalendarFragment : Fragment(), AppointmentAdapter.AppointmentItemClic
                 }
                 adapter.update(list)
             }
+        })
+        viewModel.clientResult.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
+            //it needs an observer to be able to save the clients
         })
 
         calendarView.setOnDateLongClickListener { widget, date ->

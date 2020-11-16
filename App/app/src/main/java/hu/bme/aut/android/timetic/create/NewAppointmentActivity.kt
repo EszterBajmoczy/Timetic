@@ -4,22 +4,22 @@ import android.app.DatePickerDialog
 import android.app.DatePickerDialog.OnDateSetListener
 import android.app.TimePickerDialog
 import android.app.TimePickerDialog.OnTimeSetListener
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.ConnectivityManager
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
-import android.widget.CompoundButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.preference.PreferenceManager
-import hu.bme.aut.android.timetic.MainActivity
-import hu.bme.aut.android.timetic.MyApplication
-import hu.bme.aut.android.timetic.R
+import hu.bme.aut.android.timetic.*
 import hu.bme.aut.android.timetic.data.model.Appointment
 import hu.bme.aut.android.timetic.network.models.CommonActivity
 import hu.bme.aut.android.timetic.network.models.CommonAppointment
@@ -35,6 +35,7 @@ import kotlin.collections.ArrayList
 class NewAppointmentActivity : AppCompatActivity() {
     private lateinit var viewModel: NewAppointmentViewModel
     private lateinit var defaultSharedPreferences: SharedPreferences
+    private lateinit var role: Role
     private var startTime : Long? = null
     private var endTime: Long? = null
 
@@ -55,93 +56,119 @@ class NewAppointmentActivity : AppCompatActivity() {
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences (applicationContext)
         val appointmentId = intent.getStringExtra("NetId")
 
-        //TODO csak netkapcsolatkor lehessen újat létrehozni
-
         viewModel = ViewModelProviders.of(this).get(NewAppointmentViewModel::class.java)
-        viewModel.getDataForAppointmentCreation(MyApplication.getOrganisationUrl()!!,
-            MyApplication.getToken()!!)
 
-        swPrivate.setOnCheckedChangeListener { buttonView, isChecked ->
-            if(isChecked){
-                tActivity.visibility = View.GONE
-                spActivity.visibility = View.GONE
-
-                tClient.visibility = View.GONE
-                spClient.visibility = View.GONE
-
-                tPrice.visibility = View.GONE
-                etPrice.visibility = View.GONE
-                tFt.visibility = View.GONE
-
-                tVideochat.visibility = View.GONE
-                swVideochat.visibility = View.GONE
+        viewModel.result.observe(this, Observer{
+            if(it.success!!) {
+                val intent = Intent(this, MainActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+            } else {
+                Toast.makeText(this, it.error!!, Toast.LENGTH_LONG).show()
             }
-            else{
-                tActivity.visibility = View.VISIBLE
-                spActivity.visibility = View.VISIBLE
+        })
 
-                tClient.visibility = View.VISIBLE
-                spClient.visibility = View.VISIBLE
-
-                tPrice.visibility = View.VISIBLE
-                etPrice.visibility = View.VISIBLE
-                tFt.visibility = View.VISIBLE
-
-                tVideochat.visibility = View.VISIBLE
-                swVideochat.visibility = View.VISIBLE
-            }
-        }
-
-        if(appointmentId != null){
+        if(MyApplication.getOrganisationUrl().isNullOrEmpty()){
+            role = Role.CLIENT
             //Details view
-            viewModel.getAppointmentByNetId(appointmentId)
-            viewModel.appDetail.observe(this,  AppObserver())
-        }
-        else{
-            //Create view
-            viewModel.clients.observe(this, androidx.lifecycle.Observer {
-                clients = it
-                setClientSpinner(getStringClients(it))
-            })
+            viewModel.getAppointmentByNetId(appointmentId!!)
+            viewModel.appDetail.observe(this,  ClientDetailViewObserver())
+        } else {
+            role = Role.EMPLOYEE
+            if(isNetworkAvailable()) {
+                viewModel.getDataForAppointmentCreation(MyApplication.getOrganisationUrl()!!, MyApplication.getToken()!!)
 
-            viewModel.activities.observe(this, androidx.lifecycle.Observer {
-                activities = it
-                setActivitySpinner(getStringActivities(it))
-            })
+                swPrivate.setOnCheckedChangeListener { _, isChecked ->
+                    if(isChecked) {
+                        tActivity.visibility = View.GONE
+                        spActivity.visibility = View.GONE
 
-            viewModel.places.observe(this, androidx.lifecycle.Observer {
-                setLocationSpinner(it)
-            })
-            viewModel.employee.observe(this, androidx.lifecycle.Observer {
-                employee = it
-            })
-            setTitle(R.string.title_activity_new_appointment)
+                        tClient.visibility = View.GONE
+                        spPerson.visibility = View.GONE
 
-            setDateChooseButtons()
+                        tPrice.visibility = View.GONE
+                        etPrice.visibility = View.GONE
+                        tFt.visibility = View.GONE
 
-            btCancel.setOnClickListener {
-                finish()
-            }
+                        tVideochat.visibility = View.GONE
+                        swVideochat.visibility = View.GONE
+                    }
+                    else {
+                        tActivity.visibility = View.VISIBLE
+                        spActivity.visibility = View.VISIBLE
 
-            btSave.setOnClickListener {
-                if(checkData()){
-                    viewModel.saveAppointment(getAppointment())
-                    val intent = Intent(this, MainActivity::class.java)
-                    startActivity(intent)
+                        tClient.visibility = View.VISIBLE
+                        spPerson.visibility = View.VISIBLE
+
+                        tPrice.visibility = View.VISIBLE
+                        etPrice.visibility = View.VISIBLE
+                        tFt.visibility = View.VISIBLE
+
+                        tVideochat.visibility = View.VISIBLE
+                        swVideochat.visibility = View.VISIBLE
+                    }
                 }
 
+                if(appointmentId != null){
+                    //Details view
+                    viewModel.getAppointmentByNetId(appointmentId)
+                    viewModel.appDetail.observe(this,  AppObserver())
+                }
+                else{
+                    //Create view
+                    viewModel.clients.observe(this, androidx.lifecycle.Observer {
+                        clients = it
+                        setPersonSpinner(getStringClients(it))
+                    })
+
+                    viewModel.activities.observe(this, androidx.lifecycle.Observer {
+                        activities = it
+                        setActivitySpinner(getStringActivities(it))
+                    })
+
+                    viewModel.places.observe(this, androidx.lifecycle.Observer {
+                        setLocationSpinner(it)
+                    })
+                    viewModel.employee.observe(this, androidx.lifecycle.Observer {
+                        employee = it
+                    })
+                    setTitle(R.string.title_activity_new_appointment)
+                    clientContacts.visibility = View.GONE
+
+                    setDateChooseButtons()
+
+                    btCancel.setOnClickListener {
+                        finish()
+                    }
+
+                    btSave.setOnClickListener {
+                        if(checkData()){
+                            if(isNetworkAvailable()){
+                                viewModel.saveAppointment(getAppointment())
+                            } else {
+                                Toast.makeText(applicationContext, "Internetkapcsolat szükséges új időpont létrehozásához", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                    }
+
+                    swVideochat.isChecked = defaultSharedPreferences.getBoolean("defaultVideoChat",false)
+
+                    etPrice.setText(defaultSharedPreferences.getString("price", ""))
+                    //TODO notifications
+                }
+
+                btConsultation.setOnClickListener {
+                    if(isNetworkAvailable()){
+                        viewModel.getMeetingUrl(appointmentId)
+                    } else {
+                        Toast.makeText(applicationContext, "Internetkapcsolat szükséges a konzultációhoz való csatlakozáshoz", Toast.LENGTH_LONG).show()
+                    }
+                }
+            } else {
+                viewModel.getAppointmentByNetId(appointmentId!!)
+                viewModel.appDetail.observe(this,  ClientDetailViewObserver())
             }
-
-            swVideochat.isChecked = defaultSharedPreferences.getBoolean("defaultVideoChat",false)
-
-            etPrice.setText(defaultSharedPreferences.getString("price", ""))
-            //TODO notifications
         }
-
-        btConsultation.setOnClickListener {
-            viewModel.getMeetingUrl(appointmentId)
-        }
-
         viewModel.meetingUrl.observe(this, Observer {
             JitsiMeetActivity.launch(this, it)
             finish()
@@ -149,12 +176,23 @@ class NewAppointmentActivity : AppCompatActivity() {
     }
 
     private fun AppObserver(): Observer<Appointment> {
-        observer = androidx.lifecycle.Observer<Appointment> { app ->
+        observer = androidx.lifecycle.Observer { app ->
             appointment = app
 
             viewModel.clients.observe(this, androidx.lifecycle.Observer {
                 clients = it
-                setClientSpinner(getStringClients(it), app.client)
+                setPersonSpinner(getStringClients(it), app.person)
+
+                clientCall.setOnClickListener {
+                    val callIntent = Intent(Intent.ACTION_DIAL)
+                    callIntent.data = Uri.parse("tel:${app.personPhone}")
+                    startActivity(callIntent)
+                }
+
+                clientEmail.setOnClickListener {
+                    val intent = Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", app.personPhone, null))
+                    startActivity(Intent.createChooser(intent, "Choose an Email client :"))
+                }
             })
 
             viewModel.activities.observe(this, androidx.lifecycle.Observer {
@@ -192,33 +230,35 @@ class NewAppointmentActivity : AppCompatActivity() {
                 btCancel.visibility = View.GONE
             } else {
                 btCancel.setOnClickListener {
-                    viewModel.appDetail.removeObserver(observer)
-                    viewModel.cancelAppointment(app.netId)
-                    val intent = Intent(this, MainActivity::class.java)
-                    startActivity(intent)
+                    if(isNetworkAvailable()) {
+                        viewModel.appDetail.removeObserver(observer)
+                        viewModel.cancelAppointment(app.netId)
+                    } else {
+                        Toast.makeText(applicationContext, "Internetkapcsolat szükséges az időpont lemondásához", Toast.LENGTH_LONG).show()
+                    }
                 }
                 btSave.setOnClickListener {
-                    val a = getAppointment()
+                    if(isNetworkAvailable()) {
+                        val a = getAppointment()
 
-                    if(app.start_date.timeInMillis == a.startTime && app.end_date.timeInMillis == a.endTime &&
-                        app.private_appointment == a.isPrivate && app.address == a.place && app.note == a.note &&
-                        a.isPrivate){
+                        if(app.start_date.timeInMillis == a.startTime && app.end_date.timeInMillis == a.endTime &&
+                            app.private_appointment == a.isPrivate && app.address == a.place && app.note == a.note &&
+                            a.isPrivate){
 
-                        val intent = Intent(this, MainActivity::class.java)
-                        startActivity(intent)
-                    }
-                    else if (app.start_date.timeInMillis == a.startTime && app.end_date.timeInMillis == a.endTime &&
-                        app.private_appointment == a.isPrivate && app.client == a.client!!.name &&
-                        app.activity == a.activity!!.name && app.address == a.place &&
-                        app.price == a.price && app.videochat == a.online && app.note == a.note) {
+                            finish()
+                        }
+                        else if (app.start_date.timeInMillis == a.startTime && app.end_date.timeInMillis == a.endTime &&
+                            app.private_appointment == a.isPrivate && app.person == a.client!!.name &&
+                            app.activity == a.activity!!.name && app.address == a.place &&
+                            app.price == a.price && app.videochat == a.online && app.note == a.note) {
 
-                        val intent = Intent(this, MainActivity::class.java)
-                        startActivity(intent)
-                    }
-                    else if(checkData()){
-                        viewModel.modifyAppointment(a)
-                        val intent = Intent(this, MainActivity::class.java)
-                        startActivity(intent)
+                            finish()
+                        }
+                        else if(checkData()){
+                            viewModel.modifyAppointment(a)
+                        }
+                    } else {
+                        Toast.makeText(applicationContext, "Internetkapcsolat szükséges az időpont módosításához", Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -238,6 +278,111 @@ class NewAppointmentActivity : AppCompatActivity() {
 
             etPrice.setText(app.price.toString())
             //TODO notifications
+        }
+        return observer
+    }
+
+    private fun ClientDetailViewObserver(): Observer<Appointment> {
+        observer = androidx.lifecycle.Observer { app ->
+            appointment = app
+
+            setPersonSpinner(listOf(app.person), app.person)
+            spPerson.isClickable = false
+            setActivitySpinner(listOf(app.activity), null)
+            spActivity.isClickable = false
+            setLocationSpinner(listOf(app.address), app.address)
+            spLocation.isClickable = false
+
+            clientCall.setOnClickListener {
+                val callIntent = Intent(Intent.ACTION_DIAL)
+                callIntent.data = Uri.parse("tel:${app.personPhone}")
+                startActivity(callIntent)
+            }
+
+            clientEmail.setOnClickListener {
+                val intent = Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", app.personPhone, null))
+                startActivity(Intent.createChooser(intent, "Choose an Email client :"))
+            }
+
+            viewModel.employee.observe(this, androidx.lifecycle.Observer {
+                employee = it
+            })
+            setTitle(R.string.title_activity_new_appointment_Detail)
+
+            tPrivate.visibility = View.GONE
+            swPrivate.visibility = View.GONE
+
+            etPrice.setText(app.price.toString())
+            etPrice.isClickable = false
+
+            setDateChooseButtonValue()
+
+            val tomorrow = Calendar.getInstance()
+            tomorrow.add(Calendar.DAY_OF_MONTH, 1)
+            tomorrow.set(Calendar.HOUR_OF_DAY, 0)
+            tomorrow.set(Calendar.MINUTE, 0)
+            tomorrow.set(Calendar.MILLISECOND, 0)
+            tomorrow.add(Calendar.MILLISECOND, -1)
+
+            btCancel.setText(R.string.tCancelAppointment)
+            if(role == Role.EMPLOYEE){
+                btSave.setText(R.string.tModify)
+            } else {
+                btSave.visibility = View.GONE
+            }
+
+            if(app.videochat != null){
+                swVideochat.isChecked = app.videochat
+                val c = Calendar.getInstance()
+                if(app.end_date.after(c) && app.videochat){
+                    btConsultation.visibility = View.VISIBLE
+
+                    btConsultation.setOnClickListener {
+                        if(isNetworkAvailable()){
+                            val organisationsMapString = MyApplication.secureSharedPreferences.getString("OrganisationsMap", "")
+                            val organisationMap = organisationsMapString!!.toHashMap()
+                            if(organisationMap.containsKey(app.organisationUrl)) {
+                                viewModel.getMeetingUrlByClient(app.organisationUrl!!, organisationMap[app.organisationUrl!!]!!, app.netId)
+                            }
+                        } else {
+                            Toast.makeText(applicationContext, "Internetkapcsolat szükséges a konzultációhoz való csatlakozáshoz", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+            }
+            else{
+                swVideochat.isChecked = false
+            }
+            swVideochat.isClickable = false
+
+            etNote.setText(app.note)
+            etNote.isClickable = false
+
+            if(app.start_date.before(tomorrow)){
+                btCancel.visibility = View.GONE
+            } else {
+                btCancel.setOnClickListener {
+                    if(isNetworkAvailable()) {
+                        viewModel.appDetail.removeObserver(observer)
+
+                        val organisationsMapString = MyApplication.secureSharedPreferences.getString("OrganisationsMap", "")
+                        val organisationMap = organisationsMapString!!.toHashMap()
+                        if(organisationMap.containsKey(app.organisationUrl)){
+                            viewModel.cancelAppointmentByClient(
+                                app.organisationUrl!!,
+                                organisationMap[app.organisationUrl!!]!!,
+                                app.netId
+                            )
+                        }
+                    } else {
+                        Toast.makeText(this, "Internetkapcsolat szükséges az időpont lemondásához", Toast.LENGTH_LONG).show()
+                    }
+                }
+
+                btSave.setOnClickListener {
+                    Toast.makeText(this, "Internetkapcsolat szükséges az időpont lemondásához", Toast.LENGTH_LONG).show()
+                }
+            }
         }
         return observer
     }
@@ -381,7 +526,7 @@ class NewAppointmentActivity : AppCompatActivity() {
     }
 
     private fun setActivitySpinner(
-        activityList: List<String>,
+        activityList: List<String?>,
         activity: String? = null
     ) {
         val arrayAdapter =
@@ -402,46 +547,50 @@ class NewAppointmentActivity : AppCompatActivity() {
                 }
             }
         }
-        spActivity.onItemSelectedListener = object : OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                this@NewAppointmentActivity.activity = activities[position]
+        if(!MyApplication.getOrganisationUrl().isNullOrEmpty() && isNetworkAvailable()){
+            spActivity.onItemSelectedListener = object : OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    this@NewAppointmentActivity.activity = activities[position]
+                }
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
             }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
     }
 
-    private fun setClientSpinner(
-        clientList: List<String>,
+    private fun setPersonSpinner(
+        clientList: List<String?>,
         client: String? = null
     ) {
         val arrayAdapter =
             ArrayAdapter(this, android.R.layout.simple_spinner_item, clientList)
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spClient.adapter = arrayAdapter
+        spPerson.adapter = arrayAdapter
         if(client != null){
-            spClient.setSelection(clientList.indexOf(client))
+            spPerson.setSelection(clientList.indexOf(client))
         }
-        spClient.onItemSelectedListener = object : OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                this@NewAppointmentActivity.client = clients[position]
-            }
+        if(!MyApplication.getOrganisationUrl().isNullOrEmpty() && isNetworkAvailable()){
+            spPerson.onItemSelectedListener = object : OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    this@NewAppointmentActivity.client = clients[position]
+                }
 
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            }
         }
     }
 
     private fun setLocationSpinner(
-        placesList: List<String>,
+        placesList: List<String?>,
         address: String? = null
     ) {
         val arrayAdapter =
@@ -451,18 +600,20 @@ class NewAppointmentActivity : AppCompatActivity() {
         if(address != null){
             spLocation.setSelection(placesList.indexOf(address))
         }
-        spLocation.onItemSelectedListener = object : OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                val selected = parent.getItemAtPosition(position).toString()
-                place = selected
-            }
+        if(!MyApplication.getOrganisationUrl().isNullOrEmpty() && isNetworkAvailable()) {
+            spLocation.onItemSelectedListener = object : OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    val selected = parent.getItemAtPosition(position).toString()
+                    place = selected
+                }
 
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            }
         }
     }
 
@@ -480,6 +631,12 @@ class NewAppointmentActivity : AppCompatActivity() {
             stringList.add(item.name!!)
         }
         return stringList
+    }
+
+    private fun isNetworkAvailable(): Boolean {
+        val connectivityManager = applicationContext?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetworkInfo = connectivityManager.activeNetworkInfo
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected
     }
 }
 

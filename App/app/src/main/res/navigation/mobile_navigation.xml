@@ -26,6 +26,12 @@
         tools:layout="@layout/fragment_client_operations" />
 
     <fragment
+        android:id="@+id/nav_organisation_operation"
+        android:name="hu.bme.aut.android.timetic.ui.organisationoperations.OrganisationOperationFragment"
+        android:label="@string/menuOrganisationOperations"
+        tools:layout="@layout/organisation_operation_fragment" />
+
+    <fragment
         android:id="@+id/nav_log_out"
         android:name="hu.bme.aut.android.timetic.ui.loginAregistration.logout.LogoutFragment"
         android:label="@string/menuLogout"

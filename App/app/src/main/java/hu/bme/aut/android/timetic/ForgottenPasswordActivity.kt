@@ -18,13 +18,21 @@ import hu.bme.aut.android.timetic.ui.loginAregistration.login.afterTextChanged
 class ForgottenPasswordActivity : AppCompatActivity() {
     private lateinit var viewModel: ForgottenPasswordViewModel
     private val pref = MyApplication.secureSharedPreferences
+    private lateinit var role: Role
+    private lateinit var organisationUrl: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_forgotten_password)
 
-
         viewModel = ViewModelProviders.of(this).get(ForgottenPasswordViewModel::class.java)
+
+        organisationUrl = intent.getStringExtra("OrganisationUrl")
+        if(organisationUrl.isEmpty()){
+            role = Role.CLIENT
+        } else {
+            role = Role.EMPLOYEE
+        }
 
         val code = findViewById<EditText>(R.id.resetCode)
         val password = findViewById<EditText>(R.id.resetPassword)
@@ -84,7 +92,8 @@ class ForgottenPasswordActivity : AppCompatActivity() {
                 showResetFailed(result.error)
             }
             if (result.success != null) {
-                viewModel.login(email = MyApplication.getEmail()!!, password = password.text.toString())
+                viewModel.login(email = MyApplication.getEmail()!!, password = password.text.toString(),
+                    organisationUrl = organisationUrl)
             }
         })
 
@@ -117,8 +126,20 @@ class ForgottenPasswordActivity : AppCompatActivity() {
             editor.apply()
         })
 
+        viewModel.organisations.observe(this, Observer {map ->
+            val editor = MyApplication.secureSharedPreferences.edit()
+            editor.putString("OrganisationsMap", map.toString())
+            editor.apply()
+
+            updateUiWithUser()
+            setResult(Activity.RESULT_OK)
+
+            //Complete and destroy login activity once successful
+            finish()
+        })
+
         reset.setOnClickListener {
-            viewModel.reset(MyApplication.Companion.ROLE.EMPLOYEE, MyApplication.getEmail()!!, code.text.toString().toInt(), password.text.toString())
+            viewModel.reset(role, MyApplication.getEmail()!!, code.text.toString().toInt(), password.text.toString(), organisationUrl)
         }
     }
 
@@ -137,6 +158,7 @@ class ForgottenPasswordActivity : AppCompatActivity() {
         ).show()
 
         val intent = Intent(this, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
     }
 }

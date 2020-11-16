@@ -4,10 +4,11 @@ import retrofit2.http.*
 import retrofit2.Call
 
 import hu.bme.aut.android.timetic.network.models.CommonOrganization
+import hu.bme.aut.android.timetic.network.models.CommonPasswordReset
 import hu.bme.aut.android.timetic.network.models.CommonToken
 import hu.bme.aut.android.timetic.network.models.ForMobileUserRegistration
 
-interface MobileApi {
+interface DeveloperApi {
     /**
      * Logs client into the system
      * 
@@ -69,4 +70,59 @@ interface MobileApi {
     @POST("mobile/register")
     fun mobileRegisterPost(@Body forMobileUserRegistration: ForMobileUserRegistration): Call<Unit>
 
+    /**
+     * Lists organizations where user is registered as client
+     *
+     * Responses:
+     *  - 401: Not authenticated
+     *
+     * @return [Call]<[kotlin.collections.List<CommonOrganization>]>
+     */
+    @GET("mobile/registeredOrganizations")
+    fun mobileRegisteredOrganizationsGet(): Call<kotlin.collections.List<CommonOrganization>>
+
+    /**
+     * Adds organization where user is registered as client
+     *
+     * Responses:
+     *  - 200: successful operation
+     *  - 401: Not authenticated
+     *  - 403: Access token does not have the required scope
+     *
+     * @param organisationId
+     * @return [Call]<[Unit]>
+     */
+    @PATCH("mobile/registeredOrganizations/{organisationId}")
+    fun mobileRegisteredOrganizationsIdPatch(@Path("organisationId") organisationId: kotlin.String): Call<Unit>
+
+
+
+
+
+
+
+
+    /**
+     * Asks for new password
+     *
+     * Responses:
+     *  - 200: successful operation
+     *  - 404: account not found
+     *
+     * @return [Call]<[Unit]>
+     */
+    @GET("mobile/forgottenPassword/")
+    fun mobileForgottenPassword(@Query("email") email: kotlin.String): Call<Unit>
+
+    /**
+     * Create new password
+     *
+     * Responses:
+     *  - 200: successful operation
+     *  - 404: account not found
+     *
+     * @return [Call]<[Unit]>
+     */
+    @POST("mobile/forgottenPassword")
+    fun mobileForgottenPassword(@Body commonPasswordReset: CommonPasswordReset): Call<Unit>
 }

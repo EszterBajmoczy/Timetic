@@ -40,10 +40,14 @@ class DayAndWeekCalendarFragment : Fragment() {
         viewModel = ViewModelProvider(requireActivity(), CalendarViewModelFactory()).get(CalendarViewModel::class.java)
         Log.d("EZAZ", "fragment")
 
-        weekView = requireActivity().findViewById<WeekView<Appointment>>(R.id.weekView)
+        weekView = requireActivity().findViewById(R.id.weekView)
 
-        viewModel.apps.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
+        viewModel.result.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
             weekView.submit(it)
+        })
+
+        viewModel.clientResult.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
+            //it needs an observer to be able to save the clients
         })
 
         //set viewType

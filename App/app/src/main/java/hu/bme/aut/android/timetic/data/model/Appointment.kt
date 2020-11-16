@@ -15,8 +15,11 @@ class Appointment(
     val private_appointment: Boolean,
     val videochat: Boolean?,
     val address: String?,
-    val client: String?,
-    val activity: String?
+    val person: String?,
+    val personPhone: String?,
+    val personEmail: String?,
+    val activity: String?,
+    var organisationUrl: String? = null
 ) : WeekViewDisplayable<Appointment>, Comparable<Appointment> {
 
     override fun toWeekViewEvent(): WeekViewEvent<Appointment> {

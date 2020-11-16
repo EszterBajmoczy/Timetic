@@ -2,10 +2,8 @@ package hu.bme.aut.android.timetic.database
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
-import hu.bme.aut.android.timetic.data.model.Appointment
-import hu.bme.aut.android.timetic.data.model.Client
 import hu.bme.aut.android.timetic.database.models.RoomAppointment
-import hu.bme.aut.android.timetic.database.models.RoomClient
+import hu.bme.aut.android.timetic.database.models.RoomPerson
 
 @Dao
 interface RoomDao {
@@ -32,19 +30,25 @@ interface RoomDao {
     @Delete
     fun deleteAppointment(appointment: RoomAppointment)
 
+    @Query("DELETE FROM appointment")
+    fun deleteAppointmentTable()
+
     //Client
     @Insert
-    fun insertClient(client: RoomClient)
+    fun insertPerson(person: RoomPerson)
 
-    @Query("SELECT * FROM client")
-    fun getAllClients(): LiveData<List<RoomClient>>
+    @Query("SELECT * FROM person")
+    fun getAllPersons(): LiveData<List<RoomPerson>>
 
-    @Query("SELECT * FROM client")
-    fun getClientList(): List<RoomClient>
+    @Query("SELECT * FROM person")
+    fun getPersonList(): List<RoomPerson>
 
     @Update
-    fun updateClient(client: RoomClient): Int
+    fun updatePerson(person: RoomPerson): Int
 
     @Delete
-    fun deleteClient(client: RoomClient)
+    fun deletePerson(person: RoomPerson)
+
+    @Query("DELETE FROM person")
+    fun deletePersonTable()
 }
