@@ -21,7 +21,7 @@ class NetworkDeveloperInteractor(auth: HttpBasicAuth?, autb: HttpBearerAuth?) {
             .add(KotlinJsonAdapterFactory())
             .build()
 
-        val client: OkHttpClient?
+        var client: OkHttpClient? = null
         if (auth != null) {
             client =  OkHttpClient.Builder()
                 .addInterceptor(auth)
@@ -76,7 +76,7 @@ class NetworkDeveloperInteractor(auth: HttpBasicAuth?, autb: HttpBearerAuth?) {
         }.start()
     }
 
-    fun getOrganizations(
+    fun getOrganisations(
         onSuccess: (List<CommonOrganization>) -> Unit,
         onError: (Throwable, code: Int?, call: String) -> Unit
     ) {
@@ -108,7 +108,7 @@ class NetworkDeveloperInteractor(auth: HttpBasicAuth?, autb: HttpBearerAuth?) {
         this.runCallOnBackgroundThread(getToken, onSuccess, onError)
     }
 
-    fun getRegisteredOrganizations(
+    fun getRegisteredOrganisations(
         onSuccess: (List<CommonOrganization>) -> Unit,
         onError: (Throwable, code: Int?, call: String) -> Unit
     ) {
@@ -116,12 +116,12 @@ class NetworkDeveloperInteractor(auth: HttpBasicAuth?, autb: HttpBearerAuth?) {
         this.runCallOnBackgroundThread(getToken, onSuccess, onError)
     }
 
-    fun patchRegisteredOrganizationById(
-        organizationId: String,
+    fun patchRegisteredOrganisationById(
+        organisationId: String,
         onSuccess: (Unit) -> Unit,
         onError: (Throwable, code: Int?, call: String) -> Unit
     ) {
-        val getToken = developerApi.mobileRegisteredOrganizationsIdPatch(organizationId)
+        val getToken = developerApi.mobileRegisteredOrganizationsIdPatch(organisationId)
         this.runCallOnBackgroundThread(getToken, onSuccess, onError)
     }
 

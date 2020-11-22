@@ -44,8 +44,17 @@ class DBRepository(private val roomDao: RoomDao) {
             }
     }
 
+    suspend fun deleteAppointmentByNetId(netId: String) = withContext(Dispatchers.IO) {
+        roomDao.deleteAppointmentByNetId(netId)
+    }
+
     suspend fun insert(appointment: Appointment) = withContext(Dispatchers.IO) {
         roomDao.insertAppointment(appointment.toRoomModel())
+    }
+
+    suspend fun updateAppointment(appointment: Appointment)  = withContext(Dispatchers.IO){
+        roomDao.updateAppointment(appointment.toRoomModel())
+
     }
 
     suspend fun deleteAppointment(appointment: Appointment) = withContext(Dispatchers.IO) {
@@ -65,7 +74,7 @@ class DBRepository(private val roomDao: RoomDao) {
             address = address,
             personBackendId = personBackendId,
             activity = activity,
-            organizationUrl = organizationUrl
+            organisationUrl = organisationUrl
         )
     }
 
@@ -82,7 +91,7 @@ class DBRepository(private val roomDao: RoomDao) {
             address = address,
             personBackendId = personBackendId,
             activity = activity,
-            organizationUrl = organizationUrl
+            organisationUrl = organisationUrl
         )
     }
 
@@ -107,12 +116,17 @@ class DBRepository(private val roomDao: RoomDao) {
     fun getPersonByNetId(netId: String): LiveData<Person> {
         return roomDao.getPersonByNetId(netId)
             .map {roomPerson ->
-                roomPerson.toDomainModel()
+                roomPerson?.toDomainModel()
             }
     }
 
     suspend fun insert(person: Person) = withContext(Dispatchers.IO) {
         roomDao.insertPerson(person.toRoomModel())
+    }
+
+    suspend fun updatePerson(person: Person)  = withContext(Dispatchers.IO){
+        roomDao.updatePerson(person.toRoomModel())
+
     }
 
     suspend fun deletePerson(person: Person) = withContext(Dispatchers.IO) {

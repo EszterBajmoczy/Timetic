@@ -13,22 +13,22 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 
-class OrganizationAdapter(
-    private val listener: OrganizationClickListener
+class OrganisationAdapter(
+    private val listener: OrganisationClickListener
 ) :
-    RecyclerView.Adapter<OrganizationAdapter.OrganizationViewHolder>(), Filterable {
+    RecyclerView.Adapter<OrganisationAdapter.OrganisationViewHolder>(), Filterable {
 
     private var list = mutableListOf<CommonOrganization>()
     private var originalList = mutableListOf<CommonOrganization>()
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): OrganizationViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): OrganisationViewHolder {
         val itemView: View = LayoutInflater
             .from(parent.context)
-            .inflate(R.layout.item_organization_list, parent, false)
-        return OrganizationViewHolder(itemView)
+            .inflate(R.layout.item_organisation_list, parent, false)
+        return OrganisationViewHolder(itemView)
     }
 
-    override fun onBindViewHolder(holder: OrganizationViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: OrganisationViewHolder, position: Int) {
         val item = list[position]
         holder.name.text = item.name
 
@@ -39,12 +39,12 @@ class OrganizationAdapter(
         return list.size
     }
 
-    interface OrganizationClickListener {
+    interface OrganisationClickListener {
         fun onItemClick(organization: CommonOrganization)
     }
 
-    inner class OrganizationViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
-        val name: TextView = itemView.findViewById(R.id.organizationName)
+    inner class OrganisationViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
+        val name: TextView = itemView.findViewById(R.id.organisationName)
 
         var item: CommonOrganization? = null
 
@@ -80,8 +80,8 @@ class OrganizationAdapter(
             }
 
             override fun performFiltering(constraint: CharSequence): FilterResults {
-                val filteredResults: List<CommonOrganization?>?
-                if (constraint.isEmpty()) {
+                var filteredResults: List<CommonOrganization?>? = null
+                if (constraint.length == 0) {
                     filteredResults = originalList
                 } else {
                     filteredResults = getFilteredResults(constraint.toString().toLowerCase())

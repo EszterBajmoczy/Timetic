@@ -1,10 +1,10 @@
-package hu.bme.aut.android.timetic.network.apiOrganization
+package hu.bme.aut.android.timetic.network.apiOrganisation
 
 import hu.bme.aut.android.timetic.network.models.*
 import retrofit2.http.*
 import retrofit2.Call
 
-interface OrganizationApi {
+interface OrganisationApi {
     /**
      * Cancel appointment
      * 

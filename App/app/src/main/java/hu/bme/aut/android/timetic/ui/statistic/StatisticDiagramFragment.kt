@@ -27,6 +27,10 @@ class StatisticDiagramFragment : Fragment() {
 
     private lateinit var mInflater: LayoutInflater
 
+    companion object {
+        fun newInstance() = StatisticDiagramFragment()
+    }
+
     private lateinit var viewModel: StatisticDiagramViewModel
 
     override fun onCreateView(
@@ -131,14 +135,14 @@ class StatisticDiagramFragment : Fragment() {
     private fun setDataPieChart3(sumLocalHours: Double, sumOnlineHours: Double) {
         chart3!!.addPieSlice(
             PieModel(
-                resources.getString(R.string.private_appointments)                ,
+                "Személyes időpontok",
                 sumLocalHours.toFloat(),
                 Color.parseColor("#FF6B6B")
             )
         )
         chart3!!.addPieSlice(
             PieModel(
-                resources.getString(R.string.online_appointments),
+                "Online időpontok",
                 sumOnlineHours.toFloat(),
                 Color.parseColor("#FFA96C")
             )
@@ -153,14 +157,14 @@ class StatisticDiagramFragment : Fragment() {
     private fun setDataPieChart4(sumLocalIncome: Double, sumOnlineIncome: Double) {
         chart4!!.addPieSlice(
             PieModel(
-                resources.getString(R.string.private_appointments),
+                "Személyes időpontok",
                 sumLocalIncome.toFloat(),
                 Color.parseColor("#FF6B6B")
             )
         )
         chart4!!.addPieSlice(
             PieModel(
-                resources.getString(R.string.online_appointments),
+                "Online időpontok",
                 sumOnlineIncome.toFloat(),
                 Color.parseColor("#FFA96C")
             )

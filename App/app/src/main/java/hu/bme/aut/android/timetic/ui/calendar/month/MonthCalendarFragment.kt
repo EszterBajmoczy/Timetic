@@ -54,7 +54,7 @@ class MonthCalendarFragment : Fragment(), AppointmentAdapter.AppointmentItemClic
                 val date = CalendarDay.from(appointment.start_date.get(Calendar.YEAR),  appointment.start_date.get(Calendar.MONTH) + 1, appointment.start_date.get(Calendar.DAY_OF_MONTH))
                 calendarView.addDecorators(CurrentDayDecorator(requireActivity(), date))
             }
-            calendarView.setOnDateChangedListener { _, date, _ ->
+            calendarView.setOnDateChangedListener { widget, date, selected ->
                 dateMonthView.text = date.day.toString()
                 //TODO list events under the calendar
                 val list = ArrayList<Appointment>()
@@ -71,7 +71,7 @@ class MonthCalendarFragment : Fragment(), AppointmentAdapter.AppointmentItemClic
             //it needs an observer to be able to save the clients
         })
 
-        calendarView.setOnDateLongClickListener { _, _ ->
+        calendarView.setOnDateLongClickListener { widget, date ->
             val intent = Intent(activity, NewAppointmentActivity::class.java)
             startActivity(intent)
         }

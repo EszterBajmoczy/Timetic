@@ -4,10 +4,10 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
-    <LinearLayout
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         tools:context=".ui.statistic.StatisticDiagramFragment"
         android:orientation="vertical">
@@ -38,14 +38,16 @@
                         android:id="@+id/ch1Title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/Activities"
+                        android:paddingLeft="10dp"
+                        android:text="Tevékenységek:"
                         android:layout_alignParentStart="true"/>
 
                     <TextView
                         android:id="@+id/ch1Sum"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"/>
+                        android:layout_alignParentEnd="true"
+                        android:paddingLeft="10dp"/>
                 </RelativeLayout>
 
 
@@ -102,14 +104,16 @@
                         android:id="@+id/ch2Title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/Activities"
+                        android:paddingLeft="10dp"
+                        android:text="Tevékenységek:"
                         android:layout_alignParentStart="true"/>
 
                     <TextView
                         android:id="@+id/ch2Sum"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"/>
+                        android:layout_alignParentEnd="true"
+                        android:paddingLeft="10dp"/>
                 </RelativeLayout>
 
 
@@ -164,14 +168,16 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/worked_hours"
+                        android:paddingLeft="10dp"
+                        android:text="Ledolgozott órák:"
                         android:layout_alignParentStart="true"/>
 
                     <TextView
                         android:id="@+id/ch3Sum"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"/>
+                        android:layout_alignParentEnd="true"
+                        android:paddingLeft="10dp"/>
                 </RelativeLayout>
 
 
@@ -213,7 +219,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/private_appointments"
+                            android:text="Személyes időpontok"
                             android:layout_marginStart="30dp"
                             android:layout_alignParentStart="true"/>
 
@@ -245,7 +251,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/online_appointments"
+                            android:text="Online időpontok"
                             android:layout_marginStart="30dp"
                             android:layout_alignParentStart="true"/>
 
@@ -286,7 +292,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingLeft="10dp"
-                        android:text="@string/income"
+                        android:text="Keresett jövedelem:"
                         android:layout_alignParentStart="true"/>
 
                     <TextView
@@ -336,7 +342,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/private_appointments"
+                            android:text="Személyes időpontok"
                             android:layout_marginStart="30dp"
                             android:layout_alignParentStart="true"/>
 
@@ -368,7 +374,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/online_appointments"
+                            android:text="Online időpontok"
                             android:layout_marginStart="30dp"
                             android:layout_alignParentStart="true"/>
 

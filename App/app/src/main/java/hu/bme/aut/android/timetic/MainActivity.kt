@@ -11,6 +11,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -20,6 +21,8 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
 import hu.bme.aut.android.timetic.create.toHashMap
+import hu.bme.aut.android.timetic.data.model.Appointment
+import hu.bme.aut.android.timetic.data.model.Person
 import hu.bme.aut.android.timetic.receiver.AlarmReceiver
 import hu.bme.aut.android.timetic.settings.SettingsActivity
 import hu.bme.aut.android.timetic.ui.calendar.CalendarViewModel
@@ -72,18 +75,18 @@ class MainActivity : AppCompatActivity() {
 
         viewModel = ViewModelProvider(this, CalendarViewModelFactory()).get(CalendarViewModel::class.java)
 
-        if(!MyApplication.getOrganizationUrl().isNullOrEmpty() || MyApplication.getOrganizationUrl() != ""){
+        if(!MyApplication.getOrganisationUrl().isNullOrEmpty() || MyApplication.getOrganisationUrl() != ""){
             role = Role.EMPLOYEE
-            viewModel.downloadAppointments(role, MyApplication.getOrganizationUrl()!!,
+            viewModel.downloadAppointments(role, MyApplication.getOrganisationUrl()!!,
                 MyApplication.getToken()!!)
         } else {
             role = Role.CLIENT
             val fab: FloatingActionButton = findViewById(R.id.fab)
             fab.visibility = View.GONE
 
-            val organizationsMapString = MyApplication.secureSharedPreferences.getString("OrganizationsMap", "")
-            val organizationMap = organizationsMapString!!.toHashMap()
-            for((url,token) in organizationMap){
+            val organisationsMapString = MyApplication.secureSharedPreferences.getString("OrganisationsMap", "")
+            val organisationMap = organisationsMapString!!.toHashMap()
+            for((url,token) in organisationMap){
                 viewModel.downloadAppointments(
                     role,
                     url,
@@ -100,16 +103,16 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment)
         val menu = navView.menu
         //Customize menu to role
-        if(MyApplication.getOrganizationUrl().isNullOrEmpty() || MyApplication.getOrganizationUrl() == ""){
+        if(MyApplication.getOrganisationUrl().isNullOrEmpty() || MyApplication.getOrganisationUrl() == ""){
             menu.removeItem(R.id.nav_statistic)
         } else {
-            menu.removeItem(R.id.nav_organization_operation)
+            menu.removeItem(R.id.nav_organisation_operation)
         }
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.nav_calendar, R.id.nav_statistic, R.id.nav_client_operation, R.id.nav_organization_operation, R.id.nav_log_out
+                R.id.nav_calendar, R.id.nav_statistic, R.id.nav_client_operation, R.id.nav_organisation_operation, R.id.nav_log_out
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)

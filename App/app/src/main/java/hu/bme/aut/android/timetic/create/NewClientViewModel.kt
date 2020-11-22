@@ -5,19 +5,19 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import hu.bme.aut.android.timetic.MyApplication
-import hu.bme.aut.android.timetic.Singleton
 import hu.bme.aut.android.timetic.data.model.Person
 import hu.bme.aut.android.timetic.dataManager.DBRepository
 import hu.bme.aut.android.timetic.dataManager.NetworkDeveloperInteractor
-import hu.bme.aut.android.timetic.dataManager.NetworkOrganizationInteractor
+import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.network.models.*
 import kotlinx.coroutines.launch
 
 
 class NewClientViewModel : ViewModel() {
-    private lateinit var backend: NetworkOrganizationInteractor
+    private lateinit var backend: NetworkOrganisationInteractor
     private var repo: DBRepository
 
     private val _data = MutableLiveData<ForEmployeeOrganization>()
@@ -37,29 +37,29 @@ class NewClientViewModel : ViewModel() {
         repo = DBRepository(dao)
     }
 
-    fun initialize(organizationUrl: String, token: String? = null){
+    fun initialize(organisationUrl: String, token: String? = null){
         if(token == null){
             backend =
-                NetworkOrganizationInteractor(
-                    organizationUrl,
+                NetworkOrganisationInteractor(
+                    organisationUrl,
                     null,
                     null
                 )
         } else {
             backend =
-                NetworkOrganizationInteractor(
-                    organizationUrl,
+                NetworkOrganisationInteractor(
+                    organisationUrl,
                     null,
                     HttpBearerAuth(
                         "bearer",
                         token
                     )
                 )
-            backend.getOrganizationDataForEmployee(onSuccess = this::onSuccess, onError = Singleton::logBackendError)
+            backend.getOrganisationDataForEmployee(onSuccess = this::onSuccess, onError = this::error)
         }
     }
 
-    fun sendOrganizationIdToDev(devToken: String, organizationId: String) {
+    fun sendOrganisationIdToDev(devToken: String, organisationId: String) {
         val devBackend =
             NetworkDeveloperInteractor(
                 null,
@@ -68,27 +68,39 @@ class NewClientViewModel : ViewModel() {
                         devToken
                     )
                 )
-        devBackend.patchRegisteredOrganizationById(organizationId = organizationId,
-            onSuccess = this::onSuccessAddOrganizationIdToDev, onError = this::onErrorAddOrganizationIdToDev)
+        devBackend.patchRegisteredOrganisationById(organisationId = organisationId,
+            onSuccess = this::onSuccessAddOrganisationIdToDev, onError = this::onErrorAddOrganisationIdToDev)
     }
 
-    fun onSuccessAddOrganizationIdToDev(unit: Unit){
+    fun onSuccessAddOrganisationIdToDev(unit: Unit){
         _clientRegistered.value = true
     }
 
-    fun onErrorAddOrganizationIdToDev(e: Throwable, code: Int?, call: String){
+    fun onErrorAddOrganisationIdToDev(e: Throwable, code: Int?, call: String){
         _clientRegistered.value = false
-        Singleton.logBackendError(e, code, call)
+        error(e, code, call)
     }
 
     fun onSuccess(data: ForEmployeeOrganization){
         _data.value = data
     }
 
-    fun getTokenForClient(organizationUrl: String, email: String, refreshToken: String) {
+    private fun error(e: Throwable, code: Int?, call: String) {
+        when(code) {
+            400 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "400 - Bad Request")
+            401 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "401 - Unauthorized ")
+            403 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "403 - Forbidden")
+            404 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "404 - Not Found")
+            409 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "409 - Conflict")
+        }
+        FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
+        FirebaseCrashlytics.getInstance().recordException(e)
+    }
+
+    fun getTokenForClient(organisationUrl: String, email: String, refreshToken: String) {
         val backendWithoutAuth =
-            NetworkOrganizationInteractor(
-                organizationUrl,
+            NetworkOrganisationInteractor(
+                organisationUrl,
                 null,
                 null
             )
@@ -120,7 +132,7 @@ class NewClientViewModel : ViewModel() {
 
     private fun onErrorClientAdd(e: Throwable, code: Int?, call: String){
         _success.value = false
-        Singleton.logBackendError(e, code, call)
+        error(e, code, call)
     }
 
     private fun insert(person: Person) = viewModelScope.launch {

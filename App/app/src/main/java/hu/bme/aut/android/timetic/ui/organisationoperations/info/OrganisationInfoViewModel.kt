@@ -1,40 +1,28 @@
-package hu.bme.aut.android.timetic.ui.statistic
+package hu.bme.aut.android.timetic.ui.organisationoperations.info
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
-import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
-import hu.bme.aut.android.timetic.network.models.ForEmployeeReport
+import hu.bme.aut.android.timetic.network.models.ForClientOrganization
 
-class StatisticDiagramViewModel : ViewModel() {
-    private lateinit var backend: NetworkOrganisationInteractor
+class OrganisationInfoViewModel : ViewModel() {
+    private val _info = MutableLiveData<ForClientOrganization>()
+    var info: LiveData<ForClientOrganization> = _info
 
-    private val _data = MutableLiveData<ForEmployeeReport>()
-    var data: LiveData<ForEmployeeReport> = _data
+    fun getInformation(organisationUrl: String, email: String) {
+        val backend: NetworkOrganisationInteractor = NetworkOrganisationInteractor(
+            organisationUrl,
+            null,
+            null
+        )
 
-    fun fetchData(
-        start: Long,
-        end: Long,
-        OrganisationUrl: String,
-        Token: String
-    ) {
-        backend =
-            NetworkOrganisationInteractor(
-                OrganisationUrl,
-                null,
-                HttpBearerAuth(
-                    "bearer",
-                    Token
-                )
-            )
-
-        backend.getReport(start, end, onSuccess = this::success, onError = this::error)
+        backend.getOrganisationDataForClient(email, onSuccess = this::successList, onError = this::error)
     }
 
-    private fun success(data: ForEmployeeReport) {
-        _data.value = data
+    private fun successList(list: ForClientOrganization) {
+        _info.value = list
     }
 
     private fun error(e: Throwable, code: Int?, call: String) {

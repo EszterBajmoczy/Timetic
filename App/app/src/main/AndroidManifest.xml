@@ -20,7 +20,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".ui.organizationoperations.info.OrganizationInfoActivity" />
+        <activity android:name=".ui.organisationoperations.info.OrganisationInfoActivity" />
 
         <service
             android:name=".syncAdapter.SyncService"
@@ -76,7 +76,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ChooseOrganizationActivity" />
+        <activity android:name=".ui.calendar.detail.DetailActivity" />
+        <activity android:name=".ChooseOrganisationActivity" />
         <activity android:name=".create.NewAppointmentActivity" />
         <activity
             android:name=".settings.SettingsActivity"

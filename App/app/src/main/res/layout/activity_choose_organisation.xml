@@ -4,16 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ChooseOrganizationActivity"
+    tools:context=".ChooseOrganisationActivity"
     android:orientation="vertical"
     android:gravity="center_horizontal">
 
     <TextView
-        android:id="@+id/tNoInternetConnectionChooseOrganization"
+        android:id="@+id/tNoInternetConnectionChooseOrganisation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="6dp"
-        android:text="@string/network_needed_long"
+        android:text="Nincs internet kapcsolat, a továbbiakhoz kapcsolja be."
         android:background="@color/colorAccentLight"
         android:gravity="center_horizontal"
         android:visibility="gone"/>
@@ -21,15 +21,15 @@
     <androidx.appcompat.widget.AppCompatAutoCompleteTextView
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:id="@+id/ChooseOrganization"
-        android:hint="@string/enter_name_of_your_organization"
+        android:id="@+id/ChooseOrganisation"
+        android:hint="Enter the name of your organisation"
         android:textColor="@color/colorDark"
         android:textColorHint="@color/colorAccent"
         android:layout_marginTop="50dp"
         android:layout_marginBottom="150dp"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabLoginChooseOrganization"
+        android:id="@+id/fabLoginChooseOrganisation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|center"

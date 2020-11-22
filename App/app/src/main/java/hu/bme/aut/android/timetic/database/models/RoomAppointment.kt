@@ -17,5 +17,5 @@ class RoomAppointment (
     val address: String?,
     val personBackendId: String?,
     val activity: String?,
-    val organizationUrl: String?
+    val organisationUrl: String?
 )

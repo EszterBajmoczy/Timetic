@@ -4,16 +4,19 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import hu.bme.aut.android.timetic.dataManager.NetworkDeveloperInteractor
-import hu.bme.aut.android.timetic.dataManager.NetworkOrganizationInteractor
+import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
 import hu.bme.aut.android.timetic.network.auth.HttpBasicAuth
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.network.models.*
 import hu.bme.aut.android.timetic.ui.loginAregistration.Result
 
 class ForgottenPasswordViewModel : ViewModel() {
+    private lateinit var backendOrg: NetworkOrganisationInteractor
+    private lateinit var backendDev: NetworkDeveloperInteractor
     private lateinit var email: String
-    private var organizationUrl: String? = null
+    private var organisationUrl: String? = null
     private lateinit var role: Role
     private var tmpMap = HashMap<String, String>()
     private var mapSize = 0
@@ -36,14 +39,14 @@ class ForgottenPasswordViewModel : ViewModel() {
     private val _token = MutableLiveData<String>()
     val token: LiveData<String> = _token
 
-    private val _organizations = MutableLiveData<HashMap<String, String>>()
-    val organizations: LiveData<HashMap<String, String>> = _organizations
+    private val _organisations = MutableLiveData<HashMap<String, String>>()
+    val organisations: LiveData<HashMap<String, String>> = _organisations
 
-    fun reset(role: Role, email: String, code: Int, password: String, organizationUrl: String?){
+    fun reset(role: Role, email: String, code: Int, password: String, organisationUrl: String?){
         when (role) {
             Role.EMPLOYEE -> {
-                val backend =  NetworkOrganizationInteractor(
-                    organizationUrl!!,
+                val backend =  NetworkOrganisationInteractor(
+                    organisationUrl!!,
                     null,
                     null
                 )
@@ -62,36 +65,36 @@ class ForgottenPasswordViewModel : ViewModel() {
 
     }
 
-    fun login(email: String, password: String, organizationUrl: String?) {
-        this.organizationUrl = organizationUrl
+    fun login(email: String, password: String, organisationUrl: String?) {
+        this.organisationUrl = organisationUrl
         this.email = email
 
-        if(organizationUrl.isNullOrEmpty()){
+        if(organisationUrl.isNullOrEmpty()){
             role = Role.CLIENT
             val backend =
                 NetworkDeveloperInteractor(
                     HttpBasicAuth(email, password),
                     null
                 )
-            backend.login(onSuccess = this::successLoginClient, onError = Singleton::logBackendError)
+            backend.login(onSuccess = this::successLoginClient, onError = this::errorRefreshToken)
         }
         else{
 
             role = Role.EMPLOYEE
             val backend =
-                NetworkOrganizationInteractor(
-                    organizationUrl,
+                NetworkOrganisationInteractor(
+                    organisationUrl,
                     HttpBasicAuth(email, password),
                     null
                 )
-            backend.login(onSuccess = this::successLoginEmployee, onError = Singleton::logBackendError)
+            backend.login(onSuccess = this::successLoginEmployee, onError = this::errorRefreshToken)
         }
     }
 
-    private fun getTokenOrganization(refreshToken: CommonToken){
+    private fun getTokenOrganisation(refreshToken: CommonToken){
         if(refreshToken.token != null){
-            NetworkOrganizationInteractor(
-                MyApplication.getOrganizationUrl()!!,
+            NetworkOrganisationInteractor(
+                MyApplication.getOrganisationUrl()!!,
                 null,
                 HttpBearerAuth("bearer", refreshToken.token)
             ).getToken(onSuccess = this::successToken, onError = this::errorToken)
@@ -118,22 +121,22 @@ class ForgottenPasswordViewModel : ViewModel() {
                     null,
                     HttpBearerAuth("bearer", token.token!!)
                 )
-            n.getRegisteredOrganizations(onSuccess = this::successOrganizations, onError = Singleton::logBackendError)
+            n.getRegisteredOrganisations(onSuccess = this::successOrganisations, onError = this::error)
         } else {
             _loginResult.value = Result(success = true, error = null)
         }
     }
 
-    private fun successOrganizations(organizations: List<CommonOrganization>) {
+    private fun successOrganisations(organisations: List<CommonOrganization>) {
         _refreshToken.value?.let {token: String ->
-            if(organizations.isEmpty()){
-                _organizations.value = tmpMap
+            if(organisations.isEmpty()){
+                _organisations.value = tmpMap
             }
-            mapSize = organizations.size
-            //get token for every organization
-            for(item in organizations) {
+            mapSize = organisations.size
+            //get token for every organisation
+            for(item in organisations) {
                 val network =
-                    NetworkOrganizationInteractor(
+                    NetworkOrganisationInteractor(
                         item.serverUrl!!,
                         null,
                         null
@@ -146,18 +149,19 @@ class ForgottenPasswordViewModel : ViewModel() {
     private fun successRefreshTokenForClient(token: CommonToken, url: String) {
         tmpMap[url] = token.token!!
         if(tmpMap.size == mapSize) {
-            _organizations.value = tmpMap
+            _organisations.value = tmpMap
         }
     }
 
     private fun errorRefreshTokenForClient(e: Throwable, code: Int?, call: String) {
         _loginResult.value = Result(success = true, error = R.string.login_failed)
-        Singleton.logBackendError(e, code, call)
+        error(e, code, call)
     }
 
     private fun errorToken(e: Throwable, code: Int?, call: String) {
+        Log.d("EZAZ", "getTokeeeeeeeeeeeeeeeeeeeeeeeeeeen errrrrror reset")
         _loginResult.value = Result(success = null, error = R.string.login_failed)
-        Singleton.logBackendError(e, code, call)
+        //TODO
     }
 
     private fun successLoginClient(loginData: ForUserLoginData) {
@@ -171,6 +175,11 @@ class ForgottenPasswordViewModel : ViewModel() {
         setRefreshToken(loginData.refreshToken!!)
     }
 
+    private fun errorRefreshToken(e: Throwable, code: Int?, call: String) {
+        Log.d("EZAZ", "getToken errrrrror reset")
+        //TODO
+    }
+
     private fun onSuccesReset(unit: Unit) {
         _resetResult.value = Result(success = true, error = null)
         Log.d("EZAZ", "succcccess reset password")
@@ -178,7 +187,8 @@ class ForgottenPasswordViewModel : ViewModel() {
 
     private fun onErrorReset(e: Throwable, code: Int?, call: String) {
         _resetResult.value = Result(success = null, error = R.string.user_not_found)
-        Singleton.logBackendError(e, code, call)
+        Log.d("EZAZ", "errrrrror reset password")
+        //TODO
     }
 
     fun codeDataChanged(code: String, password: String, passwordAgain: String) {
@@ -189,7 +199,7 @@ class ForgottenPasswordViewModel : ViewModel() {
                     _resetForm.value = ResetFormState(code = R.string.invalid_code_reset_empty)
                 }
                 else if (!isPasswordValid(password)) {
-                    _resetForm.value = ResetFormState(passwordError = R.string.invalid_password)
+                    _resetForm.value = ResetFormState(passwordError = R.string.invalid_password_reset)
                 } else if (password != passwordAgain) {
                     _resetForm.value = ResetFormState(passwordsNotMatchError = R.string.invalid_password2_reset)
                 } else {
@@ -222,11 +232,23 @@ class ForgottenPasswordViewModel : ViewModel() {
         return password.length == 6
     }
 
+    private fun error(e: Throwable, code: Int?, call: String) {
+        when(code) {
+            400 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "400 - Bad Request")
+            401 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "401 - Unauthorized ")
+            403 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "403 - Forbidden")
+            404 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "404 - Not Found")
+            409 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "409 - Conflict")
+        }
+        FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
+        FirebaseCrashlytics.getInstance().recordException(e)
+    }
+
     private fun setRefreshToken(token: CommonToken){
         _refreshToken.value = token.token
 
         when(role) {
-            Role.EMPLOYEE -> getTokenOrganization(token)
+            Role.EMPLOYEE -> getTokenOrganisation(token)
             Role.CLIENT -> getTokenDeveloper(token)
         }
     }

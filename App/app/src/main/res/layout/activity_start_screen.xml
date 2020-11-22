@@ -29,12 +29,12 @@
 
         <Button
             style="@style/MyAppTheme.ButtonLight"
-            android:id="@+id/btOrganizationSignIn"
+            android:id="@+id/btOrganisationSignIn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:width="200dp"
             android:layout_margin="10dp"
-            android:text="@string/tOrganizationSignIn"/>
+            android:text="@string/tOrganisationSignIn"/>
 
 
 </LinearLayout>

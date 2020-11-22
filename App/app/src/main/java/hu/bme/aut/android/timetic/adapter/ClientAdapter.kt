@@ -85,8 +85,8 @@ class ClientAdapter(
             }
 
             override fun performFiltering(constraint: CharSequence): FilterResults {
-                val filteredResults: List<Person?>?
-                if (constraint.isEmpty()) {
+                var filteredResults: List<Person?>? = null
+                if (constraint.length == 0) {
                     filteredResults = originalList
                 } else {
                     filteredResults = getFilteredResults(constraint.toString().toLowerCase())

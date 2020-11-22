@@ -5,12 +5,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import android.util.Patterns
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import hu.bme.aut.android.timetic.dataManager.NetworkDeveloperInteractor
-import hu.bme.aut.android.timetic.dataManager.NetworkOrganizationInteractor
+import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
 
 import hu.bme.aut.android.timetic.R
 import hu.bme.aut.android.timetic.Role
-import hu.bme.aut.android.timetic.Singleton
 import hu.bme.aut.android.timetic.network.auth.HttpBasicAuth
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.network.models.*
@@ -18,7 +18,7 @@ import hu.bme.aut.android.timetic.ui.loginAregistration.Result
 
 class LoginViewModel : ViewModel() {
     private lateinit var email: String
-    private var organizationUrl: String? = null
+    private var organisationUrl: String? = null
     private lateinit var role: Role
     private var tmpMap = HashMap<String, String>()
     private var mapSize = 0
@@ -41,14 +41,14 @@ class LoginViewModel : ViewModel() {
     private val _resetResult = MutableLiveData<Result>()
     val resetResult: LiveData<Result> = _resetResult
 
-    private val _organizations = MutableLiveData<HashMap<String, String>>()
-    val organizations: LiveData<HashMap<String, String>> = _organizations
+    private val _organisations = MutableLiveData<HashMap<String, String>>()
+    val organisations: LiveData<HashMap<String, String>> = _organisations
 
-    fun login(email: String, password: String, organizationUrl: String?) {
-        this.organizationUrl = organizationUrl
+    fun login(email: String, password: String, organisationUrl: String?) {
+        this.organisationUrl = organisationUrl
         this.email = email
 
-        if(organizationUrl.isNullOrEmpty()){
+        if(organisationUrl.isNullOrEmpty()){
             role = Role.CLIENT
             val backend =
                 NetworkDeveloperInteractor(
@@ -60,8 +60,8 @@ class LoginViewModel : ViewModel() {
         else{
             role = Role.EMPLOYEE
             val backend =
-                NetworkOrganizationInteractor(
-                    organizationUrl,
+                NetworkOrganisationInteractor(
+                    organisationUrl,
                     HttpBasicAuth(email, password),
                     null
                 )
@@ -105,13 +105,13 @@ class LoginViewModel : ViewModel() {
 
     private fun errorRefreshToken(e: Throwable, code: Int?, call: String) {
         _loginResult.value = Result(success = null, error = R.string.login_failed)
-        Singleton.logBackendError(e, code, call)
+        error(e, code, call)
     }
 
-    private fun getTokenOrganization(refreshToken: CommonToken){
+    private fun getTokenOrganisation(refreshToken: CommonToken){
         if(refreshToken.token != null){
-            organizationUrl?.let {
-                NetworkOrganizationInteractor(
+            val n = organisationUrl?.let {
+                NetworkOrganisationInteractor(
                     it,
                     null,
                     HttpBearerAuth("bearer", refreshToken.token)
@@ -131,11 +131,11 @@ class LoginViewModel : ViewModel() {
         }
     }
 
-    fun resetPassword(role: Role, email: String, organizationURL: String?){
+    fun resetPassword(role: Role, email: String, organisationURL: String?){
         if(role == Role.EMPLOYEE){
             val backend =
-                NetworkOrganizationInteractor(
-                    organizationURL!!,
+                NetworkOrganisationInteractor(
+                    organisationURL!!,
                     null,
                     null
                 )
@@ -160,22 +160,22 @@ class LoginViewModel : ViewModel() {
                     null,
                     HttpBearerAuth("bearer", token.token!!)
                 )
-            n.getRegisteredOrganizations(onSuccess = this::successOrganizations, onError = Singleton::logBackendError)
+            n.getRegisteredOrganisations(onSuccess = this::successOrganisations, onError = this::error)
         } else {
             _loginResult.value = Result(success = true, error = null)
         }
     }
 
-    private fun successOrganizations(organizations: List<CommonOrganization>) {
+    private fun successOrganisations(organisations: List<CommonOrganization>) {
         _refreshToken.value?.let {token: String ->
-            if(organizations.isEmpty()){
-                _organizations.value = tmpMap
+            if(organisations.isEmpty()){
+                _organisations.value = tmpMap
             }
-            mapSize = organizations.size
-            //get token for every organization
-            for(item in organizations) {
+            mapSize = organisations.size
+            //get token for every organisation
+            for(item in organisations) {
                 val network =
-                    NetworkOrganizationInteractor(
+                    NetworkOrganisationInteractor(
                         item.serverUrl!!,
                         null,
                         null
@@ -188,18 +188,18 @@ class LoginViewModel : ViewModel() {
     private fun successRefreshTokenForClient(token: CommonToken, url: String) {
         tmpMap[url] = token.token!!
         if(tmpMap.size == mapSize) {
-            _organizations.value = tmpMap
+            _organisations.value = tmpMap
         }
     }
 
     private fun errorRefreshTokenForClient(e: Throwable, code: Int?, call: String) {
         _loginResult.value = Result(success = true, error = R.string.login_failed)
-        Singleton.logBackendError(e, code, call)
+        error(e, code, call)
     }
 
     private fun errorToken(e: Throwable, code: Int?, call: String) {
         _loginResult.value = Result(success = true, error = R.string.login_failed)
-        Singleton.logBackendError(e, code, call)
+        error(e, code, call)
     }
 
     private fun onSuccesReset(unit: Unit) {
@@ -208,14 +208,26 @@ class LoginViewModel : ViewModel() {
 
     private fun onErrorReset(e: Throwable, code: Int?, call: String) {
         _resetResult.value = Result(success = null, error = R.string.user_not_found)
-        Singleton.logBackendError(e, code, call)
+        error(e, code, call)
+    }
+
+    private fun error(e: Throwable, code: Int?, call: String) {
+        when(code) {
+            400 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "400 - Bad Request")
+            401 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "401 - Unauthorized ")
+            403 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "403 - Forbidden")
+            404 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "404 - Not Found")
+            409 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "409 - Conflict")
+        }
+        FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
+        FirebaseCrashlytics.getInstance().recordException(e)
     }
 
     private fun setRefreshToken(token: CommonToken){
         _refreshToken.value = token.token
 
         when(role) {
-            Role.EMPLOYEE -> getTokenOrganization(token)
+            Role.EMPLOYEE -> getTokenOrganisation(token)
             Role.CLIENT -> getTokenDeveloper(token)
         }
     }

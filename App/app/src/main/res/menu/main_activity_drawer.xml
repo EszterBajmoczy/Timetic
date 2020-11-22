@@ -17,9 +17,9 @@
             android:icon="@drawable/round_account_circle_black_18dp"
             android:title="@string/menuClientOperations" />
         <item
-            android:id="@+id/nav_organization_operation"
+            android:id="@+id/nav_organisation_operation"
             android:icon="@drawable/round_view_carousel_black_18dp"
-            android:title="@string/menuOrganizationOperations" />
+            android:title="@string/menuOrganisationOperations" />
         <item
             android:id="@+id/nav_log_out"
             android:icon="@drawable/round_clear_black_18dp"

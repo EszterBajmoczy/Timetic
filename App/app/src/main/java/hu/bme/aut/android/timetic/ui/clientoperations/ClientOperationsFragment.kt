@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -22,6 +23,7 @@ import hu.bme.aut.android.timetic.adapter.ClientAdapter
 import hu.bme.aut.android.timetic.create.NewClientActivity
 import hu.bme.aut.android.timetic.ui.loginAregistration.login.afterTextChanged
 import kotlinx.android.synthetic.main.fragment_client_operations.*
+import kotlinx.android.synthetic.main.fragment_statistic_main.*
 import java.lang.Exception
 
 
@@ -39,7 +41,7 @@ class ClientOperationsFragment : Fragment(){
             if(isNetworkAvailable) {
                 tNoInternetConnectionClientOperations.visibility = View.GONE
 
-                viewModel.fetchData(false, MyApplication.getOrganizationUrl()!!,
+                viewModel.fetchData(false, MyApplication.getOrganisationUrl()!!,
                     MyApplication.getToken()!!)
 
                 viewModel._persons.observe(viewLifecycleOwner, Observer {
@@ -66,7 +68,7 @@ class ClientOperationsFragment : Fragment(){
         initRecyclerView()
         setFloatingActionButton()
 
-        if(!MyApplication.getOrganizationUrl()!!.isNullOrEmpty()) {
+        if(!MyApplication.getOrganisationUrl()!!.isNullOrEmpty()) {
             initialize(false)
         } else {
             initialize(true)
@@ -83,12 +85,12 @@ class ClientOperationsFragment : Fragment(){
         val activeNetworkInfo = connectivityManager.activeNetworkInfo
         val isNetworkAvailable = activeNetworkInfo != null && activeNetworkInfo.isConnected
         if(isNetworkAvailable){
-            viewModel.fetchData(local, MyApplication.getOrganizationUrl()!!,
+            viewModel.fetchData(local, MyApplication.getOrganisationUrl()!!,
                 MyApplication.getToken()!!)
         } else {
             tNoInternetConnectionClientOperations.visibility = View.VISIBLE
 
-            viewModel.fetchData(true, MyApplication.getOrganizationUrl()!!,
+            viewModel.fetchData(true, MyApplication.getOrganisationUrl()!!,
                 MyApplication.getToken()!!)
 
             val intentFilter = IntentFilter()
@@ -112,7 +114,7 @@ class ClientOperationsFragment : Fragment(){
 
     override fun onResume() {
         super.onResume()
-        if(!MyApplication.getOrganizationUrl()!!.isNullOrEmpty()){
+        if(!MyApplication.getOrganisationUrl()!!.isNullOrEmpty()){
             initialize(true)
         }
     }
@@ -136,7 +138,7 @@ class ClientOperationsFragment : Fragment(){
     }
 
     private fun setFloatingActionButton(){
-        if(MyApplication.getOrganizationUrl().isNullOrEmpty() || MyApplication.getOrganizationUrl() == ""){
+        if(MyApplication.getOrganisationUrl().isNullOrEmpty() || MyApplication.getOrganisationUrl() == ""){
             val fab = requireActivity().findViewById<FloatingActionButton>(R.id.fab)
             fab.visibility = View.GONE
         } else {
