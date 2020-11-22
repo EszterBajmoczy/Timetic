@@ -30,13 +30,12 @@ class NetworkOrganizationInteractor(private val organizationUrl: String, auth: H
             }
             autb != null -> {
                 client =  OkHttpClient.Builder()
+                    .authenticator(TokenAuthenticator())
                     .addInterceptor(autb)
-                    .addInterceptor(AuthorizationInterceptor())
                     .build()
             }
             else -> {
                 client =  OkHttpClient.Builder()
-                    .addInterceptor(AuthorizationInterceptor())
                     .build()
             }
         }
@@ -68,7 +67,6 @@ class NetworkOrganizationInteractor(private val organizationUrl: String, auth: H
             } catch (e: Exception) {
                 e.printStackTrace()
                 handler.post {
-                    //logerror
                     if (response != null) {
                         onError(e, response.code(), call.request().toString())
                     } else {

@@ -85,17 +85,6 @@ interface OrganizationApi {
     fun clientRegisterPost(@Body commonClient: CommonClient): Call<Unit>
 
     /**
-     * Share their personal/client data with the organization //client is registered by employee
-     * 
-     * Responses:
-     *  - 200: successful operation
-     * 
-    * @return [Call]<[Unit]>
-     */
-    @GET("client/shareDataWithOrganization")
-    fun clientShareDataWithOrganizationGet(): Call<Unit>
-
-    /**
      * Gets the url of the online consultation for the appointment if that is online
      *
      * Responses:
@@ -109,7 +98,7 @@ interface OrganizationApi {
     @GET("client/consultation")
     fun clientConsultationGet(@Query("appointmentId") appointmentId: kotlin.String): Call<CommonConsultation>
 
-/**
+     /**
      * Gets the data so as to create and appointment
      * 
      * Responses:

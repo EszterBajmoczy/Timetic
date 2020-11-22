@@ -91,13 +91,6 @@ interface DeveloperApi {
     @PATCH("mobile/registeredOrganizations/{organizationId}")
     fun mobileRegisteredOrganizationsIdPatch(@Path("organizationId") organizationId: kotlin.String): Call<Unit>
 
-
-
-
-
-
-
-
     /**
      * Asks for new password
      *
