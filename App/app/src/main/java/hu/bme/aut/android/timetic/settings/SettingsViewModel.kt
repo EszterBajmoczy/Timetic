@@ -1,29 +1,29 @@
 package hu.bme.aut.android.timetic.settings
 
 import androidx.lifecycle.*
-import com.google.firebase.crashlytics.FirebaseCrashlytics
-import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
+import hu.bme.aut.android.timetic.Singleton
+import hu.bme.aut.android.timetic.dataManager.NetworkOrganizationInteractor
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.network.models.ForEmployeeDataForAppointmentCreation
 import kotlin.collections.ArrayList
 
 class SettingsViewModel : ViewModel() {
-    private lateinit var backend: NetworkOrganisationInteractor
+    private lateinit var backend: NetworkOrganizationInteractor
 
     private val _activities = MutableLiveData<List<String>>()
     val activities: LiveData<List<String>> = _activities
 
-    fun getDataForAppointmentCreation(organisationUrl: String, token: String){
+    fun getDataForAppointmentCreation(organizationUrl: String, token: String){
         backend =
-            NetworkOrganisationInteractor(
-                organisationUrl,
+            NetworkOrganizationInteractor(
+                organizationUrl,
                 null,
                 HttpBearerAuth(
                     "bearer",
                     token
                 )
             )
-        backend.getDataForAppointmentCreation(onSuccess = this::successDataForCreation, onError = this::error)
+        backend.getDataForAppointmentCreation(onSuccess = this::successDataForCreation, onError = Singleton::logBackendError)
     }
 
     private fun successDataForCreation(data: ForEmployeeDataForAppointmentCreation) {
@@ -36,17 +36,5 @@ class SettingsViewModel : ViewModel() {
             }
         }
         _activities.value = stringList
-    }
-
-    private fun error(e: Throwable, code: Int?, call: String) {
-        when(code) {
-            400 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "400 - Bad Request")
-            401 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "401 - Unauthorized ")
-            403 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "403 - Forbidden")
-            404 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "404 - Not Found")
-            409 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "409 - Conflict")
-        }
-        FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
-        FirebaseCrashlytics.getInstance().recordException(e)
     }
 }

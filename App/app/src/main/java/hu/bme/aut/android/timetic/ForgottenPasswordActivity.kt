@@ -19,7 +19,7 @@ class ForgottenPasswordActivity : AppCompatActivity() {
     private lateinit var viewModel: ForgottenPasswordViewModel
     private val pref = MyApplication.secureSharedPreferences
     private lateinit var role: Role
-    private lateinit var organisationUrl: String
+    private lateinit var organizationUrl: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,8 +27,8 @@ class ForgottenPasswordActivity : AppCompatActivity() {
 
         viewModel = ViewModelProviders.of(this).get(ForgottenPasswordViewModel::class.java)
 
-        organisationUrl = intent.getStringExtra("OrganisationUrl")
-        if(organisationUrl.isEmpty()){
+        organizationUrl = intent.getStringExtra("OrganizationUrl")
+        if(organizationUrl.isEmpty()){
             role = Role.CLIENT
         } else {
             role = Role.EMPLOYEE
@@ -66,7 +66,6 @@ class ForgottenPasswordActivity : AppCompatActivity() {
 
 
         viewModel.loginResult.observe(this, Observer {
-            Log.d("EZAZ", "Resetresult" + it.error + " : "+ it.success)
             val result = it ?: return@Observer
 
             loading.visibility = View.GONE
@@ -84,7 +83,6 @@ class ForgottenPasswordActivity : AppCompatActivity() {
         })
 
         viewModel.resetResult.observe(this, Observer {
-            Log.d("EZAZ", "Resetresult" + it.error + " : "+ it.success)
             val result = it ?: return@Observer
 
             loading.visibility = View.GONE
@@ -93,7 +91,7 @@ class ForgottenPasswordActivity : AppCompatActivity() {
             }
             if (result.success != null) {
                 viewModel.login(email = MyApplication.getEmail()!!, password = password.text.toString(),
-                    organisationUrl = organisationUrl)
+                    organizationUrl = organizationUrl)
             }
         })
 
@@ -132,9 +130,9 @@ class ForgottenPasswordActivity : AppCompatActivity() {
             editor.apply()
         })
 
-        viewModel.organisations.observe(this, Observer {map ->
+        viewModel.organizations.observe(this, Observer { map ->
             val editor = MyApplication.secureSharedPreferences.edit()
-            editor.putString("OrganisationsMap", map.toString())
+            editor.putString("OrganizationsMap", map.toString())
             editor.apply()
 
             updateUiWithUser()
@@ -145,7 +143,7 @@ class ForgottenPasswordActivity : AppCompatActivity() {
         })
 
         reset.setOnClickListener {
-            viewModel.reset(role, MyApplication.getEmail()!!, code.text.toString().toInt(), password.text.toString(), organisationUrl)
+            viewModel.reset(role, MyApplication.getEmail()!!, code.text.toString().toInt(), password.text.toString(), organizationUrl)
         }
     }
 

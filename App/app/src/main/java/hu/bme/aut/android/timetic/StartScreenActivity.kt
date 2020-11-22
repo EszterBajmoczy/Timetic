@@ -23,8 +23,8 @@ class StartScreenActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        btOrganisationSignIn.setOnClickListener {
-            val intent = Intent(this, ChooseOrganisationActivity::class.java)
+        btOrganizationSignIn.setOnClickListener {
+            val intent = Intent(this, ChooseOrganizationActivity::class.java)
             startActivity(intent)
         }
     }

@@ -12,7 +12,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.google.gson.Gson
 import hu.bme.aut.android.timetic.MainActivity
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
@@ -33,16 +32,16 @@ class NewClientActivity : AppCompatActivity() {
         setContentView(R.layout.activity_new_client)
 
         val personalInfo = intent.getStringArrayExtra("PersonalInfos")
-        val organisationUrl = intent.getStringExtra("OrganisationUrl")
-        val organisationId = intent.getStringExtra("OrganisationId")
+        val organizationUrl = intent.getStringExtra("OrganizationUrl")
+        val organizationId = intent.getStringExtra("OrganizationId")
 
         viewModel = ViewModelProviders.of(this).get(NewClientViewModel::class.java)
 
-        if(organisationId != null && organisationUrl != null) {
+        if(organizationId != null && organizationUrl != null) {
             role = Role.CLIENT
             title = "Regisztrálás"
 
-            viewModel.initialize(organisationUrl)
+            viewModel.initialize(organizationUrl)
 
             val pref = MyApplication.secureSharedPreferences
             etClientName.setText(pref.getString("UserName", ""))
@@ -52,7 +51,7 @@ class NewClientActivity : AppCompatActivity() {
             val mDynamicLayoutsContainer = findViewById<LinearLayout>(R.id.tableNewClient)
 
             personalInfo?.let {
-                for((i, item) in personalInfo.withIndex()){
+                for(item in personalInfo){
                     val firstI = View.generateViewId()
                     val secondI = View.generateViewId()
 
@@ -73,7 +72,7 @@ class NewClientActivity : AppCompatActivity() {
             role = Role.EMPLOYEE
             title = "Új ügyfél felvétele"
 
-            viewModel.initialize(MyApplication.getOrganisationUrl()!!, MyApplication.getToken()!!)
+            viewModel.initialize(MyApplication.getOrganizationUrl()!!, MyApplication.getToken()!!)
 
             viewModel.data.observe(this, Observer { list ->
                 val infoList = list.clientPersonalInfoFields
@@ -82,7 +81,7 @@ class NewClientActivity : AppCompatActivity() {
                     val mInflater = LayoutInflater.from(applicationContext)
                     val mDynamicLayoutsContainer = findViewById<LinearLayout>(R.id.tableNewClient)
 
-                    for((i, item) in it.withIndex()){
+                    for(item in it){
                         val firstI = View.generateViewId()
                         val secondI = View.generateViewId()
 
@@ -111,11 +110,11 @@ class NewClientActivity : AppCompatActivity() {
                         Role.CLIENT -> viewModel.registerClient(c)
                     }
                 } else {
-                    Toast.makeText(this, "Internetkapcsolat szükséges.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, getString(R.string.network_needed), Toast.LENGTH_LONG).show()
                 }
             }
             else{
-                Toast.makeText(this, "Kérem töltse ki az összes mezőt", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.fill_all_fields_error), Toast.LENGTH_LONG).show()
             }
         }
 
@@ -127,21 +126,21 @@ class NewClientActivity : AppCompatActivity() {
             when(role) {
                 Role.EMPLOYEE -> finish()
                 Role.CLIENT -> {
-                    viewModel.getTokenForClient(organisationUrl, MyApplication.getEmail()!!, MyApplication.getRefreshToken()!!)
+                    viewModel.getTokenForClient(organizationUrl, MyApplication.getEmail()!!, MyApplication.getRefreshToken()!!)
                 }
             }
         })
 
         viewModel.tokenForClient.observe(this, Observer {
-            val mapString = MyApplication.secureSharedPreferences.getString("OrganisationsMap", "")
+            val mapString = MyApplication.secureSharedPreferences.getString("OrganizationsMap", "")
             val map = mapString!!.toHashMap()
-            map[organisationUrl!!] = it
+            map[organizationUrl!!] = it
 
             val editor = MyApplication.secureSharedPreferences.edit()
-            editor.putString("OrganisationsMap", map.toString())
+            editor.putString("OrganizationsMap", map.toString())
             editor.apply()
 
-            viewModel.sendOrganisationIdToDev(MyApplication.getDevToken()!!, organisationId!!)
+            viewModel.sendOrganizationIdToDev(MyApplication.getDevToken()!!, organizationId!!)
         })
 
         viewModel.clientRegistered.observe(this, Observer {
@@ -152,13 +151,13 @@ class NewClientActivity : AppCompatActivity() {
                     startActivity(intent)
                     finish()
                 }
-                false -> Toast.makeText(applicationContext, "Unable to register", Toast.LENGTH_SHORT).show()
+                false -> Toast.makeText(applicationContext, getString(R.string.registration_failed), Toast.LENGTH_SHORT).show()
             }
         })
     }
 
     private fun check() : Boolean {
-        for((index, item) in infos.withIndex()){
+        for((index) in infos.withIndex()){
             val view = findViewById<EditText>(ids[index])
             if(view.text.toString() == ""){
                 return false

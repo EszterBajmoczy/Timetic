@@ -18,7 +18,7 @@ class AuthorizationInterceptor() : Interceptor {
         if (mainResponse.code == 401 || mainResponse.code == 403) {
             // request to login API to get fresh token
             // synchronously calling login API
-            val apiOrg = MyApplication.getOrganisationApiForRefresh()
+            val apiOrg = MyApplication.getOrganizationApiForRefresh()
             val loginResponse: retrofit2.Response<CommonToken> = apiOrg.employeeRefreshGet().execute()
 
             Log.d("EZAZ", "1")

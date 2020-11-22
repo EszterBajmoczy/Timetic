@@ -63,13 +63,13 @@ class DayAndWeekCalendarFragment : Fragment() {
         }
 
         //set listeners
-        weekView.setOnEventClickListener { data, rect ->
+        weekView.setOnEventClickListener { data, _ ->
             val intent = Intent(context, NewAppointmentActivity::class.java)
             intent.putExtra("NetId", data.backendId)
             startActivity(intent)
         }
 
-        weekView.setOnEventLongClickListener { data, rect ->
+        weekView.setOnEventLongClickListener { data, _ ->
             val intent = Intent(context, NewAppointmentActivity::class.java)
             intent.putExtra("NetId", data.backendId)
             startActivity(intent)

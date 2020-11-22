@@ -87,7 +87,7 @@ class StatisticMainFragment : Fragment() {
             picker.show(activity?.supportFragmentManager!!, picker.toString())
 
             picker.addOnPositiveButtonClickListener {
-                viewModel.fetchData(it.first!!, it.second!!, MyApplication.getOrganisationUrl()!!, MyApplication.getToken()!!)
+                viewModel.fetchData(it.first!!, it.second!!, MyApplication.getOrganizationUrl()!!, MyApplication.getToken()!!)
                 val statisticDiagramFragment =
                     StatisticDiagramFragment()
 

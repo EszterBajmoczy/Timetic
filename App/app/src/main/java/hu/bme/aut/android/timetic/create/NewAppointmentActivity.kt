@@ -69,7 +69,7 @@ class NewAppointmentActivity : AppCompatActivity() {
             }
         })
 
-        if(MyApplication.getOrganisationUrl().isNullOrEmpty()){
+        if(MyApplication.getOrganizationUrl().isNullOrEmpty()){
             role = Role.CLIENT
             //Details view
             viewModel.getAppointmentByNetId(appointmentId!!)
@@ -77,7 +77,7 @@ class NewAppointmentActivity : AppCompatActivity() {
         } else {
             role = Role.EMPLOYEE
             if(isNetworkAvailable()) {
-                viewModel.getDataForAppointmentCreation(MyApplication.getOrganisationUrl()!!, MyApplication.getToken()!!)
+                viewModel.getDataForAppointmentCreation(MyApplication.getOrganizationUrl()!!, MyApplication.getToken()!!)
 
                 swPrivate.setOnCheckedChangeListener { _, isChecked ->
                     if(isChecked) {
@@ -147,7 +147,7 @@ class NewAppointmentActivity : AppCompatActivity() {
                             if(isNetworkAvailable()){
                                 viewModel.saveAppointment(getAppointment())
                             } else {
-                                Toast.makeText(applicationContext, "Internetkapcsolat szükséges új időpont létrehozásához", Toast.LENGTH_LONG).show()
+                                Toast.makeText(applicationContext,  getString(R.string.network_needed_new_appointment), Toast.LENGTH_LONG).show()
                             }
                         }
                     }
@@ -160,9 +160,9 @@ class NewAppointmentActivity : AppCompatActivity() {
 
                 btConsultation.setOnClickListener {
                     if(isNetworkAvailable()){
-                        viewModel.getMeetingUrl(appointmentId)
+                        viewModel.getMeetingUrl(appointmentId!!)
                     } else {
-                        Toast.makeText(applicationContext, "Internetkapcsolat szükséges a konzultációhoz való csatlakozáshoz", Toast.LENGTH_LONG).show()
+                        Toast.makeText(applicationContext, getString(R.string.network_needed_join_meeting), Toast.LENGTH_LONG).show()
                     }
                 }
             } else {
@@ -235,7 +235,7 @@ class NewAppointmentActivity : AppCompatActivity() {
                         viewModel.appDetail.removeObserver(observer)
                         viewModel.cancelAppointment(app.backendId)
                     } else {
-                        Toast.makeText(applicationContext, "Internetkapcsolat szükséges az időpont lemondásához", Toast.LENGTH_LONG).show()
+                        Toast.makeText(applicationContext, getString(R.string.network_needed_cancel_appointment), Toast.LENGTH_LONG).show()
                     }
                 }
                 btSave.setOnClickListener {
@@ -259,7 +259,7 @@ class NewAppointmentActivity : AppCompatActivity() {
                             viewModel.modifyAppointment(a)
                         }
                     } else {
-                        Toast.makeText(applicationContext, "Internetkapcsolat szükséges az időpont módosításához", Toast.LENGTH_LONG).show()
+                        Toast.makeText(applicationContext, getString(R.string.network_needed_modify_appointment), Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -348,13 +348,13 @@ class NewAppointmentActivity : AppCompatActivity() {
 
                     btConsultation.setOnClickListener {
                         if(isNetworkAvailable()){
-                            val organisationsMapString = MyApplication.secureSharedPreferences.getString("OrganisationsMap", "")
-                            val organisationMap = organisationsMapString!!.toHashMap()
-                            if(organisationMap.containsKey(app.organisationUrl)) {
-                                viewModel.getMeetingUrlByClient(app.organisationUrl!!, organisationMap[app.organisationUrl!!]!!, app.backendId)
+                            val organizationsMapString = MyApplication.secureSharedPreferences.getString("OrganizationsMap", "")
+                            val organizationMap = organizationsMapString!!.toHashMap()
+                            if(organizationMap.containsKey(app.organizationUrl)) {
+                                viewModel.getMeetingUrlByClient(app.organizationUrl!!, organizationMap[app.organizationUrl!!]!!, app.backendId)
                             }
                         } else {
-                            Toast.makeText(applicationContext, "Internetkapcsolat szükséges a konzultációhoz való csatlakozáshoz", Toast.LENGTH_LONG).show()
+                            Toast.makeText(applicationContext, getString(R.string.network_needed_join_meeting), Toast.LENGTH_LONG).show()
                         }
                     }
                 }
@@ -374,22 +374,22 @@ class NewAppointmentActivity : AppCompatActivity() {
                     if(isNetworkAvailable()) {
                         viewModel.appDetail.removeObserver(observer)
 
-                        val organisationsMapString = MyApplication.secureSharedPreferences.getString("OrganisationsMap", "")
-                        val organisationMap = organisationsMapString!!.toHashMap()
-                        if(organisationMap.containsKey(app.organisationUrl)){
+                        val organizationsMapString = MyApplication.secureSharedPreferences.getString("OrganizationsMap", "")
+                        val organizationMap = organizationsMapString!!.toHashMap()
+                        if(organizationMap.containsKey(app.organizationUrl)){
                             viewModel.cancelAppointmentByClient(
-                                app.organisationUrl!!,
-                                organisationMap[app.organisationUrl!!]!!,
+                                app.organizationUrl!!,
+                                organizationMap[app.organizationUrl!!]!!,
                                 app.backendId
                             )
                         }
                     } else {
-                        Toast.makeText(this, "Internetkapcsolat szükséges az időpont lemondásához", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, getString(R.string.network_needed_cancel_appointment), Toast.LENGTH_LONG).show()
                     }
                 }
 
                 btSave.setOnClickListener {
-                    Toast.makeText(this, "Internetkapcsolat szükséges az időpont lemondásához", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, getString(R.string.network_needed_cancel_appointment), Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -420,11 +420,11 @@ class NewAppointmentActivity : AppCompatActivity() {
 
     private fun checkData(): Boolean {
         if(startTime == null || endTime == null ){
-            Toast.makeText(this, "Időpontot kötelező megadni", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.appointment_needed), Toast.LENGTH_LONG).show()
             return false
         }
         if(startTime != null && endTime != null && startTime!! >= endTime!!){
-            Toast.makeText(this, "A kezdő időpont nem lehet hamarabb, mint az időpont vége.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.appointments_error), Toast.LENGTH_LONG).show()
             return false
         }
         if(swPrivate.isChecked){
@@ -440,13 +440,13 @@ class NewAppointmentActivity : AppCompatActivity() {
             tomorrow.add(Calendar.MILLISECOND, -1)
 
             if(startTime != null && endTime != null && startTime!! < tomorrow.timeInMillis){
-                Toast.makeText(this, "Holnapnál korábbi időpont megadása nem lehetséges", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.appointment_befare_tommorow_error), Toast.LENGTH_LONG).show()
                 return false
             }
             return true
         }
         else if(startTime != null && endTime != null) {
-            Toast.makeText(this, "Árat kötelező megadni", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.price_error), Toast.LENGTH_LONG).show()
             return false
         }
         return false
@@ -469,7 +469,7 @@ class NewAppointmentActivity : AppCompatActivity() {
 
                     val timePickerDialog = TimePickerDialog(
                         this,
-                        OnTimeSetListener { view, hourOfDay, minute ->
+                        OnTimeSetListener { _, hourOfDay, minute ->
                             c.set(Calendar.HOUR_OF_DAY, hourOfDay)
                             c.set(Calendar.MINUTE, minute)
                             startTime = c.timeInMillis
@@ -508,14 +508,14 @@ class NewAppointmentActivity : AppCompatActivity() {
 
             val datePickerDialog = DatePickerDialog(
                 this,
-                OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
+                OnDateSetListener { _, year, monthOfYear, dayOfMonth ->
                     c.set(Calendar.YEAR, year)
                     c.set(Calendar.MONTH, monthOfYear)
                     c.set(Calendar.DAY_OF_MONTH, dayOfMonth)
 
                     val timePickerDialog = TimePickerDialog(
                         this,
-                        OnTimeSetListener { view, hourOfDay, minute ->
+                        OnTimeSetListener { _, hourOfDay, minute ->
                             c.set(Calendar.HOUR_OF_DAY, hourOfDay)
                             c.set(Calendar.MINUTE, minute)
                             endTime = c.timeInMillis
@@ -556,7 +556,7 @@ class NewAppointmentActivity : AppCompatActivity() {
                 }
             }
         }
-        if(!MyApplication.getOrganisationUrl().isNullOrEmpty() && isNetworkAvailable()){
+        if(!MyApplication.getOrganizationUrl().isNullOrEmpty() && isNetworkAvailable()){
             spActivity.onItemSelectedListener = object : OnItemSelectedListener {
                 override fun onItemSelected(
                     parent: AdapterView<*>,
@@ -582,7 +582,7 @@ class NewAppointmentActivity : AppCompatActivity() {
         if(client != null){
             spPerson.setSelection(clientList.indexOf(client))
         }
-        if(!MyApplication.getOrganisationUrl().isNullOrEmpty() && isNetworkAvailable()){
+        if(!MyApplication.getOrganizationUrl().isNullOrEmpty() && isNetworkAvailable()){
             spPerson.onItemSelectedListener = object : OnItemSelectedListener {
                 override fun onItemSelected(
                     parent: AdapterView<*>,
@@ -609,7 +609,7 @@ class NewAppointmentActivity : AppCompatActivity() {
         if(address != null){
             spLocation.setSelection(placesList.indexOf(address))
         }
-        if(!MyApplication.getOrganisationUrl().isNullOrEmpty() && isNetworkAvailable()) {
+        if(!MyApplication.getOrganizationUrl().isNullOrEmpty() && isNetworkAvailable()) {
             spLocation.onItemSelectedListener = object : OnItemSelectedListener {
                 override fun onItemSelected(
                     parent: AdapterView<*>,
@@ -643,7 +643,6 @@ class NewAppointmentActivity : AppCompatActivity() {
     }
 
     private fun getClient(list: List<CommonClient>, backendId: String) : Person? {
-        val client: Person? = null
         for(item in list){
             if(item.id == backendId) {
                 return Person(backendId = item.id, name = item.name!!, email = item.email!!, phone = item.phone!!)

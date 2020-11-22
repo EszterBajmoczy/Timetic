@@ -10,10 +10,10 @@ import android.os.Bundle
 import android.os.Looper
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
 import hu.bme.aut.android.timetic.Role
+import hu.bme.aut.android.timetic.Singleton
 import hu.bme.aut.android.timetic.create.getAppointment
 import hu.bme.aut.android.timetic.create.getClient
 import hu.bme.aut.android.timetic.create.getEmployee
@@ -21,12 +21,10 @@ import hu.bme.aut.android.timetic.create.toHashMap
 import hu.bme.aut.android.timetic.data.model.Appointment
 import hu.bme.aut.android.timetic.data.model.Person
 import hu.bme.aut.android.timetic.dataManager.DBRepository
-import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
+import hu.bme.aut.android.timetic.dataManager.NetworkOrganizationInteractor
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.network.models.CommonAppointment
 import hu.bme.aut.android.timetic.network.models.ForClientAppointment
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
@@ -74,15 +72,15 @@ class SyncAdapter @JvmOverloads constructor(
     private fun synchronize() {
         when(role) {
             Role.EMPLOYEE -> {
-                val backend =  NetworkOrganisationInteractor(MyApplication.getOrganisationUrl()!!, null, HttpBearerAuth("bearer", MyApplication.getToken()!!))
+                val backend =  NetworkOrganizationInteractor(MyApplication.getOrganizationUrl()!!, null, HttpBearerAuth("bearer", MyApplication.getToken()!!))
                 backend.getEmployeeAppointments(onSuccess = this::successAppointmentList, onError = this::errorAppointmentList)
             }
             Role.CLIENT -> {
-                val organisationsMapString = MyApplication.secureSharedPreferences.getString("OrganisationsMap", "")
-                val organisationMap = organisationsMapString!!.toHashMap()
-                mapSize = organisationMap.size
-                for((url,token) in organisationMap){
-                    val backend = NetworkOrganisationInteractor(
+                val organizationsMapString = MyApplication.secureSharedPreferences.getString("OrganizationsMap", "")
+                val organizationMap = organizationsMapString!!.toHashMap()
+                mapSize = organizationMap.size
+                for((url,token) in organizationMap){
+                    val backend = NetworkOrganizationInteractor(
                         url,
                         null,
                         HttpBearerAuth(
@@ -98,10 +96,10 @@ class SyncAdapter @JvmOverloads constructor(
 
     }
 
-    private fun successClientAppointmentList(list: List<ForClientAppointment>, organisationUrl: String) {
+    private fun successClientAppointmentList(list: List<ForClientAppointment>, organizationUrl: String) {
         mapSize -= 1
         for(item in list){
-            val a = item.getAppointment(organisationUrl)
+            val a = item.getAppointment(organizationUrl)
             appointments.add(a)
             val c = item.getEmployee()
             if(!persons.contains(c)){
@@ -157,7 +155,7 @@ class SyncAdapter @JvmOverloads constructor(
         //check if it is already in the local database
         for (item in appointments){
             //make a unique id in the list
-            appointmentIds.add(item.backendId + item.organisationUrl)
+            appointmentIds.add(item.backendId + item.organizationUrl)
 
             if(newOrUpdatedAppointment(item, apps)){
 
@@ -227,7 +225,7 @@ class SyncAdapter @JvmOverloads constructor(
         apps: List<Appointment>
     ) {
         for(item in apps){
-            if(!ids.contains(item.backendId + item.organisationUrl)){
+            if(!ids.contains(item.backendId + item.organizationUrl)){
                 delete(item)
             }
         }
@@ -300,15 +298,6 @@ class SyncAdapter @JvmOverloads constructor(
 
     private fun errorAppointmentList(e: Throwable, code: Int?, call: String) {
         notification("Unable to synchronize, please log in")
-
-        when(code) {
-            400 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "400 - Bad Request")
-            401 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "401 - Unauthorized ")
-            403 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "403 - Forbidden")
-            404 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "404 - Not Found")
-            409 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "409 - Conflict")
-        }
-        FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
-        FirebaseCrashlytics.getInstance().recordException(e)
+        Singleton.logBackendError(e, code, call)
     }
 }

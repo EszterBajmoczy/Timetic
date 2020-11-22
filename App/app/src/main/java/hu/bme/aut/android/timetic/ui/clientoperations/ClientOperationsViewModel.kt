@@ -4,24 +4,24 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import hu.bme.aut.android.timetic.MyApplication
+import hu.bme.aut.android.timetic.Singleton
 import hu.bme.aut.android.timetic.data.model.Person
 import hu.bme.aut.android.timetic.dataManager.DBRepository
-import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
+import hu.bme.aut.android.timetic.dataManager.NetworkOrganizationInteractor
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.network.models.CommonClient
 
 class ClientOperationsViewModel : ViewModel() {
 
-    private lateinit var backend: NetworkOrganisationInteractor
+    private lateinit var backend: NetworkOrganizationInteractor
 
     val _persons = MutableLiveData<List<Person>>()
     var persons: LiveData<List<Person>> = _persons
 
     fun fetchData(local: Boolean,
-        OrganisationUrl: String,
-        Token: String
+                  OrganizationUrl: String,
+                  Token: String
     ) {
         //if there isn't network connection
         if(local){
@@ -32,15 +32,15 @@ class ClientOperationsViewModel : ViewModel() {
         }
         else{
             backend =
-                NetworkOrganisationInteractor(
-                    OrganisationUrl,
+                NetworkOrganizationInteractor(
+                    OrganizationUrl,
                     null,
                     HttpBearerAuth(
                         "bearer",
                         Token
                     )
                 )
-            backend.getClients(onSuccess = this::success, onError = this::error)
+            backend.getClients(onSuccess = this::success, onError = Singleton::logBackendError)
         }
     }
 
@@ -52,17 +52,5 @@ class ClientOperationsViewModel : ViewModel() {
             list.add(c)
         }
         _persons.value = list
-    }
-
-    private fun error(e: Throwable, code: Int?, call: String) {
-        when(code) {
-            400 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "400 - Bad Request")
-            401 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "401 - Unauthorized ")
-            403 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "403 - Forbidden")
-            404 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "404 - Not Found")
-            409 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "409 - Conflict")
-        }
-        FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
-        FirebaseCrashlytics.getInstance().recordException(e)
     }
 }
