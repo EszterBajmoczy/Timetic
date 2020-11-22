@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity() {
             val fab: FloatingActionButton = findViewById(R.id.fab)
             fab.visibility = View.GONE
 
-            val organizationsMapString = MyApplication.secureSharedPreferences.getString("OrganizationsMap", "")
+            val organizationsMapString = pref.getString("OrganizationsMap", "")
             val organizationMap = organizationsMapString!!.toHashMap()
             for((url,token) in organizationMap){
                 viewModel.downloadAppointments(
@@ -91,6 +91,14 @@ class MainActivity : AppCompatActivity() {
                 )
             }
         }
+
+        //update last syncronization date
+        viewModel.appsDownloaded.observe(this, androidx.lifecycle.Observer {
+            val calendar = Calendar.getInstance()
+            val editor = pref.edit()
+            editor.putLong("LastSync", calendar.timeInMillis)
+            editor.apply()
+        })
 
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)

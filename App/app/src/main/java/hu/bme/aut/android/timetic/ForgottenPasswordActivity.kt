@@ -73,7 +73,6 @@ class ForgottenPasswordActivity : AppCompatActivity() {
                 showResetFailed(result.error)
             }
             if (result.success != null) {
-                //TODO login, save email stb
                 updateUiWithUser()
             }
             setResult(Activity.RESULT_OK)

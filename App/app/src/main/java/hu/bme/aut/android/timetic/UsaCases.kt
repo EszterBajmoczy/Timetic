@@ -17,4 +17,6 @@ object Singleton {
         FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
         FirebaseCrashlytics.getInstance().recordException(e)
     }
+
+
 }

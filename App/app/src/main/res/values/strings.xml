@@ -123,6 +123,6 @@
     <string name="add_email_adress">Adja meg az e-mail címét</string>
     <string name="network_needed_password_reset">Internetkapcsolat szükséges a jelszó visszaállításához</string>
     <string name="network_needed_log_in">Internetkapcsolat szükséges a bejelentkezéshez</string>
-
+    <string name="last_sync">Utoljára szinkronizálva: "</string>
 
 </resources>

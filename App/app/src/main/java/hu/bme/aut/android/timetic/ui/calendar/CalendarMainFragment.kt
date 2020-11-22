@@ -1,7 +1,5 @@
 package hu.bme.aut.android.timetic.ui.calendar
 
-import android.R.attr.fragment
-import android.R.attr.key
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -15,16 +13,18 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.preference.PreferenceManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
 import hu.bme.aut.android.timetic.create.NewAppointmentActivity
 import hu.bme.aut.android.timetic.ui.calendar.day_and_week.DayAndWeekCalendarFragment
 import hu.bme.aut.android.timetic.ui.calendar.month.MonthCalendarFragment
 import kotlinx.android.synthetic.main.fragment_calendar_main.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class CalendarMainFragment : Fragment() {
     private var myContext: FragmentActivity? = null
-    private lateinit var viewModel: CalendarViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,7 +41,6 @@ class CalendarMainFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        // TODO: Use the ViewModel
 
         //set floating action button
         setFloatingActionButton()
@@ -107,6 +106,25 @@ class CalendarMainFragment : Fragment() {
             btDaily.setBackgroundResource(R.color.colorPrimary)
         }
 
+        checkLastSynchronizationDate()
+
+    }
+
+    private fun checkLastSynchronizationDate() {
+        val pref = MyApplication.secureSharedPreferences
+        val yesterday = Calendar.getInstance()
+        yesterday.set(Calendar.DAY_OF_MONTH, -1)
+        val syncDate = Calendar.getInstance()
+
+        syncDate.timeInMillis = pref.getLong("LastSync", 0)
+
+        if(syncDate.timeInMillis < yesterday.timeInMillis){
+            val simpleFormat = SimpleDateFormat("MM.dd.yyyy\nHH:mm", Locale.getDefault())
+            tLastSynchronized.text = getString(R.string.last_sync) + simpleFormat.format(syncDate.time)
+            tLastSynchronized.visibility = View.VISIBLE
+        } else {
+            tLastSynchronized.visibility = View.GONE
+        }
     }
 
     private fun setFloatingActionButton(){

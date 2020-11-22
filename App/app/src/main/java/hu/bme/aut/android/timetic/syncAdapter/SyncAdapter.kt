@@ -54,6 +54,8 @@ class SyncAdapter @JvmOverloads constructor(
         val minute = c.get(Calendar.MINUTE)
         notification( "SyncAdapter at $hour:$minute")
 
+        //TODO save LastSync date in millis
+
         if(MyApplication.getToken().isNullOrEmpty() || MyApplication.getDevToken().isNullOrEmpty() ){
             role = if(MyApplication.getToken() != null && MyApplication.getToken()!!.isNotEmpty()){
                 Role.EMPLOYEE

@@ -20,7 +20,6 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.settings_activity)
 
-        //TODO viewmodelfactory?
         if(!MyApplication.getOrganizationUrl().isNullOrEmpty() && MyApplication.getOrganizationUrl() != "") {
             viewModel = SettingsViewModel()
             viewModel!!.getDataForAppointmentCreation(MyApplication.getOrganizationUrl()!!, MyApplication.getToken()!!)

@@ -34,7 +34,6 @@ class CalendarViewModel : ViewModel() {
     val result = MediatorLiveData<List<Appointment>>()
     val clientResult = MediatorLiveData<List<Person>>()
 
-    //TODO check
     private val _appsDownloaded = MutableLiveData<Boolean>()
     var appsDownloaded: LiveData<Boolean> = _appsDownloaded
 
@@ -47,7 +46,6 @@ class CalendarViewModel : ViewModel() {
         apps = repo.getAllAppointments()
         clients = repo.getAllPersons()
 
-        //TODO külön az appointmentnek és a clienteknek !
         result.addSource(apps) { _ ->
             result.value = mergeAppointments(apps, appsFromBackend)
         }
@@ -136,7 +134,6 @@ class CalendarViewModel : ViewModel() {
     }
 
     private fun successEmployeeAppointmentList(list: List<CommonAppointment>) {
-        Log.d("EZAZ", "appontments success")
         _appsDownloaded.value = true
 
         val appList = ArrayList<Appointment>()

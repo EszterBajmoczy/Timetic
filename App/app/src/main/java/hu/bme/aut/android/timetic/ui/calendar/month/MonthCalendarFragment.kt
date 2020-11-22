@@ -45,7 +45,6 @@ class MonthCalendarFragment : Fragment(), AppointmentAdapter.AppointmentItemClic
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProvider(requireActivity(), CalendarViewModelFactory()).get(CalendarViewModel::class.java)
-        // TODO: Use the ViewModel
 
         val calendarView = view?.findViewById(R.id.calendarMonthView) as MaterialCalendarView
         viewModel.result.observe(viewLifecycleOwner, Observer {
@@ -56,7 +55,7 @@ class MonthCalendarFragment : Fragment(), AppointmentAdapter.AppointmentItemClic
             }
             calendarView.setOnDateChangedListener { _, date, _ ->
                 dateMonthView.text = date.day.toString()
-                //TODO list events under the calendar
+                //list events under the calendar
                 val list = ArrayList<Appointment>()
                 for(item in it) {
                     val appointmentDate = CalendarDay.from(item.start_date.get(Calendar.YEAR),  item.start_date.get(Calendar.MONTH) + 1, item.start_date.get(Calendar.DAY_OF_MONTH))

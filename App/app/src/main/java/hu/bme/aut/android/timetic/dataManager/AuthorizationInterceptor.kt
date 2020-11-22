@@ -4,12 +4,10 @@ import android.content.Intent
 import android.util.Log
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.network.models.CommonToken
-import okhttp3.Interceptor
-import okhttp3.Request
-import okhttp3.Response
+import okhttp3.*
 import java.io.IOException
 
-class AuthorizationInterceptor() : Interceptor {
+class AuthorizationInterceptor : Interceptor {
 
     @Throws(IOException::class)
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -45,4 +43,18 @@ class AuthorizationInterceptor() : Interceptor {
         }
         return mainResponse
     }
+    //TODO
+/*
+    override fun authenticate(route: Route?, response: Response): Request? {
+        var requestAvailable: Request? = null
+        try {
+            requestAvailable = response.request.newBuilder()
+                .addHeader("AUTH_TOKEN", "UUID.randomUUID().toString()")
+                .build()
+            return requestAvailable
+        } catch (ex: Exception) { }
+        return requestAvailable
+    }
+
+ */
 }

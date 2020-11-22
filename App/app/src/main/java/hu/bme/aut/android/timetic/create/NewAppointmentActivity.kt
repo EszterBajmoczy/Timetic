@@ -155,7 +155,6 @@ class NewAppointmentActivity : AppCompatActivity() {
                     swVideochat.isChecked = defaultSharedPreferences.getBoolean("defaultVideoChat",false)
 
                     etPrice.setText(defaultSharedPreferences.getString("price", ""))
-                    //TODO notifications
                 }
 
                 btConsultation.setOnClickListener {
@@ -278,7 +277,6 @@ class NewAppointmentActivity : AppCompatActivity() {
             etNote.setText(app.note)
 
             etPrice.setText(app.price.toString())
-            //TODO notifications
         }
         return observer
     }
@@ -397,7 +395,7 @@ class NewAppointmentActivity : AppCompatActivity() {
     }
 
     private fun setDateChooseButtonValue(){
-        val simpleFormat = SimpleDateFormat("MM.dd.yyyy\nhh:mm", Locale.getDefault())
+        val simpleFormat = SimpleDateFormat("MM.dd.yyyy\nHH:mm", Locale.getDefault())
         if(appointment != null){
             btChooseStartTime.text = simpleFormat.format(appointment!!.start_date.time)
             startTime = appointment!!.start_date.timeInMillis
@@ -453,7 +451,6 @@ class NewAppointmentActivity : AppCompatActivity() {
     }
 
     private fun setDateChooseButtons(){
-        //TODO
         btChooseStartTime.setOnClickListener {
             var c = Calendar.getInstance()
             if(appointment != null){
@@ -520,7 +517,7 @@ class NewAppointmentActivity : AppCompatActivity() {
                             c.set(Calendar.MINUTE, minute)
                             endTime = c.timeInMillis
 
-                            val simpleFormat = SimpleDateFormat("MM.dd.yyyy\nhh:mm", Locale.getDefault())
+                            val simpleFormat = SimpleDateFormat("MM.dd.yyyy\nHH:mm", Locale.getDefault())
                             btChooseEndTime.text = simpleFormat.format(c.time)
                         },
                         c.get(Calendar.HOUR_OF_DAY),

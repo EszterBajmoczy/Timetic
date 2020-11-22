@@ -9,16 +9,11 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import hu.bme.aut.android.timetic.MainActivity
-import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
-import hu.bme.aut.android.timetic.StartScreenActivity
 import kotlinx.android.synthetic.main.fragment_logout.*
 
 
 class LogoutFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
