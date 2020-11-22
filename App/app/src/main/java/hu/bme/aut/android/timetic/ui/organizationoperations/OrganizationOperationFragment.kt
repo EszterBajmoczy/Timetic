@@ -94,7 +94,7 @@ class OrganizationOperationFragment : Fragment(), OrganizationAdapter.Organizati
         fab.visibility = View.GONE
     }
 
-    override fun onItemClick(organization: CommonOrganizatioln) {
+    override fun onItemClick(organization: CommonOrganization) {
         val intent = Intent(requireContext(), OrganizationInfoActivity::class.java)
         intent.putExtra("OrganizationUrl", organization.serverUrl)
         intent.putExtra("OrganizationId", organization.id)
