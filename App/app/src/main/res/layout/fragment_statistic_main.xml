@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="6dp"
-        android:text="Nincs internet kapcsolat, a továbbiakhoz kapcsolja be."
+        android:text="@string/network_needed_long"
         android:background="@color/colorAccentLight"
         android:gravity="center_horizontal"
         android:visibility="gone"

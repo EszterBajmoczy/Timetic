@@ -17,7 +17,7 @@ class Appointment(
     val address: String?,
     val personBackendId: String?,
     val activity: String?,
-    var organisationUrl: String? = null
+    var organizationUrl: String? = null
 ) : WeekViewDisplayable<Appointment>, Comparable<Appointment> {
 
     override fun toWeekViewEvent(): WeekViewEvent<Appointment> {

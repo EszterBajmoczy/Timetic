@@ -85,11 +85,11 @@ interface DeveloperApi {
      *  - 401: Not authenticated
      *  - 403: Access token does not have the required scope
      *
-     * @param organisationId
+     * @param organizationId
      * @return [Call]<[Unit]>
      */
-    @PATCH("mobile/registeredOrganizations/{organisationId}")
-    fun mobileRegisteredOrganizationsIdPatch(@Path("organisationId") organisationId: kotlin.String): Call<Unit>
+    @PATCH("mobile/registeredOrganizations/{organizationId}")
+    fun mobileRegisteredOrganizationsIdPatch(@Path("organizationId") organizationId: kotlin.String): Call<Unit>
 
 
 

@@ -24,9 +24,6 @@ interface RoomDao {
     @Query("DELETE FROM appointment WHERE backendId == :netId")
     fun deleteAppointmentByNetId(netId: String)
 
-    @Update
-    fun updateAppointment(appointment: RoomAppointment): Int
-
     @Delete
     fun deleteAppointment(appointment: RoomAppointment)
 
@@ -45,9 +42,6 @@ interface RoomDao {
 
     @Query("SELECT * FROM person WHERE backendId == :netId")
     fun getPersonByNetId(netId: String): LiveData<RoomPerson>
-
-    @Update
-    fun updatePerson(person: RoomPerson): Int
 
     @Delete
     fun deletePerson(person: RoomPerson)

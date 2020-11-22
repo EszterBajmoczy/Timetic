@@ -1,4 +1,4 @@
-package hu.bme.aut.android.timetic.ui.organisationoperations
+package hu.bme.aut.android.timetic.ui.organizationoperations
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -15,23 +15,21 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
-import hu.bme.aut.android.timetic.adapter.OrganisationAdapter
+import hu.bme.aut.android.timetic.adapter.OrganizationAdapter
 import hu.bme.aut.android.timetic.network.models.CommonOrganization
 import hu.bme.aut.android.timetic.ui.loginAregistration.login.afterTextChanged
-import hu.bme.aut.android.timetic.ui.organisationoperations.info.OrganisationInfoActivity
-import kotlinx.android.synthetic.main.fragment_client_operations.*
-import kotlinx.android.synthetic.main.organisation_operation_fragment.*
+import hu.bme.aut.android.timetic.ui.organizationoperations.info.OrganizationInfoActivity
+import kotlinx.android.synthetic.main.organization_operation_fragment.*
 import java.lang.Exception
 
-class OrganisationOperationFragment : Fragment(), OrganisationAdapter.OrganisationClickListener {
-    private lateinit var viewModel: OrganisationOperationViewModel
+class OrganizationOperationFragment : Fragment(), OrganizationAdapter.OrganizationClickListener {
+    private lateinit var viewModel: OrganizationOperationViewModel
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: OrganisationAdapter
+    private lateinit var adapter: OrganizationAdapter
 
     companion object {
-        fun newInstance() = OrganisationOperationFragment()
+        fun newInstance() = OrganizationOperationFragment()
     }
 
     private val internetStateChangedReceiver = object : BroadcastReceiver() {
@@ -40,9 +38,9 @@ class OrganisationOperationFragment : Fragment(), OrganisationAdapter.Organisati
             val activeNetworkInfo = connectivityManager.activeNetworkInfo
             val isNetworkAvailable = activeNetworkInfo != null && activeNetworkInfo.isConnected
             if(isNetworkAvailable) {
-                tNoInternetConnectionOrganisationOperations.visibility = View.GONE
+                tNoInternetConnectionOrganizationOperations.visibility = View.GONE
                 viewModel.fetchData()
-                viewModel.organisations.observe(requireActivity(), Observer {
+                viewModel.organizations.observe(requireActivity(), Observer {
                     adapter.update(it)
                 })
                 context.unregisterReceiver(this)
@@ -54,12 +52,12 @@ class OrganisationOperationFragment : Fragment(), OrganisationAdapter.Organisati
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.organisation_operation_fragment, container, false)
+        return inflater.inflate(R.layout.organization_operation_fragment, container, false)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(this).get(OrganisationOperationViewModel::class.java)
+        viewModel = ViewModelProvider(this).get(OrganizationOperationViewModel::class.java)
 
         initRecyclerView()
         removeFloatingActionButton()
@@ -69,24 +67,24 @@ class OrganisationOperationFragment : Fragment(), OrganisationAdapter.Organisati
         val isNetworkAvailable = activeNetworkInfo != null && activeNetworkInfo.isConnected
         if(isNetworkAvailable) {
             viewModel.fetchData()
-            viewModel.organisations.observe(requireActivity(), Observer {
+            viewModel.organizations.observe(requireActivity(), Observer {
                 adapter.update(it)
             })
         } else {
-            tNoInternetConnectionOrganisationOperations.visibility = View.VISIBLE
+            tNoInternetConnectionOrganizationOperations.visibility = View.VISIBLE
 
             val intentFilter = IntentFilter()
             intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION)
             context?.registerReceiver(internetStateChangedReceiver, intentFilter)
         }
-        SearchOrganisation.afterTextChanged {
+        SearchOrganization.afterTextChanged {
             adapter.filter.filter(it)
         }
     }
 
     private fun initRecyclerView() {
-        recyclerView = OrganisationRecyclerView
-        adapter = OrganisationAdapter(this)
+        recyclerView = OrganizationRecyclerView
+        adapter = OrganizationAdapter(this)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter
     }
@@ -96,10 +94,10 @@ class OrganisationOperationFragment : Fragment(), OrganisationAdapter.Organisati
         fab.visibility = View.GONE
     }
 
-    override fun onItemClick(organization: CommonOrganization) {
-        val intent = Intent(requireContext(), OrganisationInfoActivity::class.java)
-        intent.putExtra("OrganisationUrl", organization.serverUrl)
-        intent.putExtra("OrganisationId", organization.id)
+    override fun onItemClick(organization: CommonOrganizatioln) {
+        val intent = Intent(requireContext(), OrganizationInfoActivity::class.java)
+        intent.putExtra("OrganizationUrl", organization.serverUrl)
+        intent.putExtra("OrganizationId", organization.id)
         startActivity(intent)
     }
 

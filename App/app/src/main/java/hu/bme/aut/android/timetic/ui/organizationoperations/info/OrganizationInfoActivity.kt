@@ -1,7 +1,6 @@
-package hu.bme.aut.android.timetic.ui.organisationoperations.info
+package hu.bme.aut.android.timetic.ui.organizationoperations.info
 
 import android.content.Intent
-import android.content.res.Resources
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -11,7 +10,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
 import hu.bme.aut.android.timetic.adapter.ClientAdapter
@@ -19,54 +17,54 @@ import hu.bme.aut.android.timetic.create.NewClientActivity
 import hu.bme.aut.android.timetic.create.toHashMap
 import hu.bme.aut.android.timetic.data.model.Person
 import hu.bme.aut.android.timetic.network.models.CommonEmployee
-import kotlinx.android.synthetic.main.activity_organisation_info.*
+import kotlinx.android.synthetic.main.activity_organization_info.*
 
-class OrganisationInfoActivity : AppCompatActivity() {
-    private lateinit var viewModel: OrganisationInfoViewModel
+class OrganizationInfoActivity : AppCompatActivity() {
+    private lateinit var viewModel: OrganizationInfoViewModel
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ClientAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_organisation_info)
+        setContentView(R.layout.activity_organization_info)
 
-        val organisationUrl = intent.getStringExtra("OrganisationUrl")
-        val organisationId = intent.getStringExtra("OrganisationId")
+        val organizationUrl = intent.getStringExtra("OrganizationUrl")
+        val organizationId = intent.getStringExtra("OrganizationId")
 
-        viewModel = ViewModelProviders.of(this).get(OrganisationInfoViewModel::class.java)
+        viewModel = ViewModelProviders.of(this).get(OrganizationInfoViewModel::class.java)
 
-        viewModel.getInformation(organisationUrl!!, MyApplication.getEmail()!!)
+        viewModel.getInformation(organizationUrl!!, MyApplication.getEmail()!!)
         viewModel.info.observe(this, Observer {info ->
             title = info.name
-            OrganisationDetail.text = info.details
+            OrganizationDetail.text = info.details
             adapter.update(getEmployees(info.employees!!))
 
-            if(!isOrganisationsAppointmentsAlreadyActivated(organisationUrl)) {
+            if(!isOrganizationsAppointmentsAlreadyActivated(organizationUrl)) {
                 btShareData.visibility = View.VISIBLE
             } else if(info.isClientRegistered!!) {
-                btShareData.setText(R.string.btActivateOrganisation)
+                btShareData.setText(R.string.btActivateOrganization)
             }
 
             btShareData.setOnClickListener {
                 if(!info.isClientRegistered!!) {
                     val intent = Intent(this, NewClientActivity::class.java)
                     intent.putExtra("PersonalInfos", info.clientPersonalInfoFields?.toTypedArray())
-                    intent.putExtra("OrganisationUrl", organisationUrl)
-                    intent.putExtra("OrganisationId", organisationId)
+                    intent.putExtra("OrganizationUrl", organizationUrl)
+                    intent.putExtra("OrganizationId", organizationId)
                     startActivity(intent)
                 } else {
-                    Toast.makeText(this, "Ön már korábban regisztrált a szervezethez, mostantól már a naptárban is láthatja időpontjait.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, getString(R.string.activated_organization), Toast.LENGTH_LONG).show()
                 }
             }
         })
         initRecyclerView()
     }
 
-    private fun isOrganisationsAppointmentsAlreadyActivated(organisationUrl: String): Boolean{
-        val mapString = MyApplication.secureSharedPreferences.getString("OrganisationsMap", "")
-        val organisationMap = mapString?.toHashMap()
-        organisationMap?.let { map ->
-            if(map.containsKey(organisationUrl)){
+    private fun isOrganizationsAppointmentsAlreadyActivated(organizationUrl: String): Boolean{
+        val mapString = MyApplication.secureSharedPreferences.getString("OrganizationsMap", "")
+        val organizationMap = mapString?.toHashMap()
+        organizationMap?.let { map ->
+            if(map.containsKey(organizationUrl)){
                 return true
             }
         }
@@ -83,7 +81,7 @@ class OrganisationInfoActivity : AppCompatActivity() {
     }
 
     private fun initRecyclerView() {
-        recyclerView = OrganisationInfoRecyclerView
+        recyclerView = OrganizationInfoRecyclerView
         adapter = ClientAdapter(this::callCallBack, this::emailCallBack)
         recyclerView.layoutManager = LinearLayoutManager(applicationContext)
         recyclerView.adapter = adapter

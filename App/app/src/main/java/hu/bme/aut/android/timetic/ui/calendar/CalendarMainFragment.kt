@@ -119,7 +119,7 @@ class CalendarMainFragment : Fragment() {
                 val intent = Intent(activity, NewAppointmentActivity::class.java)
                 startActivity(intent)
             } else {
-                Toast.makeText(context, "Internetkapcsolat szükséges új időpont létrehozásához", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, getString(R.string.network_needed_new_appointment), Toast.LENGTH_LONG).show()
             }
         }
     }

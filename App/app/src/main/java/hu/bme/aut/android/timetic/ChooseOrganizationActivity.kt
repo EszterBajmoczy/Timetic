@@ -12,18 +12,15 @@ import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import hu.bme.aut.android.timetic.dataManager.NetworkDeveloperInteractor
 import hu.bme.aut.android.timetic.network.models.CommonOrganization
-import hu.bme.aut.android.timetic.ui.clientoperations.ClientOperationsViewModel
 import hu.bme.aut.android.timetic.ui.loginAregistration.login.LoginActivity
-import kotlinx.android.synthetic.main.activity_choose_organisation.*
-import kotlinx.android.synthetic.main.fragment_statistic_main.*
+import kotlinx.android.synthetic.main.activity_choose_organization.*
 import java.lang.Exception
 
 
-class ChooseOrganisationActivity : AppCompatActivity() {
-    private var organisationList: List<CommonOrganization>? = null
-    private lateinit var viewModel: ChooseOrganisationViewModel
+class ChooseOrganizationActivity : AppCompatActivity() {
+    private var organizationList: List<CommonOrganization>? = null
+    private lateinit var viewModel: ChooseOrganizationViewModel
 
     private val internetStateChangedReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -31,7 +28,7 @@ class ChooseOrganisationActivity : AppCompatActivity() {
             val activeNetworkInfo = connectivityManager.activeNetworkInfo
             val isNetworkAvailable = activeNetworkInfo != null && activeNetworkInfo.isConnected
             if(isNetworkAvailable) {
-                tNoInternetConnectionChooseOrganisation.visibility = View.GONE
+                tNoInternetConnectionChooseOrganization.visibility = View.GONE
                 initialize()
                 context.unregisterReceiver(this)
             }
@@ -40,9 +37,9 @@ class ChooseOrganisationActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_choose_organisation)
+        setContentView(R.layout.activity_choose_organization)
 
-        viewModel = ViewModelProviders.of(this).get(ChooseOrganisationViewModel::class.java)
+        viewModel = ViewModelProviders.of(this).get(ChooseOrganizationViewModel::class.java)
 
         //check internet connection
         val connectivityManager = applicationContext?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -51,7 +48,7 @@ class ChooseOrganisationActivity : AppCompatActivity() {
         if(isNetworkAvailable){
             initialize()
         } else {
-            tNoInternetConnectionChooseOrganisation.visibility = View.VISIBLE
+            tNoInternetConnectionChooseOrganization.visibility = View.VISIBLE
             val intentFilter = IntentFilter()
             intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION)
             applicationContext?.registerReceiver(internetStateChangedReceiver, intentFilter)
@@ -60,38 +57,36 @@ class ChooseOrganisationActivity : AppCompatActivity() {
 
     private fun initialize() {
         //viewModel.init()
-        viewModel.organisationList.observe(this, Observer{
-            organisationList = it
+        viewModel.organizationList.observe(this, Observer{
+            organizationList = it
             val adapter: ArrayAdapter<String> =
-                ArrayAdapter<String>(this, android.R.layout.select_dialog_item, getOrganisationsName(it))
+                ArrayAdapter<String>(this, android.R.layout.select_dialog_item, getOrganizationsName(it))
 
-            ChooseOrganisation.threshold = 1
+            ChooseOrganization.threshold = 1
 
-            ChooseOrganisation.setAdapter(adapter)
+            ChooseOrganization.setAdapter(adapter)
         })
 
-        ChooseOrganisation.setOnItemClickListener { parent, view, position, id ->
-            Log.d("EZAZ", "itemclicked")
-
-            fabLoginChooseOrganisation.setOnClickListener {
-                saveOrganisationUrl(organisationList?.get(position)?.serverUrl)
+        ChooseOrganization.setOnItemClickListener { parent, view, position, id ->
+            fabLoginChooseOrganization.setOnClickListener {
+                saveOrganizationUrl(organizationList?.get(position)?.serverUrl)
 
                 val intent = Intent(this, LoginActivity::class.java)
-                intent.putExtra("OrganisationUrl", organisationList?.get(position)?.serverUrl)
+                intent.putExtra("OrganizationUrl", organizationList?.get(position)?.serverUrl)
                 startActivity(intent)
             }
         }
     }
 
-    private fun saveOrganisationUrl(serverUrl: String?) {
+    private fun saveOrganizationUrl(serverUrl: String?) {
         val secureSharedPreferences = MyApplication.secureSharedPreferences
 
         val editor = secureSharedPreferences.edit()
-        editor.putString("OrganisationUrl", serverUrl)
+        editor.putString("OrganizationUrl", serverUrl)
         editor.apply()
     }
 
-    private fun getOrganisationsName(list: List<CommonOrganization>) : Array<String?> {
+    private fun getOrganizationsName(list: List<CommonOrganization>) : Array<String?> {
         val newList = arrayOfNulls<String>(list.size)
         for (item in list){
             newList[list.indexOf(item)] = item.name

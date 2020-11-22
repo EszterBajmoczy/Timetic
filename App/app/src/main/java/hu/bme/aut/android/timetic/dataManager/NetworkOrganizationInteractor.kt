@@ -3,7 +3,7 @@ package hu.bme.aut.android.timetic.dataManager
 import android.os.Handler
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import hu.bme.aut.android.timetic.network.apiOrganisation.OrganisationApi
+import hu.bme.aut.android.timetic.network.apiOrganization.OrganizationApi
 import hu.bme.aut.android.timetic.network.auth.HttpBasicAuth
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.network.models.*
@@ -13,15 +13,15 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
-class NetworkOrganisationInteractor(private val organisationUrl: String, auth: HttpBasicAuth?, autb: HttpBearerAuth?) {
-    private val organisationApi: OrganisationApi
+class NetworkOrganizationInteractor(private val organizationUrl: String, auth: HttpBasicAuth?, autb: HttpBearerAuth?) {
+    private val organizationApi: OrganizationApi
 
     init {
         val m = Moshi.Builder()
             .add(KotlinJsonAdapterFactory())
             .build()
 
-        var client: OkHttpClient? = null
+        val client: OkHttpClient?
         when {
             auth != null -> {
                 client =  OkHttpClient.Builder()
@@ -42,12 +42,12 @@ class NetworkOrganisationInteractor(private val organisationUrl: String, auth: H
         }
 
         val retrofit = Retrofit.Builder()
-            .baseUrl(organisationUrl)
+            .baseUrl(organizationUrl)
             .client(client)
             .addConverterFactory(MoshiConverterFactory.create(m).asLenient())
             .build()
 
-        this.organisationApi = retrofit.create(OrganisationApi::class.java)
+        this.organizationApi = retrofit.create(OrganizationApi::class.java)
     }
 
     private fun <T> runCallOnBackgroundThread(
@@ -91,7 +91,7 @@ class NetworkOrganisationInteractor(private val organisationUrl: String, auth: H
                 response = call.execute()
                 val body = response.body()!!
                 handler.post {
-                    onSuccess(body, organisationUrl)
+                    onSuccess(body, organizationUrl)
                 }
 
             } catch (e: Exception) {
@@ -111,7 +111,7 @@ class NetworkOrganisationInteractor(private val organisationUrl: String, auth: H
         onSuccess: (ForEmployeeLoginData) -> Unit,
         onError: (Throwable, Int?, String) -> Unit
     ) {
-        val getRefreshToken = organisationApi.employeeLoginGet()
+        val getRefreshToken = organizationApi.employeeLoginGet()
         this.runCallOnBackgroundThread(getRefreshToken, onSuccess, onError)
     }
 
@@ -119,7 +119,7 @@ class NetworkOrganisationInteractor(private val organisationUrl: String, auth: H
         onSuccess: (CommonToken) -> Unit,
         onError: (Throwable, Int?, String) -> Unit
     ) {
-        val getToken = organisationApi.employeeRefreshGet()
+        val getToken = organizationApi.employeeRefreshGet()
         this.runCallOnBackgroundThread(getToken, onSuccess, onError)
     }
 
@@ -127,7 +127,7 @@ class NetworkOrganisationInteractor(private val organisationUrl: String, auth: H
         onSuccess: (CommonToken, String) -> Unit,
         onError: (Throwable, Int?, String) -> Unit
     ) {
-        val getToken = organisationApi.clientRefreshGet()
+        val getToken = organizationApi.clientRefreshGet()
         this.runCallOnBackgroundThreadAndAddURL(getToken, onSuccess, onError)
     }
 
@@ -135,7 +135,7 @@ class NetworkOrganisationInteractor(private val organisationUrl: String, auth: H
         onSuccess: (List<CommonAppointment>) -> Unit,
         onError: (Throwable, Int?, String) -> Unit
     ) {
-        val getData = organisationApi.employeeAppointmentsGet()
+        val getData = organizationApi.employeeAppointmentsGet()
         this.runCallOnBackgroundThread(getData, onSuccess, onError)
     }
 
@@ -143,7 +143,7 @@ class NetworkOrganisationInteractor(private val organisationUrl: String, auth: H
         onSuccess: (List<ForClientAppointment>, String) -> Unit,
         onError: (Throwable, Int?, String) -> Unit
     ) {
-        val getData = organisationApi.clientAppointmentsGet()
+        val getData = organizationApi.clientAppointmentsGet()
         this.runCallOnBackgroundThreadAndAddURL(getData, onSuccess, onError)
     }
 
@@ -151,7 +151,7 @@ class NetworkOrganisationInteractor(private val organisationUrl: String, auth: H
         onSuccess: (ForEmployeeDataForAppointmentCreation) -> Unit,
         onError: (Throwable, Int?, String) -> Unit
     ){
-        val getData = organisationApi.employeeAppointmentCreationDataGet()
+        val getData = organizationApi.employeeAppointmentCreationDataGet()
         this.runCallOnBackgroundThread(getData, onSuccess, onError)
     }
 
@@ -160,7 +160,7 @@ class NetworkOrganisationInteractor(private val organisationUrl: String, auth: H
         onSuccess: (CommonAppointment) -> Unit,
         onError: (Throwable, Int?, String) -> Unit
     ){
-        val getData = organisationApi.employeeAppointmentsPost(appointment)
+        val getData = organizationApi.employeeAppointmentsPost(appointment)
         this.runCallOnBackgroundThread(getData, onSuccess, onError)
     }
 
@@ -169,7 +169,7 @@ class NetworkOrganisationInteractor(private val organisationUrl: String, auth: H
         onSuccess: (CommonAppointment) -> Unit,
         onError: (Throwable, Int?, String) -> Unit
     ){
-        val getData = organisationApi.employeeAppointmentsPut(appointment)
+        val getData = organizationApi.employeeAppointmentsPut(appointment)
         this.runCallOnBackgroundThread(getData, onSuccess, onError)
     }
 
@@ -178,7 +178,7 @@ class NetworkOrganisationInteractor(private val organisationUrl: String, auth: H
         onSuccess: (Unit) -> Unit,
         onError: (Throwable, Int?, String) -> Unit
     ){
-        val getData = organisationApi.employeeAppointmentsAppointmentIdDelete(id)
+        val getData = organizationApi.employeeAppointmentsAppointmentIdDelete(id)
         this.runCallOnBackgroundThread(getData, onSuccess, onError)
     }
 
@@ -187,7 +187,7 @@ class NetworkOrganisationInteractor(private val organisationUrl: String, auth: H
         onSuccess: (Unit) -> Unit,
         onError: (Throwable, Int?, String) -> Unit
     ){
-        val getData = organisationApi.clientAppointmentsAppointmentIdDelete(id)
+        val getData = organizationApi.clientAppointmentsAppointmentIdDelete(id)
         this.runCallOnBackgroundThread(getData, onSuccess, onError)
     }
 
@@ -197,7 +197,7 @@ class NetworkOrganisationInteractor(private val organisationUrl: String, auth: H
         onSuccess: (ForEmployeeReport) -> Unit,
         onError: (Throwable, Int?, String) -> Unit
     ){
-        val getData = organisationApi.employeeReportGet(start, end)
+        val getData = organizationApi.employeeReportGet(start, end)
         this.runCallOnBackgroundThread(getData, onSuccess, onError)
     }
 
@@ -206,7 +206,7 @@ class NetworkOrganisationInteractor(private val organisationUrl: String, auth: H
         onSuccess: (CommonClient) -> Unit,
         onError: (Throwable, Int?, String) -> Unit
     ){
-        val getData = organisationApi.employeeClientsPost(client)
+        val getData = organizationApi.employeeClientsPost(client)
         this.runCallOnBackgroundThread(getData, onSuccess, onError)
     }
 
@@ -215,7 +215,7 @@ class NetworkOrganisationInteractor(private val organisationUrl: String, auth: H
         onSuccess: (Unit) -> Unit,
         onError: (Throwable, Int?, String) -> Unit
     ){
-        val getData = organisationApi.clientRegisterPost(client)
+        val getData = organizationApi.clientRegisterPost(client)
         this.runCallOnBackgroundThread(getData, onSuccess, onError)
     }
 
@@ -224,7 +224,7 @@ class NetworkOrganisationInteractor(private val organisationUrl: String, auth: H
         onSuccess: (CommonToken, String) -> Unit,
         onError: (Throwable, Int?, String) -> Unit
     ){
-        val getData = organisationApi.clientRefreshPost(commonPostRefresh)
+        val getData = organizationApi.clientRefreshPost(commonPostRefresh)
         this.runCallOnBackgroundThreadAndAddURL(getData, onSuccess, onError)
     }
 
@@ -232,24 +232,24 @@ class NetworkOrganisationInteractor(private val organisationUrl: String, auth: H
         onSuccess: (List<CommonClient>) -> Unit,
         onError: (Throwable, Int?, String) -> Unit
     ){
-        val getData = organisationApi.employeeClientsGet()
+        val getData = organizationApi.employeeClientsGet()
         this.runCallOnBackgroundThread(getData, onSuccess, onError)
     }
 
-    fun getOrganisationDataForEmployee(
+    fun getOrganizationDataForEmployee(
         onSuccess: (ForEmployeeOrganization) -> Unit,
         onError: (Throwable, Int?, String) -> Unit
     ){
-        val getData = organisationApi.employeeOrganizationGet()
+        val getData = organizationApi.employeeOrganizationGet()
         this.runCallOnBackgroundThread(getData, onSuccess, onError)
     }
 
-    fun getOrganisationDataForClient(
+    fun getOrganizationDataForClient(
         email: String,
         onSuccess: (ForClientOrganization) -> Unit,
         onError: (Throwable, Int?, String) -> Unit
     ){
-        val getData = organisationApi.clientOrganizationGet(email)
+        val getData = organizationApi.clientOrganizationGet(email)
         this.runCallOnBackgroundThread(getData, onSuccess, onError)
     }
 
@@ -258,7 +258,7 @@ class NetworkOrganisationInteractor(private val organisationUrl: String, auth: H
         onSuccess: (Unit) -> Unit,
         onError: (Throwable, Int?, String) -> Unit
     ){
-        val getData = organisationApi.employeeForgottenPasswordGet(email)
+        val getData = organizationApi.employeeForgottenPasswordGet(email)
         this.runCallOnBackgroundThread(getData, onSuccess, onError)
     }
 
@@ -267,7 +267,7 @@ class NetworkOrganisationInteractor(private val organisationUrl: String, auth: H
         onSuccess: (Unit) -> Unit,
         onError: (Throwable, Int?, String) -> Unit
     ){
-        val getData = organisationApi.employeeForgottenPasswordPost(commonPasswordReset)
+        val getData = organizationApi.employeeForgottenPasswordPost(commonPasswordReset)
         this.runCallOnBackgroundThread(getData, onSuccess, onError)
     }
 
@@ -276,7 +276,7 @@ class NetworkOrganisationInteractor(private val organisationUrl: String, auth: H
         onSuccess: (CommonConsultation) -> Unit,
         onError: (Throwable, Int?, String) -> Unit
     ){
-        val getData = organisationApi.employeeConsultationGet(appointmentId)
+        val getData = organizationApi.employeeConsultationGet(appointmentId)
         this.runCallOnBackgroundThread(getData, onSuccess, onError)
     }
 
@@ -285,7 +285,7 @@ class NetworkOrganisationInteractor(private val organisationUrl: String, auth: H
         onSuccess: (CommonConsultation) -> Unit,
         onError: (Throwable, Int?, String) -> Unit
     ){
-        val getData = organisationApi.clientConsultationGet(appointmentId)
+        val getData = organizationApi.clientConsultationGet(appointmentId)
         this.runCallOnBackgroundThread(getData, onSuccess, onError)
     }
 }

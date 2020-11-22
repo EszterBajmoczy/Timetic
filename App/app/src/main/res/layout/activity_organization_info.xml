@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".ui.organisationoperations.info.OrganisationInfoActivity"
+    tools:context=".ui.organizationoperations.info.OrganizationInfoActivity"
     android:orientation="vertical"
     android:gravity="center_horizontal">
 
@@ -18,7 +18,7 @@
         app:cardBackgroundColor="@color/colorAccentLighter">
 
         <TextView
-            android:id="@+id/OrganisationDetail"
+            android:id="@+id/OrganizationDetail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
     </androidx.cardview.widget.CardView>
@@ -27,14 +27,13 @@
         android:id="@+id/btShareData"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Adataim megosztása a szervezettel"
+        android:text="@string/share_data_with_organization"
         android:padding="10dp"
         android:background="@color/colorAccent"
         android:visibility="gone"/>
 
-    <androidx.recyclerview.widget.RecyclerView xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/OrganisationInfoRecyclerView"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/OrganizationInfoRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"

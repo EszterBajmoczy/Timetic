@@ -9,6 +9,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import hu.bme.aut.android.timetic.dataManager.NetworkDeveloperInteractor
 
 import hu.bme.aut.android.timetic.R
+import hu.bme.aut.android.timetic.Singleton
 import hu.bme.aut.android.timetic.network.auth.HttpBasicAuth
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.network.models.*
@@ -96,7 +97,7 @@ class RegistrationViewModel() : ViewModel() {
                 success = null,
                 error = R.string.login_failed
             )
-        error(e, code, call)
+        Singleton.logBackendError(e, code, call)
     }
 
     private fun getToken(refreshToken: CommonToken){
@@ -114,7 +115,7 @@ class RegistrationViewModel() : ViewModel() {
 
     private fun successToken(token: CommonToken) {
         _token.value = token.token
-        //no need to check the registered organisations, because it's a registration!
+        //no need to check the registered organizations, because it's a registration!
         _loginResult.value =
             Result(
                 success = true,
@@ -128,17 +129,15 @@ class RegistrationViewModel() : ViewModel() {
                 success = null,
                 error = R.string.login_failed
             )
-        error(e, code, call)
+        Singleton.logBackendError(e, code, call)
     }
 
     private fun successReg(u: Unit) {
-        Log.d("EZAZ", "Registration succcccess")
         val n =
             NetworkDeveloperInteractor(
                 HttpBasicAuth(user!!.email!!, user!!.password!!),
                 null
             )
-        Log.d("EZAZ", "login")
 
         n.login(onSuccess = this::successRefreshToken, onError = this::errorRefreshToken)
     }
@@ -149,18 +148,6 @@ class RegistrationViewModel() : ViewModel() {
                 success = null,
                 error = R.string.registration_failed
             )
-        error(e, code, call)
-    }
-
-    private fun error(e: Throwable, code: Int?, call: String) {
-        when(code) {
-            400 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "400 - Bad Request")
-            401 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "401 - Unauthorized ")
-            403 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "403 - Forbidden")
-            404 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "404 - Not Found")
-            409 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "409 - Conflict")
-        }
-        FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
-        FirebaseCrashlytics.getInstance().recordException(e)
+        Singleton.logBackendError(e, code, call)
     }
 }

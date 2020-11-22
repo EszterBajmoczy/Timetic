@@ -14,7 +14,6 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:layout_marginBottom="8dp"
-        android:text="Masszász"
         android:textColor="@color/colorAccentDark"
         android:textSize="20sp"
         android:textStyle="bold" />
@@ -24,7 +23,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:text="10:00-12:00"
         android:textColor="@color/colorAccent"
         android:textSize="16sp"
         android:textStyle="bold" />

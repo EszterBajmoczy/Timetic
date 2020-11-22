@@ -2,13 +2,13 @@ package hu.bme.aut.android.timetic.ui.calendar
 
 import android.util.Log
 import androidx.lifecycle.*
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.Role
+import hu.bme.aut.android.timetic.Singleton
 import hu.bme.aut.android.timetic.create.getAppointment
 import hu.bme.aut.android.timetic.create.getClient
 import hu.bme.aut.android.timetic.create.getEmployee
-import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
+import hu.bme.aut.android.timetic.dataManager.NetworkOrganizationInteractor
 import hu.bme.aut.android.timetic.data.model.Appointment
 import hu.bme.aut.android.timetic.data.model.Person
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 import kotlin.collections.ArrayList
 
 class CalendarViewModel : ViewModel() {
-    private lateinit var backend: NetworkOrganisationInteractor
+    private lateinit var backend: NetworkOrganizationInteractor
     private var repo: DBRepository
 
     var apps: LiveData<List<Appointment>>
@@ -34,10 +34,11 @@ class CalendarViewModel : ViewModel() {
     val result = MediatorLiveData<List<Appointment>>()
     val clientResult = MediatorLiveData<List<Person>>()
 
+    //TODO check
     private val _appsDownloaded = MutableLiveData<Boolean>()
     var appsDownloaded: LiveData<Boolean> = _appsDownloaded
 
-    private lateinit var organisationUrl: String
+    private lateinit var organizationUrl: String
 
     init{
         val dao = MyApplication.myDatabase.roomDao()
@@ -47,18 +48,18 @@ class CalendarViewModel : ViewModel() {
         clients = repo.getAllPersons()
 
         //TODO külön az appointmentnek és a clienteknek !
-        result.addSource(apps) { value ->
+        result.addSource(apps) { _ ->
             result.value = mergeAppointments(apps, appsFromBackend)
         }
-        result.addSource(appsFromBackend) { value ->
+        result.addSource(appsFromBackend) { _ ->
             result.value = mergeAppointments(apps, appsFromBackend)
         }
 
-        clientResult.addSource(clients) { value ->
+        clientResult.addSource(clients) { _ ->
             clientResult.value = mergeClients(clients, clientsFromBackend)
         }
 
-        clientResult.addSource(clientsFromBackend) { value ->
+        clientResult.addSource(clientsFromBackend) { _ ->
             clientResult.value = mergeClients(clients, clientsFromBackend)
         }
     }
@@ -76,7 +77,7 @@ class CalendarViewModel : ViewModel() {
             //check if it is already in the local database
             if (backendList != null) {
                 for (item in backendList){
-                    appointmentIds.add(item.backendId+item.organisationUrl)
+                    appointmentIds.add(item.backendId+item.organizationUrl)
                     if(newOrUpdatedAppointment(item)){
                         insert(item)
                     }
@@ -115,13 +116,13 @@ class CalendarViewModel : ViewModel() {
 
     fun downloadAppointments(
         role: Role,
-        organisationUrl: String,
+        organizationUrl: String,
         token: String
     ) {
         Log.d("EZAZ", "appontments downloooooooood")
-        this.organisationUrl = organisationUrl
-        backend = NetworkOrganisationInteractor(
-                organisationUrl,
+        this.organizationUrl = organizationUrl
+        backend = NetworkOrganizationInteractor(
+                organizationUrl,
                 null,
                 HttpBearerAuth(
                     "bearer",
@@ -129,8 +130,8 @@ class CalendarViewModel : ViewModel() {
                 )
             )
         when(role) {
-            Role.EMPLOYEE -> backend.getEmployeeAppointments(onSuccess = this::successEmployeeAppointmentList, onError = this::error)
-            Role.CLIENT -> backend.getClientAppointments(onSuccess = this::successClientAppointmentList, onError = this::error)
+            Role.EMPLOYEE -> backend.getEmployeeAppointments(onSuccess = this::successEmployeeAppointmentList, onError = Singleton::logBackendError)
+            Role.CLIENT -> backend.getClientAppointments(onSuccess = this::successClientAppointmentList, onError = Singleton::logBackendError)
         }
     }
 
@@ -150,13 +151,13 @@ class CalendarViewModel : ViewModel() {
         _clientsFromBackend.value = clientList
     }
 
-    private fun successClientAppointmentList(list: List<ForClientAppointment>, organisationUrl: String) {
+    private fun successClientAppointmentList(list: List<ForClientAppointment>, organizationUrl: String) {
         _appsDownloaded.value = true
 
         val appList = ArrayList<Appointment>()
         val employeeList = ArrayList<Person>()
         for(item in list) {
-            appList.add(item.getAppointment(organisationUrl))
+            appList.add(item.getAppointment(organizationUrl))
             if (!employeeList.contains(item.getEmployee())){
                 employeeList.add(item.getEmployee())
             }
@@ -168,7 +169,7 @@ class CalendarViewModel : ViewModel() {
     //delete if some Appointment was deleted at the server side
     private fun deleteCanceledAppointments(ids: List<String>) {
         for(item in apps.value!!){
-            if(!ids.contains(item.backendId + item.organisationUrl)){
+            if(!ids.contains(item.backendId + item.organizationUrl)){
                 delete(item)
             }
         }
@@ -238,18 +239,6 @@ class CalendarViewModel : ViewModel() {
 
     private fun delete(person: Person) = viewModelScope.launch {
         repo.deletePerson(person)
-    }
-
-    private fun error(e: Throwable, code: Int?, call: String) {
-        when(code) {
-            400 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "400 - Bad Request")
-            401 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "401 - Unauthorized ")
-            403 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "403 - Forbidden")
-            404 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "404 - Not Found")
-            409 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "409 - Conflict")
-        }
-        FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
-        FirebaseCrashlytics.getInstance().recordException(e)
     }
 
     fun deleteAllFromProject() = viewModelScope.launch {

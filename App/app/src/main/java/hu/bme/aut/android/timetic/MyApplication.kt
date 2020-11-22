@@ -9,7 +9,7 @@ import androidx.security.crypto.MasterKeys
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import hu.bme.aut.android.timetic.database.Database
-import hu.bme.aut.android.timetic.network.apiOrganisation.OrganisationApi
+import hu.bme.aut.android.timetic.network.apiOrganization.OrganizationApi
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -37,20 +37,20 @@ class MyApplication : Application() {
 			return secureSharedPreferences.getString("RefreshToken", "")
 		}
 
-		fun getOrganisationUrl(): String? {
-			return secureSharedPreferences.getString("OrganisationUrl", "")
+		fun getOrganizationUrl(): String? {
+			return secureSharedPreferences.getString("OrganizationUrl", "")
 		}
 
 		fun getEmail(): String? {
 			return secureSharedPreferences.getString("Email", "")
 		}
 
-		fun getOrganisationApiForRefresh(): OrganisationApi {
+		fun getOrganizationApiForRefresh(): OrganizationApi {
 			val m = Moshi.Builder()
 				.add(KotlinJsonAdapterFactory())
 				.build()
 
-			var client: OkHttpClient? = null
+			var client: OkHttpClient?
 			client =  OkHttpClient.Builder()
 				.addInterceptor(HttpBearerAuth(
 					"bearer",
@@ -59,12 +59,12 @@ class MyApplication : Application() {
 				.build()
 
 			val retrofit = Retrofit.Builder()
-				.baseUrl(secureSharedPreferences.getString("OrganisationUrl", "").toString())
+				.baseUrl(secureSharedPreferences.getString("OrganizationUrl", "").toString())
 				.client(client)
 				.addConverterFactory(MoshiConverterFactory.create(m))
 				.build()
 
-			return retrofit.create(OrganisationApi::class.java)
+			return retrofit.create(OrganizationApi::class.java)
 		}
 	}
 	

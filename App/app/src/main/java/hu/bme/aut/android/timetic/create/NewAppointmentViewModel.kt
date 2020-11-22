@@ -4,12 +4,12 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
+import hu.bme.aut.android.timetic.Singleton
 import hu.bme.aut.android.timetic.data.model.Appointment
 import hu.bme.aut.android.timetic.data.model.Person
-import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
+import hu.bme.aut.android.timetic.dataManager.NetworkOrganizationInteractor
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.dataManager.DBRepository
 import hu.bme.aut.android.timetic.network.models.*
@@ -17,7 +17,7 @@ import hu.bme.aut.android.timetic.ui.loginAregistration.Result
 import java.util.*
 
 class NewAppointmentViewModel: ViewModel() {
-    private lateinit var backend: NetworkOrganisationInteractor
+    private lateinit var backend: NetworkOrganizationInteractor
     private var repo: DBRepository
 
     private lateinit var data: ForEmployeeDataForAppointmentCreation
@@ -47,7 +47,6 @@ class NewAppointmentViewModel: ViewModel() {
 
     init{
         val dao = MyApplication.myDatabase.roomDao()
-        Log.d("EZAZ", "newapp")
         repo = DBRepository(dao)
     }
 
@@ -59,9 +58,9 @@ class NewAppointmentViewModel: ViewModel() {
         personDetail = repo.getPersonByNetId(netId)
     }
 
-    fun getDataForAppointmentCreation(organisationUrl: String, token: String){
+    fun getDataForAppointmentCreation(organizationUrl: String, token: String){
         backend =
-            NetworkOrganisationInteractor(organisationUrl,
+            NetworkOrganizationInteractor(organizationUrl,
                 null,
                 HttpBearerAuth(
                     "bearer",
@@ -72,8 +71,6 @@ class NewAppointmentViewModel: ViewModel() {
     }
 
     private fun successDataForCreation(data: ForEmployeeDataForAppointmentCreation) {
-        Log.d("EZAZ", "data success")
-
         this.data = data
 
         _places.value = data.places
@@ -84,16 +81,7 @@ class NewAppointmentViewModel: ViewModel() {
 
     private fun error(e: Throwable, code: Int?, call: String) {
         _result.value = Result(false, R.string.errorCreateAppointment)
-
-        when(code) {
-            400 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "400 - Bad Request")
-            401 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "401 - Unauthorized ")
-            403 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "403 - Forbidden")
-            404 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "404 - Not Found")
-            409 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "409 - Conflict")
-        }
-        FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
-        FirebaseCrashlytics.getInstance().recordException(e)
+        Singleton.logBackendError(e, code, call)
     }
 
     fun saveAppointment(appointment: CommonAppointment){
@@ -109,9 +97,9 @@ class NewAppointmentViewModel: ViewModel() {
         backend.cancelAppointmentByEmployee(id, onSuccess = this::successCancelAppointment, onError = this::error)
     }
 
-    fun cancelAppointmentByClient(organisationUrl: String, token: String, id: String){
+    fun cancelAppointmentByClient(organizationUrl: String, token: String, id: String){
         val interactor =
-            NetworkOrganisationInteractor(organisationUrl,
+            NetworkOrganizationInteractor(organizationUrl,
                 null,
                 HttpBearerAuth(
                     "bearer",
@@ -125,9 +113,9 @@ class NewAppointmentViewModel: ViewModel() {
         backend.getMeetingUrl(appointmentId, this::successMeetingUrl, this::error)
     }
 
-    fun getMeetingUrlByClient(organisationUrl: String, token: String, appointmentId: String) {
+    fun getMeetingUrlByClient(organizationUrl: String, token: String, appointmentId: String) {
         val interactor =
-            NetworkOrganisationInteractor(organisationUrl,
+            NetworkOrganizationInteractor(organizationUrl,
                 null,
                 HttpBearerAuth(
                     "bearer",
@@ -138,7 +126,6 @@ class NewAppointmentViewModel: ViewModel() {
     }
 
     private fun successMeetingUrl(commonConsultation: CommonConsultation)  {
-        Log.d("EZAZ", "url success")
         _meetingUrl.value = commonConsultation.url
     }
 
@@ -148,12 +135,10 @@ class NewAppointmentViewModel: ViewModel() {
     }
 
     private fun successModifyAppointment(appointment: CommonAppointment)  {
-        Log.d("EZAZ", "modifying success")
         _result.value = Result(true, null)
     }
 
     private fun successAddAppointment(appointment: CommonAppointment) {
-        Log.d("EZAZ", "adding success")
         _result.value = Result(true, null)
     }
 }
@@ -210,7 +195,7 @@ fun ForClientAppointment.getAppointment(url: String): Appointment{
         address = place,
         personBackendId = employee!!.id,
         activity = activity!!.name,
-        organisationUrl = url
+        organizationUrl = url
     )
 }
 

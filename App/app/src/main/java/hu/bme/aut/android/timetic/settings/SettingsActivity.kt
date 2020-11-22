@@ -21,9 +21,9 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(R.layout.settings_activity)
 
         //TODO viewmodelfactory?
-        if(!MyApplication.getOrganisationUrl().isNullOrEmpty() && MyApplication.getOrganisationUrl() != "") {
+        if(!MyApplication.getOrganizationUrl().isNullOrEmpty() && MyApplication.getOrganizationUrl() != "") {
             viewModel = SettingsViewModel()
-            viewModel!!.getDataForAppointmentCreation(MyApplication.getOrganisationUrl()!!, MyApplication.getToken()!!)
+            viewModel!!.getDataForAppointmentCreation(MyApplication.getOrganizationUrl()!!, MyApplication.getToken()!!)
         }
 
         supportFragmentManager
@@ -66,7 +66,7 @@ class SettingsActivity : AppCompatActivity() {
                     })
                 } else {
                     activityType?.isEnabled = false
-                    Toast.makeText(context, "Nincs internet kapcsolat, a tevékenység beállításához kapcsolja be.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, getString(R.string.network_needed_long), Toast.LENGTH_LONG).show()
                 }
             }
         }

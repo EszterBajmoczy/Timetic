@@ -18,7 +18,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import hu.bme.aut.android.timetic.*
-import kotlinx.android.synthetic.main.fragment_statistic_main.*
 
 
 class LoginActivity : AppCompatActivity() {
@@ -34,9 +33,9 @@ class LoginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
         sharedPreferences = MyApplication.secureSharedPreferences
 
-        val organisationURL = intent.getStringExtra("OrganisationUrl")
+        val organizationURL = intent.getStringExtra("OrganizationUrl")
 
-        role = if(organisationURL == null){
+        role = if(organizationURL == null){
             Role.CLIENT
         } else {
             Role.EMPLOYEE
@@ -116,18 +115,18 @@ class LoginActivity : AppCompatActivity() {
             }
             if (resetResult.success != null) {
                 val intent = Intent(this, ForgottenPasswordActivity::class.java)
-                if(organisationURL != null) {
-                    intent.putExtra("OrganisationUrl", organisationURL)
+                if(organizationURL != null) {
+                    intent.putExtra("OrganizationUrl", organizationURL)
                 } else {
-                    intent.putExtra("OrganisationUrl", "")
+                    intent.putExtra("OrganizationUrl", "")
                 }
                 startActivity(intent)
             }
         })
 
-        loginViewModel.organisations.observe(this, Observer {map ->
+        loginViewModel.organizations.observe(this, Observer { map ->
             val editor = MyApplication.secureSharedPreferences.edit()
-            editor.putString("OrganisationsMap", map.toString())
+            editor.putString("OrganizationsMap", map.toString())
             editor.apply()
 
             updateUiWithUser()
@@ -144,16 +143,12 @@ class LoginActivity : AppCompatActivity() {
                     editor.putString("Email", email.text.toString())
                     editor.apply()
 
-                    loginViewModel.resetPassword(role, email.text.toString(), organisationURL)
+                    loginViewModel.resetPassword(role, email.text.toString(), organizationURL)
                 } else {
-                    Toast.makeText(
-                        applicationContext,
-                        "Adja meg az e-mail címét",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    Toast.makeText(applicationContext, getString(R.string.add_email_adress), Toast.LENGTH_LONG).show()
                 }
             } else {
-                Toast.makeText(applicationContext, "Internetkapcsolat szükséges a jelszó visszaállításához", Toast.LENGTH_LONG).show()
+                Toast.makeText(applicationContext, getString(R.string.network_needed_password_reset), Toast.LENGTH_LONG).show()
             }
         }
 
@@ -179,7 +174,7 @@ class LoginActivity : AppCompatActivity() {
                         loginViewModel.login(
                             email.text.toString(),
                             password.text.toString(),
-                            organisationURL
+                            organizationURL
                         )
                         emailAccount = email.text.toString()
                     }
@@ -190,10 +185,10 @@ class LoginActivity : AppCompatActivity() {
             login.setOnClickListener {
                 if(isNetworkConnection()){
                     loading.visibility = View.VISIBLE
-                    loginViewModel.login(email.text.toString(), password.text.toString(), organisationURL)
+                    loginViewModel.login(email.text.toString(), password.text.toString(), organizationURL)
                     emailAccount = email.text.toString()
                 } else {
-                    Toast.makeText(context, "Internetkapcsolat szükséges a bejelentkezéshez", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, getString(R.string.network_needed_log_in), Toast.LENGTH_LONG).show()
                 }
             }
         }
