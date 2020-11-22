@@ -45,6 +45,7 @@ class NewClientActivity : AppCompatActivity() {
             viewModel.initialize(organisationUrl)
 
             val pref = MyApplication.secureSharedPreferences
+            etClientName.setText(pref.getString("UserName", ""))
             etClientEmail.setText(pref.getString("Email", ""))
 
             val mInflater = LayoutInflater.from(applicationContext)

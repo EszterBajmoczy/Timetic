@@ -7,7 +7,7 @@ import java.util.*
 
 class Appointment(
     val id: Long?,
-    val netId: String,
+    val backendId: String,
     val note: String?,
     val start_date: Calendar,
     val end_date: Calendar,
@@ -15,9 +15,7 @@ class Appointment(
     val private_appointment: Boolean,
     val videochat: Boolean?,
     val address: String?,
-    val person: String?,
-    val personPhone: String?,
-    val personEmail: String?,
+    val personBackendId: String?,
     val activity: String?,
     var organisationUrl: String? = null
 ) : WeekViewDisplayable<Appointment>, Comparable<Appointment> {

@@ -119,7 +119,9 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
 
         val header: View = navView.getHeaderView(0)
+        val name = pref.getString("UserName", "")
         val email = pref.getString("Email", "")
+        header.tName.text = name
         header.tEmail.text = email
     }
 
@@ -130,8 +132,8 @@ class MainActivity : AppCompatActivity() {
             editor.apply()
 
             val calAlarm = Calendar.getInstance()
-            calAlarm[Calendar.HOUR_OF_DAY] = 15
-            calAlarm[Calendar.MINUTE] = 32
+            calAlarm[Calendar.HOUR_OF_DAY] = 2
+            calAlarm[Calendar.MINUTE] = 0
             calAlarm[Calendar.SECOND] = 0
 
             val intent = Intent()

@@ -91,6 +91,7 @@ class NewClientViewModel : ViewModel() {
             401 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "401 - Unauthorized ")
             403 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "403 - Forbidden")
             404 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "404 - Not Found")
+            409 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "409 - Conflict")
         }
         FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
         FirebaseCrashlytics.getInstance().recordException(e)
@@ -124,7 +125,7 @@ class NewClientViewModel : ViewModel() {
     private fun onSuccessClientAdd(client: CommonClient){
         Log.d("EZAZ", "add clienttttttttttt")
         _success.value = true
-        val c = Person(netId = client.id!!, name = client.name!!, email = client.email!!, phone = client.phone!!)
+        val c = Person(backendId = client.id!!, name = client.name!!, email = client.email!!, phone = client.phone!!)
 
         insert(c)
     }

@@ -1,9 +1,7 @@
 package hu.bme.aut.android.timetic.ui.calendar.month
 
 import android.content.Intent
-import android.location.Location
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -90,7 +88,7 @@ class MonthCalendarFragment : Fragment(), AppointmentAdapter.AppointmentItemClic
 
     override fun onItemClick(appointment: Appointment) {
         val intent = Intent(context, NewAppointmentActivity::class.java)
-        intent.putExtra("NetId", appointment.netId)
+        intent.putExtra("NetId", appointment.backendId)
         startActivity(intent)
     }
 

@@ -9,10 +9,7 @@ import hu.bme.aut.android.timetic.dataManager.NetworkDeveloperInteractor
 import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
 import hu.bme.aut.android.timetic.network.auth.HttpBasicAuth
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
-import hu.bme.aut.android.timetic.network.models.CommonOrganization
-import hu.bme.aut.android.timetic.network.models.CommonPasswordReset
-import hu.bme.aut.android.timetic.network.models.CommonPostRefresh
-import hu.bme.aut.android.timetic.network.models.CommonToken
+import hu.bme.aut.android.timetic.network.models.*
 import hu.bme.aut.android.timetic.ui.loginAregistration.Result
 
 class ForgottenPasswordViewModel : ViewModel() {
@@ -32,6 +29,9 @@ class ForgottenPasswordViewModel : ViewModel() {
 
     private val _loginResult = MutableLiveData<Result>()
     val loginResult: LiveData<Result> = _loginResult
+
+    private val _userName = MutableLiveData<String>()
+    val userName: LiveData<String> = _userName
 
     private val _refreshToken = MutableLiveData<String>()
     val refreshToken: LiveData<String> = _refreshToken
@@ -76,7 +76,7 @@ class ForgottenPasswordViewModel : ViewModel() {
                     HttpBasicAuth(email, password),
                     null
                 )
-            backend.login(onSuccess = this::successRefreshToken, onError = this::errorRefreshToken)
+            backend.login(onSuccess = this::successLoginClient, onError = this::errorRefreshToken)
         }
         else{
 
@@ -87,7 +87,7 @@ class ForgottenPasswordViewModel : ViewModel() {
                     HttpBasicAuth(email, password),
                     null
                 )
-            backend.login(onSuccess = this::successRefreshToken, onError = this::errorRefreshToken)
+            backend.login(onSuccess = this::successLoginEmployee, onError = this::errorRefreshToken)
         }
     }
 
@@ -164,13 +164,15 @@ class ForgottenPasswordViewModel : ViewModel() {
         //TODO
     }
 
-    private fun successRefreshToken(token: CommonToken) {
+    private fun successLoginClient(loginData: ForUserLoginData) {
+        _userName.value = loginData.user!!.name
+        setRefreshToken(loginData.refreshToken!!)
+    }
+
+    private fun successLoginEmployee(loginData: ForEmployeeLoginData) {
         Log.d("EZAZ", "getToken succcccess reset")
-        _refreshToken.value = token.token
-        when(role) {
-            Role.EMPLOYEE -> getTokenOrganisation(token)
-            Role.CLIENT -> getTokenDeveloper(token)
-        }
+        _userName.value = loginData.employee!!.name
+        setRefreshToken(loginData.refreshToken!!)
     }
 
     private fun errorRefreshToken(e: Throwable, code: Int?, call: String) {
@@ -236,8 +238,18 @@ class ForgottenPasswordViewModel : ViewModel() {
             401 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "401 - Unauthorized ")
             403 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "403 - Forbidden")
             404 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "404 - Not Found")
+            409 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "409 - Conflict")
         }
         FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
         FirebaseCrashlytics.getInstance().recordException(e)
+    }
+
+    private fun setRefreshToken(token: CommonToken){
+        _refreshToken.value = token.token
+
+        when(role) {
+            Role.EMPLOYEE -> getTokenOrganisation(token)
+            Role.CLIENT -> getTokenDeveloper(token)
+        }
     }
 }

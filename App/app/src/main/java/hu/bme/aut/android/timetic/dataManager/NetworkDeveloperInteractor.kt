@@ -1,16 +1,12 @@
 package hu.bme.aut.android.timetic.dataManager
 
 import android.os.Handler
-import android.util.Log
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import hu.bme.aut.android.timetic.network.auth.HttpBasicAuth
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.network.apiDeveloper.DeveloperApi
-import hu.bme.aut.android.timetic.network.models.CommonOrganization
-import hu.bme.aut.android.timetic.network.models.CommonPasswordReset
-import hu.bme.aut.android.timetic.network.models.CommonToken
-import hu.bme.aut.android.timetic.network.models.ForMobileUserRegistration
+import hu.bme.aut.android.timetic.network.models.*
 import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Response
@@ -97,7 +93,7 @@ class NetworkDeveloperInteractor(auth: HttpBasicAuth?, autb: HttpBearerAuth?) {
     }
 
     fun login(
-        onSuccess: (CommonToken) -> Unit,
+        onSuccess: (ForUserLoginData) -> Unit,
         onError: (Throwable, code: Int?, call: String) -> Unit
     ) {
         val getRefreshToken = developerApi.mobileLoginGet()

@@ -1,6 +1,9 @@
 package hu.bme.aut.android.timetic.settings
 
+import android.content.Context
+import android.net.ConnectivityManager
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
@@ -16,7 +19,6 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.settings_activity)
-
 
         //TODO viewmodelfactory?
         if(!MyApplication.getOrganisationUrl().isNullOrEmpty() && MyApplication.getOrganisationUrl() != "") {
@@ -54,14 +56,24 @@ class SettingsActivity : AppCompatActivity() {
             } else {
                 val activityType = findPreference<ListPreference>("activityType")
 
-                viewModel.activities.observe(this, androidx.lifecycle.Observer {
-                    if (activityType != null) {
-                        activityType.entries = it.toTypedArray()
-                        activityType.setDefaultValue(it[0])
-                        activityType.entryValues = it.toTypedArray()
-                    }
-                })
+                if(isNetworkConnection()){
+                    viewModel.activities.observe(this, androidx.lifecycle.Observer {
+                        if (activityType != null) {
+                            activityType.entries = it.toTypedArray()
+                            activityType.setDefaultValue(it[0])
+                            activityType.entryValues = it.toTypedArray()
+                        }
+                    })
+                } else {
+                    activityType?.isEnabled = false
+                    Toast.makeText(context, "Nincs internet kapcsolat, a tevékenység beállításához kapcsolja be.", Toast.LENGTH_LONG).show()
+                }
             }
+        }
+        private fun isNetworkConnection(): Boolean {
+            val connectivityManager = context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val activeNetworkInfo = connectivityManager.activeNetworkInfo
+            return activeNetworkInfo != null && activeNetworkInfo.isConnected
         }
     }
 }

@@ -8,6 +8,16 @@
     android:orientation="vertical"
     android:gravity="center_horizontal">
 
+    <TextView
+        android:id="@+id/tNoInternetConnectionChooseOrganisation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="6dp"
+        android:text="Nincs internet kapcsolat, a továbbiakhoz kapcsolja be."
+        android:background="@color/colorAccentLight"
+        android:gravity="center_horizontal"
+        android:visibility="gone"/>
+
     <androidx.appcompat.widget.AppCompatAutoCompleteTextView
         android:layout_width="300dp"
         android:layout_height="wrap_content"
@@ -16,13 +26,13 @@
         android:textColor="@color/colorDark"
         android:textColorHint="@color/colorAccent"
         android:layout_marginTop="50dp"
-        android:layout_marginBottom="400dp"/>
+        android:layout_marginBottom="150dp"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabLoginChooseOrganisation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center"
+        android:layout_gravity="top|center"
         android:layout_margin="@dimen/fab_margin"
         app:srcCompat="@drawable/mcv_action_next"
         android:background="@color/colorPrimaryLight"

@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 class RoomAppointment (
     @PrimaryKey(autoGenerate = true)
     val id: Long? = null,
-    val netId: String,
+    val backendId: String,
     val note: String?,
     val start_date: Long,
     val end_date: Long,
@@ -15,9 +15,7 @@ class RoomAppointment (
     val private_appointment: Boolean,
     val videochat: Boolean?,
     val address: String?,
-    val person: String?,
-    val personPhone: String?,
-    val personEmail: String?,
+    val personBackendId: String?,
     val activity: String?,
     val organisationUrl: String?
 )

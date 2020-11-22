@@ -69,7 +69,6 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
     implementation 'com.github.prolificinteractive:material-calendarview:2.0.0'
-    implementation 'com.github.khacpv:Calendar-Day-View:master-SNAPSHOT'
     implementation 'com.github.blackfizz:eazegraph:1.2.5l@aar'
     implementation 'com.nineoldandroids:library:2.4.0'
     implementation 'androidx.cardview:cardview:1.0.0'

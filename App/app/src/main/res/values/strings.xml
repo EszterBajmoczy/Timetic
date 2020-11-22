@@ -12,6 +12,7 @@
     <string name="invalid_email">Not a valid email address</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"A bejelentkezés nem sikerült"</string>
+    <string name="registration_failed">"A regisztráció nem sikerült"</string>
     <string name="user_not_found">"Nincs ilyen felhasználónk"</string>
     <string name="tSignIn">Bejelentkezés</string>
     <string name="tRegistration">Regisztráció</string>

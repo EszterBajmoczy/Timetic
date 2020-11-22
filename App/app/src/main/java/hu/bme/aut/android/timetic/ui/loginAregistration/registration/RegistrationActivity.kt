@@ -1,8 +1,10 @@
 package hu.bme.aut.android.timetic.ui.loginAregistration.registration
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.ConnectivityManager
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
@@ -11,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
@@ -77,6 +78,12 @@ class RegistrationActivity : AppCompatActivity() {
         })
         sharedPreferences = MyApplication.secureSharedPreferences
 
+        registrationViewModel.userName.observe(this, Observer {
+            val editor = sharedPreferences.edit()
+            editor.putString("UserName", it)
+            editor.apply()
+        })
+
         registrationViewModel.refreshToken.observe(this@RegistrationActivity, Observer {
             val editor = sharedPreferences.edit()
             editor.putString("RefreshToken", it)
@@ -115,20 +122,13 @@ class RegistrationActivity : AppCompatActivity() {
                 )
             }
 
-            setOnEditorActionListener { _, actionId, _ ->
-                when (actionId) {
-                    EditorInfo.IME_ACTION_DONE ->
-                        registrationViewModel.login(
-                                email.text.toString(),
-                                password.text.toString()
-                        )
-                }
-                false
-            }
-
             register.setOnClickListener {
-                loading.visibility = View.VISIBLE
-                registrationViewModel.register(name.text.toString(), email.text.toString(), password.text.toString())
+                if(isNetworkConnection()){
+                    loading.visibility = View.VISIBLE
+                    registrationViewModel.register(name.text.toString(), email.text.toString(), password.text.toString())
+                } else {
+                    Toast.makeText(context, "Internetkapcsolat szükséges a bejelentkezéshez", Toast.LENGTH_LONG).show()
+                }
             }
         }
     }
@@ -152,6 +152,12 @@ class RegistrationActivity : AppCompatActivity() {
 
     private fun showLoginFailed(@StringRes errorString: Int) {
         Toast.makeText(applicationContext, errorString, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun isNetworkConnection(): Boolean {
+        val connectivityManager = applicationContext?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetworkInfo = connectivityManager.activeNetworkInfo
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected
     }
 }
 

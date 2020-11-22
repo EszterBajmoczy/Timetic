@@ -30,6 +30,7 @@ class OrganisationOperationViewModel : ViewModel() {
             401 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "401 - Unauthorized ")
             403 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "403 - Forbidden")
             404 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "404 - Not Found")
+            409 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "409 - Conflict")
         }
         FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
         FirebaseCrashlytics.getInstance().recordException(e)

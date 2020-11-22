@@ -108,7 +108,7 @@ class NetworkOrganisationInteractor(private val organisationUrl: String, auth: H
     }
 
     fun login(
-        onSuccess: (CommonToken) -> Unit,
+        onSuccess: (ForEmployeeLoginData) -> Unit,
         onError: (Throwable, Int?, String) -> Unit
     ) {
         val getRefreshToken = organisationApi.employeeLoginGet()

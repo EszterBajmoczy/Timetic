@@ -37,7 +37,8 @@ class NewAppointmentViewModel: ViewModel() {
     private val _employee = MutableLiveData<CommonEmployee>()
     val employee: LiveData<CommonEmployee> = _employee
 
-    var appDetail: LiveData<Appointment>
+    lateinit var appDetail: LiveData<Appointment>
+    lateinit var personDetail: LiveData<Person>
 
     private val _meetingUrl = MutableLiveData<String>()
     val meetingUrl: LiveData<String> = _meetingUrl
@@ -48,11 +49,14 @@ class NewAppointmentViewModel: ViewModel() {
         val dao = MyApplication.myDatabase.roomDao()
         Log.d("EZAZ", "newapp")
         repo = DBRepository(dao)
-        appDetail = repo.getAppointmentByNetId("")
     }
 
     fun getAppointmentByNetId(netId: String){
         appDetail = repo.getAppointmentByNetId(netId)
+    }
+
+    fun getPersonByNetId(netId: String){
+        personDetail = repo.getPersonByNetId(netId)
     }
 
     fun getDataForAppointmentCreation(organisationUrl: String, token: String){
@@ -86,6 +90,7 @@ class NewAppointmentViewModel: ViewModel() {
             401 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "401 - Unauthorized ")
             403 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "403 - Forbidden")
             404 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "404 - Not Found")
+            409 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "409 - Conflict")
         }
         FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
         FirebaseCrashlytics.getInstance().recordException(e)
@@ -159,13 +164,13 @@ fun CommonAppointment.getAppointment(): Appointment{
     val end = Calendar.getInstance()
     end.timeInMillis = endTime!!
     return if(isPrivate!!){
-        Appointment(id = null, netId = id!!, note = note, start_date = start, end_date = end, price = null, private_appointment = isPrivate,
-            videochat = null, address = place, person = null, personPhone = null, personEmail = null, activity = null)
+        Appointment(id = null, backendId = id!!, note = note, start_date = start, end_date = end, price = null, private_appointment = isPrivate,
+            videochat = null, address = place, personBackendId = null, activity = null)
     }
     else {
         Appointment(
             id = null,
-            netId = id!!,
+            backendId = id!!,
             note = note,
             start_date = start,
             end_date = end,
@@ -173,9 +178,7 @@ fun CommonAppointment.getAppointment(): Appointment{
             private_appointment = isPrivate,
             videochat = online!!,
             address = place,
-            person = client!!.name,
-            personPhone = client.phone,
-            personEmail = client.email,
+            personBackendId = client!!.id,
             activity = activity!!.name
         )
     }
@@ -186,7 +189,7 @@ fun CommonAppointment.getClient(): Person? {
          null
     }
     else {
-        Person(id = null, netId = client!!.id!!, name = client.name!!, email = client.email!!, phone = client.phone!!)
+        Person(id = null, backendId = client!!.id!!, name = client.name!!, email = client.email!!, phone = client.phone!!)
     }
 }
 
@@ -197,7 +200,7 @@ fun ForClientAppointment.getAppointment(url: String): Appointment{
     end.timeInMillis = endTime!!
     return Appointment(
         id = null,
-        netId = id!!,
+        backendId = id!!,
         note = note,
         start_date = start,
         end_date = end,
@@ -205,14 +208,12 @@ fun ForClientAppointment.getAppointment(url: String): Appointment{
         private_appointment = false,
         videochat = online!!,
         address = place,
-        person = employee!!.name,
-        personPhone = employee.phone,
-        personEmail = employee.email,
+        personBackendId = employee!!.id,
         activity = activity!!.name,
         organisationUrl = url
     )
 }
 
 fun ForClientAppointment.getEmployee(): Person {
-    return Person(id = null, netId = employee!!.id!!, name = employee.name!!, email = employee.email!!, phone = employee.phone!!)
+    return Person(id = null, backendId = employee!!.id!!, name = employee.name!!, email = employee.email!!, phone = employee.phone!!)
 }

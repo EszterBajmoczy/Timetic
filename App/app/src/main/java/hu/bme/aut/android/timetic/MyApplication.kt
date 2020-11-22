@@ -11,9 +11,6 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import hu.bme.aut.android.timetic.database.Database
 import hu.bme.aut.android.timetic.network.apiOrganisation.OrganisationApi
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -77,14 +74,14 @@ class MyApplication : Application() {
 		myDatabase = Room.databaseBuilder(
                     applicationContext,
                     Database::class.java,
-                    "my_database"
+                    "timetic_database"
                 ).build()
 
 		val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
 		val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
 
 		secureSharedPreferences = EncryptedSharedPreferences.create(
-			"secure_shared_preferences",
+			"encrypted_shared_preferences",
 			masterKeyAlias,
 			applicationContext,
 			EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,

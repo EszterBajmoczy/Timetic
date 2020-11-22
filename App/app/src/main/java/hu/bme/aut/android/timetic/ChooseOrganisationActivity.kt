@@ -1,8 +1,13 @@
 package hu.bme.aut.android.timetic
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -12,11 +17,26 @@ import hu.bme.aut.android.timetic.network.models.CommonOrganization
 import hu.bme.aut.android.timetic.ui.clientoperations.ClientOperationsViewModel
 import hu.bme.aut.android.timetic.ui.loginAregistration.login.LoginActivity
 import kotlinx.android.synthetic.main.activity_choose_organisation.*
+import kotlinx.android.synthetic.main.fragment_statistic_main.*
+import java.lang.Exception
 
 
 class ChooseOrganisationActivity : AppCompatActivity() {
     private var organisationList: List<CommonOrganization>? = null
     private lateinit var viewModel: ChooseOrganisationViewModel
+
+    private val internetStateChangedReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val activeNetworkInfo = connectivityManager.activeNetworkInfo
+            val isNetworkAvailable = activeNetworkInfo != null && activeNetworkInfo.isConnected
+            if(isNetworkAvailable) {
+                tNoInternetConnectionChooseOrganisation.visibility = View.GONE
+                initialize()
+                context.unregisterReceiver(this)
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,6 +44,22 @@ class ChooseOrganisationActivity : AppCompatActivity() {
 
         viewModel = ViewModelProviders.of(this).get(ChooseOrganisationViewModel::class.java)
 
+        //check internet connection
+        val connectivityManager = applicationContext?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetworkInfo = connectivityManager.activeNetworkInfo
+        val isNetworkAvailable = activeNetworkInfo != null && activeNetworkInfo.isConnected
+        if(isNetworkAvailable){
+            initialize()
+        } else {
+            tNoInternetConnectionChooseOrganisation.visibility = View.VISIBLE
+            val intentFilter = IntentFilter()
+            intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION)
+            applicationContext?.registerReceiver(internetStateChangedReceiver, intentFilter)
+        }
+    }
+
+    private fun initialize() {
+        //viewModel.init()
         viewModel.organisationList.observe(this, Observer{
             organisationList = it
             val adapter: ArrayAdapter<String> =
@@ -61,5 +97,14 @@ class ChooseOrganisationActivity : AppCompatActivity() {
             newList[list.indexOf(item)] = item.name
         }
         return newList
+    }
+
+    override fun onPause() {
+        try {
+            applicationContext?.unregisterReceiver(internetStateChangedReceiver)
+        } catch (e: Exception) {
+
+        }
+        super.onPause()
     }
 }

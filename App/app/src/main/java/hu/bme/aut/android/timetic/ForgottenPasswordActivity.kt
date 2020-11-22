@@ -114,6 +114,12 @@ class ForgottenPasswordActivity : AppCompatActivity() {
             }
         })
 
+        viewModel.userName.observe(this, Observer {
+            val editor = pref.edit()
+            editor.putString("UserName", it)
+            editor.apply()
+        })
+
         viewModel.refreshToken.observe(this, Observer {
             val editor = pref.edit()
             editor.putString("RefreshToken", it)

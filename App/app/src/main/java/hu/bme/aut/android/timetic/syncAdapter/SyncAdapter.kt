@@ -24,8 +24,9 @@ import hu.bme.aut.android.timetic.dataManager.DBRepository
 import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.network.models.CommonAppointment
-import hu.bme.aut.android.timetic.network.models.CommonClient
 import hu.bme.aut.android.timetic.network.models.ForClientAppointment
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
@@ -50,7 +51,10 @@ class SyncAdapter @JvmOverloads constructor(
         provider: ContentProviderClient,
         syncResult: SyncResult
     ) {
-        notification( "SyncAdapter ;)")
+        val c = Calendar.getInstance()
+        val hour = c.get(Calendar.HOUR_OF_DAY)
+        val minute = c.get(Calendar.MINUTE)
+        notification( "SyncAdapter at $hour:$minute")
 
         if(MyApplication.getToken().isNullOrEmpty() || MyApplication.getDevToken().isNullOrEmpty() ){
             role = if(MyApplication.getToken() != null && MyApplication.getToken()!!.isNotEmpty()){
@@ -153,7 +157,7 @@ class SyncAdapter @JvmOverloads constructor(
         //check if it is already in the local database
         for (item in appointments){
             //make a unique id in the list
-            appointmentIds.add(item.netId + item.organisationUrl)
+            appointmentIds.add(item.backendId + item.organisationUrl)
 
             if(newOrUpdatedAppointment(item, apps)){
 
@@ -187,9 +191,9 @@ class SyncAdapter @JvmOverloads constructor(
 
         //check if it is already in the local database
         for (item in persons) {
-            if (newOrUpdatedPerson(item, personsFromDB) && !checkedPersons.contains(item.netId + item.email)) {
+            if (newOrUpdatedPerson(item, personsFromDB) && !checkedPersons.contains(item.backendId + item.email)) {
                 //make a unique id in the list
-                checkedPersons.add(item.netId + item.email)
+                checkedPersons.add(item.backendId + item.email)
                 insert(item)
             }
         }
@@ -223,7 +227,7 @@ class SyncAdapter @JvmOverloads constructor(
         apps: List<Appointment>
     ) {
         for(item in apps){
-            if(!ids.contains(item.netId + item.organisationUrl)){
+            if(!ids.contains(item.backendId + item.organisationUrl)){
                 delete(item)
             }
         }
@@ -235,7 +239,7 @@ class SyncAdapter @JvmOverloads constructor(
         apps: List<Appointment>
     ) : Boolean {
         for(item in apps){
-            if(item.netId == appointment.netId){
+            if(item.backendId == appointment.backendId){
                 if(item.note == appointment.note && item.start_date == appointment.start_date &&
                     item.end_date == appointment.end_date &&
                     item.private_appointment == appointment.private_appointment &&
@@ -245,7 +249,7 @@ class SyncAdapter @JvmOverloads constructor(
                 if(item.note == appointment.note && item.start_date == appointment.start_date &&
                     item.end_date == appointment.end_date && item.price == appointment.price &&
                     item.private_appointment == appointment.private_appointment && item.videochat == appointment.videochat &&
-                    item.address == appointment.address && item.person == appointment.person && item.activity == appointment.activity){
+                    item.address == appointment.address && item.personBackendId == appointment.personBackendId && item.activity == appointment.activity){
                     return false
                 }
                 else if(item.note == appointment.note && item.start_date == appointment.start_date &&
@@ -267,7 +271,7 @@ class SyncAdapter @JvmOverloads constructor(
         people: List<Person>
     ) : Boolean {
         for(item in people){
-            if(item.netId == person.netId){
+            if(item.backendId == person.backendId){
                 if(item.name == person.name && item.email == person.email && item.phone == person.phone ){
                     return false
                 }
@@ -302,6 +306,7 @@ class SyncAdapter @JvmOverloads constructor(
             401 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "401 - Unauthorized ")
             403 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "403 - Forbidden")
             404 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "404 - Not Found")
+            409 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "409 - Conflict")
         }
         FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
         FirebaseCrashlytics.getInstance().recordException(e)

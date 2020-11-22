@@ -13,9 +13,7 @@ import hu.bme.aut.android.timetic.R
 import hu.bme.aut.android.timetic.Role
 import hu.bme.aut.android.timetic.network.auth.HttpBasicAuth
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
-import hu.bme.aut.android.timetic.network.models.CommonOrganization
-import hu.bme.aut.android.timetic.network.models.CommonPostRefresh
-import hu.bme.aut.android.timetic.network.models.CommonToken
+import hu.bme.aut.android.timetic.network.models.*
 import hu.bme.aut.android.timetic.ui.loginAregistration.Result
 
 class LoginViewModel : ViewModel() {
@@ -30,6 +28,9 @@ class LoginViewModel : ViewModel() {
 
     private val _loginResult = MutableLiveData<Result>()
     val loginResult: LiveData<Result> = _loginResult
+
+    private val _userName = MutableLiveData<String>()
+    val userName: LiveData<String> = _userName
 
     private val _refreshToken = MutableLiveData<String>()
     val refreshToken: LiveData<String> = _refreshToken
@@ -54,7 +55,7 @@ class LoginViewModel : ViewModel() {
                     HttpBasicAuth(email, password),
                     null
                 )
-            backend.login(onSuccess = this::successRefreshToken, onError = this::errorRefreshToken)
+            backend.login(onSuccess = this::successRefreshTokenClient, onError = this::errorRefreshToken)
         }
         else{
             role = Role.EMPLOYEE
@@ -64,7 +65,7 @@ class LoginViewModel : ViewModel() {
                     HttpBasicAuth(email, password),
                     null
                 )
-            backend.login(onSuccess = this::successRefreshToken, onError = this::errorRefreshToken)
+            backend.login(onSuccess = this::successRefreshTokenEmployee, onError = this::errorRefreshToken)
         }
     }
 
@@ -92,14 +93,14 @@ class LoginViewModel : ViewModel() {
         return password.length > 5
     }
 
-    private fun successRefreshToken(token: CommonToken) {
-        _refreshToken.value = token.token
+    private fun successRefreshTokenClient(loginData: ForUserLoginData) {
+        _userName.value = loginData.user!!.name
+        setRefreshToken(loginData.refreshToken!!)
+    }
 
-        when(role) {
-            Role.EMPLOYEE -> getTokenOrganisation(token)
-            Role.CLIENT -> getTokenDeveloper(token)
-        }
-        Log.d("EZAZ", _refreshToken.value)
+    private fun successRefreshTokenEmployee(loginData: ForEmployeeLoginData) {
+        _userName.value = loginData.employee!!.name
+        setRefreshToken(loginData.refreshToken!!)
     }
 
     private fun errorRefreshToken(e: Throwable, code: Int?, call: String) {
@@ -216,8 +217,18 @@ class LoginViewModel : ViewModel() {
             401 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "401 - Unauthorized ")
             403 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "403 - Forbidden")
             404 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "404 - Not Found")
+            409 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "409 - Conflict")
         }
         FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
         FirebaseCrashlytics.getInstance().recordException(e)
+    }
+
+    private fun setRefreshToken(token: CommonToken){
+        _refreshToken.value = token.token
+
+        when(role) {
+            Role.EMPLOYEE -> getTokenOrganisation(token)
+            Role.CLIENT -> getTokenDeveloper(token)
+        }
     }
 }

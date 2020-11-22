@@ -1,8 +1,8 @@
 package hu.bme.aut.android.timetic.ui.loginAregistration.login
 
 import android.app.Activity
-import android.content.Intent
-import android.content.SharedPreferences
+import android.content.*
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import hu.bme.aut.android.timetic.*
+import kotlinx.android.synthetic.main.fragment_statistic_main.*
 
 
 class LoginActivity : AppCompatActivity() {
@@ -81,6 +82,12 @@ class LoginActivity : AppCompatActivity() {
             finish()
         })
 
+        loginViewModel.userName.observe(this, Observer {
+            val editor = sharedPreferences.edit()
+            editor.putString("UserName", it)
+            editor.apply()
+        })
+
         loginViewModel.refreshToken.observe(this@LoginActivity, Observer {
             val editor = sharedPreferences.edit()
             editor.putString("RefreshToken", it)
@@ -131,18 +138,22 @@ class LoginActivity : AppCompatActivity() {
         })
 
         passwordForgotten.setOnClickListener {
-            if(email.text.toString() != ""){
-                val editor = sharedPreferences.edit()
-                editor.putString("Email", email.text.toString())
-                editor.apply()
+            if(isNetworkConnection()) {
+                if(email.text.toString() != ""){
+                    val editor = sharedPreferences.edit()
+                    editor.putString("Email", email.text.toString())
+                    editor.apply()
 
-                loginViewModel.resetPassword(role, email.text.toString(), organisationURL)
+                    loginViewModel.resetPassword(role, email.text.toString(), organisationURL)
+                } else {
+                    Toast.makeText(
+                        applicationContext,
+                        "Adja meg az e-mail címét",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
             } else {
-                Toast.makeText(
-                    applicationContext,
-                    "Adja meg az e-mail címét",
-                    Toast.LENGTH_LONG
-                ).show()
+                Toast.makeText(applicationContext, "Internetkapcsolat szükséges a jelszó visszaállításához", Toast.LENGTH_LONG).show()
             }
         }
 
@@ -177,9 +188,13 @@ class LoginActivity : AppCompatActivity() {
             }
 
             login.setOnClickListener {
-                loading.visibility = View.VISIBLE
-                loginViewModel.login(email.text.toString(), password.text.toString(), organisationURL)
-                emailAccount = email.text.toString()
+                if(isNetworkConnection()){
+                    loading.visibility = View.VISIBLE
+                    loginViewModel.login(email.text.toString(), password.text.toString(), organisationURL)
+                    emailAccount = email.text.toString()
+                } else {
+                    Toast.makeText(context, "Internetkapcsolat szükséges a bejelentkezéshez", Toast.LENGTH_LONG).show()
+                }
             }
         }
     }
@@ -203,6 +218,12 @@ class LoginActivity : AppCompatActivity() {
 
     private fun showLoginFailed(@StringRes errorString: Int) {
         Toast.makeText(applicationContext, errorString, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun isNetworkConnection(): Boolean {
+        val connectivityManager = applicationContext?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetworkInfo = connectivityManager.activeNetworkInfo
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected
     }
 }
 

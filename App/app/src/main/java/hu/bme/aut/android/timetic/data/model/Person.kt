@@ -2,7 +2,7 @@ package hu.bme.aut.android.timetic.data.model
 
 class Person(
     val id: Long? = null,
-    val netId: String,
+    val backendId: String,
     val name: String,
     val email: String,
     val phone: String

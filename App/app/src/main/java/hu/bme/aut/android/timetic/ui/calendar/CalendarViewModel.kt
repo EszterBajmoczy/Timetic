@@ -76,7 +76,7 @@ class CalendarViewModel : ViewModel() {
             //check if it is already in the local database
             if (backendList != null) {
                 for (item in backendList){
-                    appointmentIds.add(item.netId+item.organisationUrl)
+                    appointmentIds.add(item.backendId+item.organisationUrl)
                     if(newOrUpdatedAppointment(item)){
                         insert(item)
                     }
@@ -101,9 +101,9 @@ class CalendarViewModel : ViewModel() {
             //check if it is already in the local database
             if (backendList != null) {
                 for (item in backendList){
-                    clientIds.add(item.netId+item.email)
-                    if(!clientAlreadyAdded.contains(item.netId+item.email) && newOrUpdatedClient(item) ){
-                        clientAlreadyAdded.add(item.netId+item.email)
+                    clientIds.add(item.backendId+item.email)
+                    if(!clientAlreadyAdded.contains(item.backendId+item.email) && newOrUpdatedClient(item) ){
+                        clientAlreadyAdded.add(item.backendId+item.email)
                         insert(item)
                     }
                 }
@@ -168,7 +168,7 @@ class CalendarViewModel : ViewModel() {
     //delete if some Appointment was deleted at the server side
     private fun deleteCanceledAppointments(ids: List<String>) {
         for(item in apps.value!!){
-            if(!ids.contains(item.netId + item.organisationUrl)){
+            if(!ids.contains(item.backendId + item.organisationUrl)){
                 delete(item)
             }
         }
@@ -179,7 +179,7 @@ class CalendarViewModel : ViewModel() {
         appointment: Appointment
     ) : Boolean {
         for(item in apps.value!!){
-            if(item.netId == appointment.netId){
+            if(item.backendId == appointment.backendId){
                 if(item.note == appointment.note && item.start_date.timeInMillis == appointment.start_date.timeInMillis &&
                     item.end_date.timeInMillis == appointment.end_date.timeInMillis &&
                     item.private_appointment == appointment.private_appointment &&
@@ -189,7 +189,7 @@ class CalendarViewModel : ViewModel() {
                 if(item.note == appointment.note && item.start_date.timeInMillis == appointment.start_date.timeInMillis &&
                     item.end_date.timeInMillis == appointment.end_date.timeInMillis && item.price!! == appointment.price &&
                     item.private_appointment == appointment.private_appointment && item.videochat == appointment.videochat &&
-                    item.address == appointment.address && item.person == appointment.person && item.activity == appointment.activity){
+                    item.address == appointment.address && item.personBackendId == appointment.personBackendId && item.activity == appointment.activity){
                     return false
                 }
                 delete(item)
@@ -201,8 +201,8 @@ class CalendarViewModel : ViewModel() {
 
     //delete if some Client does not have any appointment
     private fun deleteClientsWithoutAppointment(ids: List<String>) {
-        for(item in clientsFromBackend.value!!){
-            if(!ids.contains(item.netId + item.email)){
+        for(item in clients.value!!){
+            if(!ids.contains(item.backendId + item.email)){
                 delete(item)
             }
         }
@@ -213,7 +213,7 @@ class CalendarViewModel : ViewModel() {
         person: Person?
     ) : Boolean {
         for(item in clients.value!!){
-            if(item.netId == person!!.netId){
+            if(item.backendId == person!!.backendId){
                 if(item.name == person.name && item.email == person.email && item.phone == person.phone ){
                     return false
                 }
@@ -246,6 +246,7 @@ class CalendarViewModel : ViewModel() {
             401 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "401 - Unauthorized ")
             403 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "403 - Forbidden")
             404 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "404 - Not Found")
+            409 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "409 - Conflict")
         }
         FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
         FirebaseCrashlytics.getInstance().recordException(e)

@@ -21,6 +21,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.preference.PreferenceManager
 import hu.bme.aut.android.timetic.*
 import hu.bme.aut.android.timetic.data.model.Appointment
+import hu.bme.aut.android.timetic.data.model.Person
 import hu.bme.aut.android.timetic.network.models.CommonActivity
 import hu.bme.aut.android.timetic.network.models.CommonAppointment
 import hu.bme.aut.android.timetic.network.models.CommonClient
@@ -178,20 +179,22 @@ class NewAppointmentActivity : AppCompatActivity() {
     private fun AppObserver(): Observer<Appointment> {
         observer = androidx.lifecycle.Observer { app ->
             appointment = app
+            viewModel.clients.observe(this, androidx.lifecycle.Observer { clientList->
+                clients = clientList
+                app.personBackendId?.let{ clientId->
+                    val person = getClient(clientList, clientId)!!
+                    setPersonSpinner(getStringClients(clientList), person.name)
 
-            viewModel.clients.observe(this, androidx.lifecycle.Observer {
-                clients = it
-                setPersonSpinner(getStringClients(it), app.person)
+                    clientCall.setOnClickListener {
+                        val callIntent = Intent(Intent.ACTION_DIAL)
+                        callIntent.data = Uri.parse("tel:${person.phone}")
+                        startActivity(callIntent)
+                    }
 
-                clientCall.setOnClickListener {
-                    val callIntent = Intent(Intent.ACTION_DIAL)
-                    callIntent.data = Uri.parse("tel:${app.personPhone}")
-                    startActivity(callIntent)
-                }
-
-                clientEmail.setOnClickListener {
-                    val intent = Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", app.personPhone, null))
-                    startActivity(Intent.createChooser(intent, "Choose an Email client :"))
+                    clientEmail.setOnClickListener {
+                        val intent = Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", person.email, null))
+                        startActivity(Intent.createChooser(intent, "Choose an Email client :"))
+                    }
                 }
             })
 
@@ -209,8 +212,6 @@ class NewAppointmentActivity : AppCompatActivity() {
             setTitle(R.string.title_activity_new_appointment_Detail)
 
             swPrivate.isChecked = app.private_appointment
-
-            //TODO notificatiion
 
             setDateChooseButtonValue()
             setDateChooseButtons()
@@ -232,7 +233,7 @@ class NewAppointmentActivity : AppCompatActivity() {
                 btCancel.setOnClickListener {
                     if(isNetworkAvailable()) {
                         viewModel.appDetail.removeObserver(observer)
-                        viewModel.cancelAppointment(app.netId)
+                        viewModel.cancelAppointment(app.backendId)
                     } else {
                         Toast.makeText(applicationContext, "Internetkapcsolat szükséges az időpont lemondásához", Toast.LENGTH_LONG).show()
                     }
@@ -248,7 +249,7 @@ class NewAppointmentActivity : AppCompatActivity() {
                             finish()
                         }
                         else if (app.start_date.timeInMillis == a.startTime && app.end_date.timeInMillis == a.endTime &&
-                            app.private_appointment == a.isPrivate && app.person == a.client!!.name &&
+                            app.private_appointment == a.isPrivate && app.personBackendId == a.client!!.id &&
                             app.activity == a.activity!!.name && app.address == a.place &&
                             app.price == a.price && app.videochat == a.online && app.note == a.note) {
 
@@ -286,23 +287,31 @@ class NewAppointmentActivity : AppCompatActivity() {
         observer = androidx.lifecycle.Observer { app ->
             appointment = app
 
-            setPersonSpinner(listOf(app.person), app.person)
-            spPerson.isClickable = false
+            if(app.personBackendId != null && app.personBackendId.isNotEmpty()){
+                viewModel.getPersonByNetId(app.personBackendId)
+            }
+
+            viewModel.personDetail.observe(this, Observer{person ->
+                setPersonSpinner(listOf(person.name), person.name)
+                spPerson.isClickable = false
+
+
+                clientCall.setOnClickListener {
+                    val callIntent = Intent(Intent.ACTION_DIAL)
+                    callIntent.data = Uri.parse("tel:${person.phone}")
+                    startActivity(callIntent)
+                }
+
+                clientEmail.setOnClickListener {
+                    val intent = Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", person.phone, null))
+                    startActivity(Intent.createChooser(intent, "Choose an Email client :"))
+                }
+            })
+
             setActivitySpinner(listOf(app.activity), null)
             spActivity.isClickable = false
             setLocationSpinner(listOf(app.address), app.address)
             spLocation.isClickable = false
-
-            clientCall.setOnClickListener {
-                val callIntent = Intent(Intent.ACTION_DIAL)
-                callIntent.data = Uri.parse("tel:${app.personPhone}")
-                startActivity(callIntent)
-            }
-
-            clientEmail.setOnClickListener {
-                val intent = Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", app.personPhone, null))
-                startActivity(Intent.createChooser(intent, "Choose an Email client :"))
-            }
 
             viewModel.employee.observe(this, androidx.lifecycle.Observer {
                 employee = it
@@ -342,7 +351,7 @@ class NewAppointmentActivity : AppCompatActivity() {
                             val organisationsMapString = MyApplication.secureSharedPreferences.getString("OrganisationsMap", "")
                             val organisationMap = organisationsMapString!!.toHashMap()
                             if(organisationMap.containsKey(app.organisationUrl)) {
-                                viewModel.getMeetingUrlByClient(app.organisationUrl!!, organisationMap[app.organisationUrl!!]!!, app.netId)
+                                viewModel.getMeetingUrlByClient(app.organisationUrl!!, organisationMap[app.organisationUrl!!]!!, app.backendId)
                             }
                         } else {
                             Toast.makeText(applicationContext, "Internetkapcsolat szükséges a konzultációhoz való csatlakozáshoz", Toast.LENGTH_LONG).show()
@@ -371,7 +380,7 @@ class NewAppointmentActivity : AppCompatActivity() {
                             viewModel.cancelAppointmentByClient(
                                 app.organisationUrl!!,
                                 organisationMap[app.organisationUrl!!]!!,
-                                app.netId
+                                app.backendId
                             )
                         }
                     } else {
@@ -400,11 +409,11 @@ class NewAppointmentActivity : AppCompatActivity() {
 
     private fun getAppointment() : CommonAppointment{
         return if(swPrivate.isChecked){
-            CommonAppointment(id = appointment?.netId, isPrivate = swPrivate.isChecked, startTime = startTime, endTime = endTime, client = null, activity = null, employee = employee, place = place,
+            CommonAppointment(id = appointment?.backendId, isPrivate = swPrivate.isChecked, startTime = startTime, endTime = endTime, client = null, activity = null, employee = employee, place = place,
                 price = null, online = null, note = etNote.text.toString())
         }
         else{
-            CommonAppointment(id = appointment?.netId, isPrivate = swPrivate.isChecked, startTime = startTime, endTime = endTime, client = client, activity = activity, employee = employee, place = place,
+            CommonAppointment(id = appointment?.backendId, isPrivate = swPrivate.isChecked, startTime = startTime, endTime = endTime, client = client, activity = activity, employee = employee, place = place,
                 price = etPrice.text.toString().toDouble(), online = swVideochat.isChecked, note = etNote.text.toString())
         }
     }
@@ -631,6 +640,16 @@ class NewAppointmentActivity : AppCompatActivity() {
             stringList.add(item.name!!)
         }
         return stringList
+    }
+
+    private fun getClient(list: List<CommonClient>, backendId: String) : Person? {
+        val client: Person? = null
+        for(item in list){
+            if(item.id == backendId) {
+                return Person(backendId = item.id, name = item.name!!, email = item.email!!, phone = item.phone!!)
+            }
+        }
+        return null
     }
 
     private fun isNetworkAvailable(): Boolean {

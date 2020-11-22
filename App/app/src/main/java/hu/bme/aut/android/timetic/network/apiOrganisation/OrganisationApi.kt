@@ -34,19 +34,6 @@ interface OrganisationApi {
     fun clientAppointmentsGet(): Call<kotlin.collections.List<ForClientAppointment>>
 
     /**
-     * Logs client into the system
-     * 
-     * Responses:
-     *  - 200: successful operation
-     *  - 400: Invalid username/password supplied
-     *  - 401: Not authenticated
-     * 
-    * @return [Call]<[CommonToken]>
-     */
-    @GET("client/login")
-    fun clientLoginGet(): Call<CommonToken>
-
-    /**
      * Lists details of the organization // no authentication required
      * 
      * Responses:
@@ -275,7 +262,7 @@ interface OrganisationApi {
     * @return [Call]<[CommonToken]>
      */
     @GET("employee/login")
-    fun employeeLoginGet(): Call<CommonToken>
+    fun employeeLoginGet(): Call<ForEmployeeLoginData>
 
     /**
      * Logs employee out of the system

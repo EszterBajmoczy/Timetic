@@ -26,7 +26,7 @@ const val ACCOUNTPlaceholder = "placeholderaccount"
 const val ACCOUNT = "default_account"
 // Sync interval constants
 const val SECONDS_PER_MINUTE = 60L
-const val SYNC_INTERVAL_IN_MINUTES = 15L
+const val SYNC_INTERVAL_IN_MINUTES = 60
 const val SYNC_INTERVAL = SYNC_INTERVAL_IN_MINUTES * SECONDS_PER_MINUTE
 
 class AlarmReceiver : BroadcastReceiver() {
@@ -39,19 +39,20 @@ class AlarmReceiver : BroadcastReceiver() {
         notification( "AlarmReceiver ;)", context)
         // Get the content resolver for your app
         val mResolver = context.contentResolver
-
+/*
         val settingsBundle = Bundle().apply {
             putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true)
             putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true)
         }
         ContentResolver.requestSync(mAccount, AUTHORITY, settingsBundle)
-/*
+
+ */
+
         ContentResolver.addPeriodicSync(
             mAccount,
             AUTHORITY,
             Bundle.EMPTY,
-            86400)
-*/
+            SYNC_INTERVAL)
 
     }
 

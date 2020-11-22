@@ -9,14 +9,9 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import hu.bme.aut.android.timetic.dataManager.NetworkDeveloperInteractor
 
 import hu.bme.aut.android.timetic.R
-import hu.bme.aut.android.timetic.Role
-import hu.bme.aut.android.timetic.dataManager.NetworkOrganisationInteractor
 import hu.bme.aut.android.timetic.network.auth.HttpBasicAuth
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
-import hu.bme.aut.android.timetic.network.models.CommonOrganization
-import hu.bme.aut.android.timetic.network.models.CommonPostRefresh
-import hu.bme.aut.android.timetic.network.models.CommonToken
-import hu.bme.aut.android.timetic.network.models.ForMobileUserRegistration
+import hu.bme.aut.android.timetic.network.models.*
 import hu.bme.aut.android.timetic.ui.loginAregistration.Result
 
 class RegistrationViewModel() : ViewModel() {
@@ -28,22 +23,14 @@ class RegistrationViewModel() : ViewModel() {
     private val _loginResult = MutableLiveData<Result>()
     val result: LiveData<Result> = _loginResult
 
+    private val _userName = MutableLiveData<String>()
+    val userName: LiveData<String> = _userName
+
     private val _refreshToken = MutableLiveData<String>()
     val refreshToken: LiveData<String> = _refreshToken
 
     private val _token = MutableLiveData<String>()
     val token: LiveData<String> = _token
-
-    fun login(email: String, password: String) {
-        val n =
-            NetworkDeveloperInteractor(
-                HttpBasicAuth(email, password),
-                null
-            )
-        Log.d("EZAZ", "getToken")
-
-        n.login(onSuccess = this::successRefreshToken, onError = this::errorRefreshToken)
-    }
 
     fun register(name: String, email: String, password: String) {
         user =
@@ -96,9 +83,10 @@ class RegistrationViewModel() : ViewModel() {
         return password.length > 5
     }
 
-    private fun successRefreshToken(token: CommonToken) {
-        _refreshToken.value = token.token
-        getToken(token)
+    private fun successRefreshToken(loginData: ForUserLoginData) {
+        _userName.value = loginData.user!!.name
+        _refreshToken.value = loginData.refreshToken!!.token
+        getToken(loginData.refreshToken)
     }
 
     private fun errorRefreshToken(e: Throwable, code: Int?, call: String) {
@@ -156,7 +144,11 @@ class RegistrationViewModel() : ViewModel() {
     }
 
     private fun errorReg(e: Throwable, code: Int?, call: String) {
-        //TODO inform view
+        _loginResult.value =
+            Result(
+                success = null,
+                error = R.string.registration_failed
+            )
         error(e, code, call)
     }
 
@@ -166,6 +158,7 @@ class RegistrationViewModel() : ViewModel() {
             401 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "401 - Unauthorized ")
             403 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "403 - Forbidden")
             404 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "404 - Not Found")
+            409 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "409 - Conflict")
         }
         FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
         FirebaseCrashlytics.getInstance().recordException(e)

@@ -1,12 +1,8 @@
 package hu.bme.aut.android.timetic.network.apiDeveloper
 
+import hu.bme.aut.android.timetic.network.models.*
 import retrofit2.http.*
 import retrofit2.Call
-
-import hu.bme.aut.android.timetic.network.models.CommonOrganization
-import hu.bme.aut.android.timetic.network.models.CommonPasswordReset
-import hu.bme.aut.android.timetic.network.models.CommonToken
-import hu.bme.aut.android.timetic.network.models.ForMobileUserRegistration
 
 interface DeveloperApi {
     /**
@@ -20,7 +16,7 @@ interface DeveloperApi {
     * @return [Call]<[CommonToken]>
      */
     @GET("mobile/login")
-    fun mobileLoginGet(): Call<CommonToken>
+    fun mobileLoginGet(): Call<ForUserLoginData>
 
     /**
      * Logs  mobile user out of the system

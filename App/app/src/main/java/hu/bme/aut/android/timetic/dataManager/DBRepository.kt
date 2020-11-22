@@ -39,8 +39,8 @@ class DBRepository(private val roomDao: RoomDao) {
 
     fun getAppointmentByNetId(netId: String): LiveData<Appointment> {
         return roomDao.getAppointmentByNetId(netId)
-            .map {roomAppointments ->
-                roomAppointments.toDomainModel()
+            .map {roomAppointment ->
+                roomAppointment.toDomainModel()
             }
     }
 
@@ -64,7 +64,7 @@ class DBRepository(private val roomDao: RoomDao) {
     private fun RoomAppointment.toDomainModel(): Appointment {
         return Appointment(
             id = id,
-            netId = netId,
+            backendId = backendId,
             note = note,
             start_date = calendarTypeConverter.toCalendar(start_date),
             end_date = calendarTypeConverter.toCalendar(end_date),
@@ -72,9 +72,7 @@ class DBRepository(private val roomDao: RoomDao) {
             private_appointment = private_appointment,
             videochat = videochat,
             address = address,
-            person = person,
-            personPhone = personPhone,
-            personEmail = personEmail,
+            personBackendId = personBackendId,
             activity = activity,
             organisationUrl = organisationUrl
         )
@@ -83,7 +81,7 @@ class DBRepository(private val roomDao: RoomDao) {
     private fun Appointment.toRoomModel(): RoomAppointment {
         return RoomAppointment(
             id = id,
-            netId = netId,
+            backendId = backendId,
             note = note,
             start_date = calendarTypeConverter.toLong(start_date),
             end_date = calendarTypeConverter.toLong(end_date),
@@ -91,9 +89,7 @@ class DBRepository(private val roomDao: RoomDao) {
             private_appointment = private_appointment,
             videochat = videochat,
             address = address,
-            person = person,
-            personPhone = personPhone,
-            personEmail = personEmail,
+            personBackendId = personBackendId,
             activity = activity,
             organisationUrl = organisationUrl
         )
@@ -117,6 +113,13 @@ class DBRepository(private val roomDao: RoomDao) {
         return result
     }
 
+    fun getPersonByNetId(netId: String): LiveData<Person> {
+        return roomDao.getPersonByNetId(netId)
+            .map {roomPerson ->
+                roomPerson?.toDomainModel()
+            }
+    }
+
     suspend fun insert(person: Person) = withContext(Dispatchers.IO) {
         roomDao.insertPerson(person.toRoomModel())
     }
@@ -133,7 +136,7 @@ class DBRepository(private val roomDao: RoomDao) {
     private fun RoomPerson.toDomainModel(): Person {
         return Person(
             id = id,
-            netId = netId,
+            backendId = backendId,
             name = name,
             email = email,
             phone = phone
@@ -143,7 +146,7 @@ class DBRepository(private val roomDao: RoomDao) {
     private fun Person.toRoomModel(): RoomPerson {
         return RoomPerson(
             id = id,
-            netId = netId,
+            backendId = backendId,
             name = name,
             email = email,
             phone = phone

@@ -6,7 +6,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.alamkanak.weekview.WeekView
@@ -15,6 +14,7 @@ import hu.bme.aut.android.timetic.create.NewAppointmentActivity
 import hu.bme.aut.android.timetic.data.model.Appointment
 import hu.bme.aut.android.timetic.ui.calendar.CalendarViewModel
 import hu.bme.aut.android.timetic.ui.calendar.CalendarViewModelFactory
+import java.util.*
 
 
 class DayAndWeekCalendarFragment : Fragment() {
@@ -41,14 +41,19 @@ class DayAndWeekCalendarFragment : Fragment() {
         Log.d("EZAZ", "fragment")
 
         weekView = requireActivity().findViewById(R.id.weekView)
-
+        val calendar = Calendar.getInstance()
+        weekView.goToHour(calendar.get(Calendar.HOUR_OF_DAY))
         viewModel.result.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
-            weekView.submit(it)
+            it?.let{
+                weekView.submit(it)
+            }
         })
 
-        viewModel.clientResult.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
-            //it needs an observer to be able to save the clients
-        })
+        if(!viewModel.clientResult.hasObservers()){
+            viewModel.clientResult.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
+                //it needs an observer to be able to save the clients
+            })
+        }
 
         //set viewType
         val bundle = this.arguments
@@ -60,13 +65,13 @@ class DayAndWeekCalendarFragment : Fragment() {
         //set listeners
         weekView.setOnEventClickListener { data, rect ->
             val intent = Intent(context, NewAppointmentActivity::class.java)
-            intent.putExtra("NetId", data.netId)
+            intent.putExtra("NetId", data.backendId)
             startActivity(intent)
         }
 
         weekView.setOnEventLongClickListener { data, rect ->
             val intent = Intent(context, NewAppointmentActivity::class.java)
-            intent.putExtra("NetId", data.netId)
+            intent.putExtra("NetId", data.backendId)
             startActivity(intent)
         }
 

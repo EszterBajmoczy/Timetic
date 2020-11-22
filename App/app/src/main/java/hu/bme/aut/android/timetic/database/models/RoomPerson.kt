@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 class RoomPerson (
     @PrimaryKey(autoGenerate = true)
     val id: Long? = null,
-    val netId: String,
+    val backendId: String,
     val name: String,
     val email: String,
     val phone: String

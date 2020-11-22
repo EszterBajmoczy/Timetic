@@ -18,10 +18,10 @@ interface RoomDao {
     @Query("SELECT * FROM appointment")
     fun getAppointmentList(): List<RoomAppointment>
 
-    @Query("SELECT * FROM appointment WHERE netId == :netId")
+    @Query("SELECT * FROM appointment WHERE backendId == :netId")
     fun getAppointmentByNetId(netId: String): LiveData<RoomAppointment>
 
-    @Query("DELETE FROM appointment WHERE netId == :netId")
+    @Query("DELETE FROM appointment WHERE backendId == :netId")
     fun deleteAppointmentByNetId(netId: String)
 
     @Update
@@ -42,6 +42,9 @@ interface RoomDao {
 
     @Query("SELECT * FROM person")
     fun getPersonList(): List<RoomPerson>
+
+    @Query("SELECT * FROM person WHERE backendId == :netId")
+    fun getPersonByNetId(netId: String): LiveData<RoomPerson>
 
     @Update
     fun updatePerson(person: RoomPerson): Int
