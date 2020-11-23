@@ -28,7 +28,7 @@ class UseCases {
         scope: CoroutineScope,
         backendList: List<Appointment>,
         dbList: List<Appointment>
-    ): List<Appointment> {
+    ) {
         val appointmentIds = ArrayList<String>()
 
         for (item in backendList){
@@ -38,7 +38,6 @@ class UseCases {
             }
         }
         deleteCanceledAppointments(repo, scope, dbList, appointmentIds)
-        return backendList
     }
 
     //checks if the appointment already saved
@@ -88,7 +87,7 @@ class UseCases {
         scope: CoroutineScope,
         backendList: List<Person>,
         dbList: List<Person>
-    ): List<Person> {
+    ) {
         val clientIds = ArrayList<String>()
         val clientAlreadyAdded = ArrayList<String>()
 
@@ -100,7 +99,6 @@ class UseCases {
             }
         }
         deleteClientsWithoutAppointment(repo, scope, dbList, clientIds)
-        return backendList
     }
 
     //delete if some Client does not have any appointment

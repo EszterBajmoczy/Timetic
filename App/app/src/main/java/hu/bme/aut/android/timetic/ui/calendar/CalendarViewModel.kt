@@ -67,16 +67,12 @@ class CalendarViewModel : ViewModel() {
     ): List<Appointment>? {
         val backendList = appsFromBackend.value
         val dbList = apps.value
-        var list = dbList ?: ArrayList()
 
         if(dbList != null) {
             if(backendList != null) {
                 //check if it is already in the local database
                 UseCases().appointmentOrganizer(repo, viewModelScope, backendList, dbList)
-                //result.removeSource(apps)
 
-            } else {
-                list = dbList
             }
         }
         return dbList
@@ -93,13 +89,11 @@ class CalendarViewModel : ViewModel() {
         if(dbList != null) {
             //check if it is already in the local database
             if (backendList != null) {
-                list = UseCases().personOrganizer(repo, viewModelScope, backendList, dbList)
-                //clientResult.removeSource(clients)
-            } else {
-                list = dbList
+                UseCases().personOrganizer(repo, viewModelScope, backendList, dbList)
             }
+
         }
-        return list
+        return dbList
     }
 
     fun downloadAppointments(

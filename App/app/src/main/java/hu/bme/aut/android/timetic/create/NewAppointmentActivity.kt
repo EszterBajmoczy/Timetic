@@ -84,7 +84,7 @@ class NewAppointmentActivity : AppCompatActivity() {
                         tActivity.visibility = View.GONE
                         spActivity.visibility = View.GONE
 
-                        tClient.visibility = View.GONE
+                        tPerson.visibility = View.GONE
                         spPerson.visibility = View.GONE
 
                         tPrice.visibility = View.GONE
@@ -98,7 +98,7 @@ class NewAppointmentActivity : AppCompatActivity() {
                         tActivity.visibility = View.VISIBLE
                         spActivity.visibility = View.VISIBLE
 
-                        tClient.visibility = View.VISIBLE
+                        tPerson.visibility = View.VISIBLE
                         spPerson.visibility = View.VISIBLE
 
                         tPrice.visibility = View.VISIBLE
@@ -134,7 +134,7 @@ class NewAppointmentActivity : AppCompatActivity() {
                         employee = it
                     })
                     setTitle(R.string.title_activity_new_appointment)
-                    clientContacts.visibility = View.GONE
+                    personContacts.visibility = View.GONE
 
                     setDateChooseButtons()
 
@@ -184,13 +184,13 @@ class NewAppointmentActivity : AppCompatActivity() {
                     val person = getClient(clientList, clientId)!!
                     setPersonSpinner(getStringClients(clientList), person.name)
 
-                    clientCall.setOnClickListener {
+                    personCall.setOnClickListener {
                         val callIntent = Intent(Intent.ACTION_DIAL)
                         callIntent.data = Uri.parse("tel:${person.phone}")
                         startActivity(callIntent)
                     }
 
-                    clientEmail.setOnClickListener {
+                    personEmail.setOnClickListener {
                         val intent = Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", person.email, null))
                         startActivity(Intent.createChooser(intent, "Choose an Email client :"))
                     }
@@ -285,6 +285,11 @@ class NewAppointmentActivity : AppCompatActivity() {
         observer = androidx.lifecycle.Observer { app ->
             appointment = app
 
+            if(app.private_appointment) {
+                privateAppointmentNoInternet(app)
+                return@Observer
+            }
+
             if(app.personBackendId != null && app.personBackendId.isNotEmpty()){
                 viewModel.getPersonByNetId(app.personBackendId)
                 viewModel.personDetail.observe(this, Observer{person ->
@@ -292,13 +297,13 @@ class NewAppointmentActivity : AppCompatActivity() {
                     spPerson.isClickable = false
 
 
-                    clientCall.setOnClickListener {
+                    personCall.setOnClickListener {
                         val callIntent = Intent(Intent.ACTION_DIAL)
                         callIntent.data = Uri.parse("tel:${person.phone}")
                         startActivity(callIntent)
                     }
 
-                    clientEmail.setOnClickListener {
+                    personEmail.setOnClickListener {
                         val intent = Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", person.phone, null))
                         startActivity(Intent.createChooser(intent, "Choose an Email client :"))
                     }
@@ -391,6 +396,71 @@ class NewAppointmentActivity : AppCompatActivity() {
             }
         }
         return observer
+    }
+
+    private fun privateAppointmentNoInternet(app: Appointment) {
+        setLocationSpinner(listOf(app.address), app.address)
+        spLocation.isClickable = false
+
+        viewModel.employee.observe(this, androidx.lifecycle.Observer {
+            employee = it
+        })
+        setTitle(R.string.title_activity_new_appointment_Detail)
+
+        swPrivate.isChecked = app.private_appointment
+        tActivity.visibility = View.GONE
+        spActivity.visibility = View.GONE
+        tPerson.visibility = View.GONE
+        spPerson.visibility = View.GONE
+        personContacts.visibility = View.GONE
+        tPrice.visibility = View.GONE
+        priceLinearLayout.visibility = View.GONE
+        tVideochat.visibility = View.GONE
+        swVideochat.visibility = View.GONE
+
+        setDateChooseButtonValue()
+
+        val tomorrow = Calendar.getInstance()
+        tomorrow.add(Calendar.DAY_OF_MONTH, 1)
+        tomorrow.set(Calendar.HOUR_OF_DAY, 0)
+        tomorrow.set(Calendar.MINUTE, 0)
+        tomorrow.set(Calendar.MILLISECOND, 0)
+        tomorrow.add(Calendar.MILLISECOND, -1)
+
+        btCancel.setText(R.string.tCancelAppointment)
+        if(role == Role.EMPLOYEE){
+            btSave.setText(R.string.tModify)
+        }
+
+        etNote.setText(app.note)
+        etNote.isClickable = false
+
+        if(app.start_date.before(tomorrow)){
+            btCancel.visibility = View.GONE
+        } else {
+            btCancel.setOnClickListener {
+                if(isNetworkAvailable()) {
+                    viewModel.appDetail.removeObserver(observer)
+
+                    val organizationsMapString = MyApplication.secureSharedPreferences.getString("OrganizationsMap", "")
+                    val organizationMap = organizationsMapString!!.toHashMap()
+                    if(organizationMap.containsKey(app.organizationUrl)){
+                        viewModel.cancelAppointmentByClient(
+                            app.organizationUrl!!,
+                            organizationMap[app.organizationUrl!!]!!,
+                            app.backendId
+                        )
+                    }
+                } else {
+                    Toast.makeText(this, getString(R.string.network_needed_cancel_appointment), Toast.LENGTH_LONG).show()
+                }
+            }
+
+            btSave.setOnClickListener {
+                Toast.makeText(this, getString(R.string.network_needed_cancel_appointment), Toast.LENGTH_LONG).show()
+            }
+        }
+
     }
 
     private fun setDateChooseButtonValue(){
