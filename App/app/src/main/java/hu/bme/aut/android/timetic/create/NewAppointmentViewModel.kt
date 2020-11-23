@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
-import hu.bme.aut.android.timetic.Singleton
+import hu.bme.aut.android.timetic.UseCases
 import hu.bme.aut.android.timetic.data.model.Appointment
 import hu.bme.aut.android.timetic.data.model.Person
 import hu.bme.aut.android.timetic.dataManager.NetworkOrganizationInteractor
@@ -80,7 +80,7 @@ class NewAppointmentViewModel: ViewModel() {
 
     private fun error(e: Throwable, code: Int?, call: String) {
         _result.value = Result(false, R.string.errorCreateAppointment)
-        Singleton.logBackendError(e, code, call)
+        UseCases.logBackendError(e, code, call)
     }
 
     fun saveAppointment(appointment: CommonAppointment){

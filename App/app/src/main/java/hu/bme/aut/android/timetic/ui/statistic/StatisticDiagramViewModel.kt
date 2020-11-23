@@ -3,7 +3,7 @@ package hu.bme.aut.android.timetic.ui.statistic
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import hu.bme.aut.android.timetic.Singleton
+import hu.bme.aut.android.timetic.UseCases
 import hu.bme.aut.android.timetic.dataManager.NetworkOrganizationInteractor
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.network.models.ForEmployeeReport
@@ -30,7 +30,7 @@ class StatisticDiagramViewModel : ViewModel() {
                 )
             )
 
-        backend.getReport(start, end, onSuccess = this::success, onError = Singleton::logBackendError)
+        backend.getReport(start, end, onSuccess = this::success, onError = UseCases.Companion::logBackendError)
     }
 
     private fun success(data: ForEmployeeReport) {

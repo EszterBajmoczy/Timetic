@@ -17,7 +17,7 @@ class ChooseOrganizationViewModel : ViewModel() {
     var organizationList: LiveData<List<CommonOrganization>> = _organizationList
 
     init {
-        backend.getOrganizations(onSuccess = this::successList, onError = Singleton::logBackendError)
+        backend.getOrganizations(onSuccess = this::successList, onError = UseCases.Companion::logBackendError)
     }
 
     private fun successList(list: List<CommonOrganization>) {

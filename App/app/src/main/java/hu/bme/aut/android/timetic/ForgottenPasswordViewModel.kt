@@ -73,7 +73,7 @@ class ForgottenPasswordViewModel : ViewModel() {
                     HttpBasicAuth(email, password),
                     null
                 )
-            backend.login(onSuccess = this::successLoginClient, onError = Singleton::logBackendError)
+            backend.login(onSuccess = this::successLoginClient, onError = UseCases.Companion::logBackendError)
         }
         else{
 
@@ -84,7 +84,7 @@ class ForgottenPasswordViewModel : ViewModel() {
                     HttpBasicAuth(email, password),
                     null
                 )
-            backend.login(onSuccess = this::successLoginEmployee, onError = Singleton::logBackendError)
+            backend.login(onSuccess = this::successLoginEmployee, onError = UseCases.Companion::logBackendError)
         }
     }
 
@@ -118,7 +118,7 @@ class ForgottenPasswordViewModel : ViewModel() {
                     null,
                     HttpBearerAuth("bearer", token.token!!)
                 )
-            n.getRegisteredOrganizations(onSuccess = this::successOrganizations, onError = Singleton::logBackendError)
+            n.getRegisteredOrganizations(onSuccess = this::successOrganizations, onError = UseCases.Companion::logBackendError)
         } else {
             _loginResult.value = Result(success = true, error = null)
         }
@@ -152,12 +152,12 @@ class ForgottenPasswordViewModel : ViewModel() {
 
     private fun errorRefreshTokenForClient(e: Throwable, code: Int?, call: String) {
         _loginResult.value = Result(success = true, error = R.string.login_failed)
-        Singleton.logBackendError(e, code, call)
+        UseCases.logBackendError(e, code, call)
     }
 
     private fun errorToken(e: Throwable, code: Int?, call: String) {
         _loginResult.value = Result(success = null, error = R.string.login_failed)
-        Singleton.logBackendError(e, code, call)
+        UseCases.logBackendError(e, code, call)
     }
 
     private fun successLoginClient(loginData: ForUserLoginData) {
@@ -178,7 +178,7 @@ class ForgottenPasswordViewModel : ViewModel() {
 
     private fun onErrorReset(e: Throwable, code: Int?, call: String) {
         _resetResult.value = Result(success = null, error = R.string.user_not_found)
-        Singleton.logBackendError(e, code, call)
+        UseCases.logBackendError(e, code, call)
     }
 
     fun codeDataChanged(code: String, password: String, passwordAgain: String) {

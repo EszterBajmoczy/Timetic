@@ -10,7 +10,7 @@ import hu.bme.aut.android.timetic.dataManager.NetworkOrganizationInteractor
 
 import hu.bme.aut.android.timetic.R
 import hu.bme.aut.android.timetic.Role
-import hu.bme.aut.android.timetic.Singleton
+import hu.bme.aut.android.timetic.UseCases
 import hu.bme.aut.android.timetic.network.auth.HttpBasicAuth
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.network.models.*
@@ -105,7 +105,7 @@ class LoginViewModel : ViewModel() {
 
     private fun errorRefreshToken(e: Throwable, code: Int?, call: String) {
         _loginResult.value = Result(success = null, error = R.string.login_failed)
-        Singleton.logBackendError(e, code, call)
+        UseCases.logBackendError(e, code, call)
     }
 
     private fun getTokenOrganization(refreshToken: CommonToken){
@@ -160,7 +160,7 @@ class LoginViewModel : ViewModel() {
                     null,
                     HttpBearerAuth("bearer", token.token!!)
                 )
-            n.getRegisteredOrganizations(onSuccess = this::successOrganizations, onError = Singleton::logBackendError)
+            n.getRegisteredOrganizations(onSuccess = this::successOrganizations, onError = UseCases.Companion::logBackendError)
         } else {
             _loginResult.value = Result(success = true, error = null)
         }
@@ -194,12 +194,12 @@ class LoginViewModel : ViewModel() {
 
     private fun errorRefreshTokenForClient(e: Throwable, code: Int?, call: String) {
         _loginResult.value = Result(success = true, error = R.string.login_failed)
-        Singleton.logBackendError(e, code, call)
+        UseCases.logBackendError(e, code, call)
     }
 
     private fun errorToken(e: Throwable, code: Int?, call: String) {
         _loginResult.value = Result(success = true, error = R.string.login_failed)
-        Singleton.logBackendError(e, code, call)
+        UseCases.logBackendError(e, code, call)
     }
 
     private fun onSuccesReset(unit: Unit) {
@@ -208,7 +208,7 @@ class LoginViewModel : ViewModel() {
 
     private fun onErrorReset(e: Throwable, code: Int?, call: String) {
         _resetResult.value = Result(success = null, error = R.string.user_not_found)
-        Singleton.logBackendError(e, code, call)
+        UseCases.logBackendError(e, code, call)
     }
 
     private fun setRefreshToken(token: CommonToken){

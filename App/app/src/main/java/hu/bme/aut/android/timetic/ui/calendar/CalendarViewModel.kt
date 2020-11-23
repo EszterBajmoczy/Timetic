@@ -3,7 +3,7 @@ package hu.bme.aut.android.timetic.ui.calendar
 import androidx.lifecycle.*
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.Role
-import hu.bme.aut.android.timetic.Singleton
+import hu.bme.aut.android.timetic.UseCases
 import hu.bme.aut.android.timetic.create.getAppointment
 import hu.bme.aut.android.timetic.create.getClient
 import hu.bme.aut.android.timetic.create.getEmployee
@@ -72,7 +72,7 @@ class CalendarViewModel : ViewModel() {
         if(dbList != null) {
             if(backendList != null) {
                 //check if it is already in the local database
-                Singleton.appointmentOrganizer(repo, viewModelScope, backendList, dbList)
+                UseCases().appointmentOrganizer(repo, viewModelScope, backendList, dbList)
                 //result.removeSource(apps)
 
             } else {
@@ -93,7 +93,7 @@ class CalendarViewModel : ViewModel() {
         if(dbList != null) {
             //check if it is already in the local database
             if (backendList != null) {
-                list = Singleton.personOrganizer(repo, viewModelScope, backendList, dbList)
+                list = UseCases().personOrganizer(repo, viewModelScope, backendList, dbList)
                 //clientResult.removeSource(clients)
             } else {
                 list = dbList
@@ -117,8 +117,8 @@ class CalendarViewModel : ViewModel() {
                 )
             )
         when(role) {
-            Role.EMPLOYEE -> backend.getEmployeeAppointments(onSuccess = this::successEmployeeAppointmentList, onError = Singleton::logBackendError)
-            Role.CLIENT -> backend.getClientAppointments(onSuccess = this::successClientAppointmentList, onError = Singleton::logBackendError)
+            Role.EMPLOYEE -> backend.getEmployeeAppointments(onSuccess = this::successEmployeeAppointmentList, onError = UseCases.Companion::logBackendError)
+            Role.CLIENT -> backend.getClientAppointments(onSuccess = this::successClientAppointmentList, onError = UseCases.Companion::logBackendError)
         }
     }
 

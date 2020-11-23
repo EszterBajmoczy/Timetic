@@ -3,7 +3,7 @@ package hu.bme.aut.android.timetic.ui.organizationoperations
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import hu.bme.aut.android.timetic.Singleton
+import hu.bme.aut.android.timetic.UseCases
 import hu.bme.aut.android.timetic.dataManager.NetworkDeveloperInteractor
 import hu.bme.aut.android.timetic.network.models.CommonOrganization
 
@@ -17,7 +17,7 @@ class OrganizationOperationViewModel : ViewModel() {
                 null,
                 null
             )
-        backend.getOrganizations(onSuccess = this::success, onError = Singleton::logBackendError)
+        backend.getOrganizations(onSuccess = this::success, onError = UseCases.Companion::logBackendError)
     }
 
     private fun success(list: List<CommonOrganization>) {

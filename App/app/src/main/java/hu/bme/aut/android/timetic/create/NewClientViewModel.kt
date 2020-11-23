@@ -6,7 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hu.bme.aut.android.timetic.MyApplication
-import hu.bme.aut.android.timetic.Singleton
+import hu.bme.aut.android.timetic.UseCases
 import hu.bme.aut.android.timetic.data.model.Person
 import hu.bme.aut.android.timetic.dataManager.DBRepository
 import hu.bme.aut.android.timetic.dataManager.NetworkDeveloperInteractor
@@ -55,7 +55,7 @@ class NewClientViewModel : ViewModel() {
                         token
                     )
                 )
-            backend.getOrganizationDataForEmployee(onSuccess = this::onSuccess, onError = Singleton::logBackendError)
+            backend.getOrganizationDataForEmployee(onSuccess = this::onSuccess, onError = UseCases.Companion::logBackendError)
         }
     }
 
@@ -78,7 +78,7 @@ class NewClientViewModel : ViewModel() {
 
     fun onErrorAddOrganizationIdToDev(e: Throwable, code: Int?, call: String){
         _clientRegistered.value = false
-        Singleton.logBackendError(e, code, call)
+        UseCases.logBackendError(e, code, call)
     }
 
     fun onSuccess(data: ForEmployeeOrganization){
@@ -120,7 +120,7 @@ class NewClientViewModel : ViewModel() {
 
     private fun onErrorClientAdd(e: Throwable, code: Int?, call: String){
         _success.value = false
-        Singleton.logBackendError(e, code, call)
+        UseCases.logBackendError(e, code, call)
     }
 
     private fun insert(person: Person) = viewModelScope.launch {

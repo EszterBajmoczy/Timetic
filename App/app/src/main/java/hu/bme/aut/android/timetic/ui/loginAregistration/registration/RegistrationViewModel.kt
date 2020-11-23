@@ -9,7 +9,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import hu.bme.aut.android.timetic.dataManager.NetworkDeveloperInteractor
 
 import hu.bme.aut.android.timetic.R
-import hu.bme.aut.android.timetic.Singleton
+import hu.bme.aut.android.timetic.UseCases
 import hu.bme.aut.android.timetic.network.auth.HttpBasicAuth
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.network.models.*
@@ -97,7 +97,7 @@ class RegistrationViewModel() : ViewModel() {
                 success = null,
                 error = R.string.login_failed
             )
-        Singleton.logBackendError(e, code, call)
+        UseCases.logBackendError(e, code, call)
     }
 
     private fun getToken(refreshToken: CommonToken){
@@ -129,7 +129,7 @@ class RegistrationViewModel() : ViewModel() {
                 success = null,
                 error = R.string.login_failed
             )
-        Singleton.logBackendError(e, code, call)
+        UseCases.logBackendError(e, code, call)
     }
 
     private fun successReg(u: Unit) {
@@ -148,6 +148,6 @@ class RegistrationViewModel() : ViewModel() {
                 success = null,
                 error = R.string.registration_failed
             )
-        Singleton.logBackendError(e, code, call)
+        UseCases.logBackendError(e, code, call)
     }
 }

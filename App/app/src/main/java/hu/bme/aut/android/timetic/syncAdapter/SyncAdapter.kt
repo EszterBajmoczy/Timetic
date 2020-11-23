@@ -10,10 +10,7 @@ import android.os.Bundle
 import android.os.Looper
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import hu.bme.aut.android.timetic.MyApplication
-import hu.bme.aut.android.timetic.R
-import hu.bme.aut.android.timetic.Role
-import hu.bme.aut.android.timetic.Singleton
+import hu.bme.aut.android.timetic.*
 import hu.bme.aut.android.timetic.create.getAppointment
 import hu.bme.aut.android.timetic.create.getClient
 import hu.bme.aut.android.timetic.create.getEmployee
@@ -300,6 +297,6 @@ class SyncAdapter @JvmOverloads constructor(
 
     private fun errorAppointmentList(e: Throwable, code: Int?, call: String) {
         notification("Unable to synchronize, please log in")
-        Singleton.logBackendError(e, code, call)
+        UseCases.logBackendError(e, code, call)
     }
 }

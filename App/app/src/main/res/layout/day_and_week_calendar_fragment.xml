@@ -36,6 +36,7 @@
         app:todayHeaderTextColor="@color/colorPrimaryLight"
         app:firstDayOfWeek="monday"
         app:showFirstDayOfWeekFirst="true"
+        app:headerRowTextSize="13sp"
         />
 
 

@@ -3,7 +3,7 @@ package hu.bme.aut.android.timetic.ui.organizationoperations.info
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import hu.bme.aut.android.timetic.Singleton
+import hu.bme.aut.android.timetic.UseCases
 import hu.bme.aut.android.timetic.dataManager.NetworkOrganizationInteractor
 import hu.bme.aut.android.timetic.network.models.ForClientOrganization
 
@@ -18,7 +18,7 @@ class OrganizationInfoViewModel : ViewModel() {
             null
         )
 
-        backend.getOrganizationDataForClient(email, onSuccess = this::successList, onError = Singleton::logBackendError)
+        backend.getOrganizationDataForClient(email, onSuccess = this::successList, onError = UseCases.Companion::logBackendError)
     }
 
     private fun successList(list: ForClientOrganization) {

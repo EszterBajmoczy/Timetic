@@ -1,7 +1,7 @@
 package hu.bme.aut.android.timetic.settings
 
 import androidx.lifecycle.*
-import hu.bme.aut.android.timetic.Singleton
+import hu.bme.aut.android.timetic.UseCases
 import hu.bme.aut.android.timetic.dataManager.NetworkOrganizationInteractor
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.network.models.ForEmployeeDataForAppointmentCreation
@@ -23,7 +23,7 @@ class SettingsViewModel : ViewModel() {
                     token
                 )
             )
-        backend.getDataForAppointmentCreation(onSuccess = this::successDataForCreation, onError = Singleton::logBackendError)
+        backend.getDataForAppointmentCreation(onSuccess = this::successDataForCreation, onError = UseCases.Companion::logBackendError)
     }
 
     private fun successDataForCreation(data: ForEmployeeDataForAppointmentCreation) {

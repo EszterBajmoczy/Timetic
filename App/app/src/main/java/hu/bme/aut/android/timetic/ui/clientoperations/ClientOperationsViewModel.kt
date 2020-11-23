@@ -5,7 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import hu.bme.aut.android.timetic.MyApplication
-import hu.bme.aut.android.timetic.Singleton
+import hu.bme.aut.android.timetic.UseCases
 import hu.bme.aut.android.timetic.data.model.Person
 import hu.bme.aut.android.timetic.dataManager.DBRepository
 import hu.bme.aut.android.timetic.dataManager.NetworkOrganizationInteractor
@@ -40,7 +40,7 @@ class ClientOperationsViewModel : ViewModel() {
                         Token
                     )
                 )
-            backend.getClients(onSuccess = this::success, onError = Singleton::logBackendError)
+            backend.getClients(onSuccess = this::success, onError = UseCases.Companion::logBackendError)
         }
     }
 
