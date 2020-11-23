@@ -32,7 +32,6 @@ class MyApplication : Application() {
 			return secureSharedPreferences.getString("DevToken", "")
 		}
 
-
 		fun getRefreshToken(): String? {
 			return secureSharedPreferences.getString("RefreshToken", "")
 		}
@@ -50,8 +49,7 @@ class MyApplication : Application() {
 				.add(KotlinJsonAdapterFactory())
 				.build()
 
-			var client: OkHttpClient?
-			client =  OkHttpClient.Builder()
+			val client =  OkHttpClient.Builder()
 				.addInterceptor(HttpBearerAuth(
 					"bearer",
 					getRefreshToken()!!

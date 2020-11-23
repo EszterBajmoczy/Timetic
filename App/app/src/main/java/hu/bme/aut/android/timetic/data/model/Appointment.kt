@@ -3,7 +3,9 @@ package hu.bme.aut.android.timetic.data.model
 import com.alamkanak.weekview.WeekViewDisplayable
 import com.alamkanak.weekview.WeekViewEvent
 import hu.bme.aut.android.timetic.R
+import java.lang.Exception
 import java.util.*
+import kotlin.random.Random.Default.nextInt
 
 class Appointment(
     val id: Long?,
@@ -22,9 +24,15 @@ class Appointment(
 
     override fun toWeekViewEvent(): WeekViewEvent<Appointment> {
         // Build the styling of the event, for instance background color and strike-through
-        val style = WeekViewEvent.Style.Builder()
-            .setBackgroundColor(R.color.colorPrimaryLight)
-            .build()
+        val style = if(private_appointment) {
+            WeekViewEvent.Style.Builder()
+                .setBackgroundColorResource(R.color.colorAccentLight)
+                .build()
+        } else{
+            WeekViewEvent.Style.Builder()
+                .setBackgroundColorResource(R.color.colorAccent)
+                .build()
+        }
         // Build the WeekViewEvent via the Builder
         val title: String
         if(activity != null){
@@ -37,14 +45,17 @@ class Appointment(
             title = "Event"
         }
 
-        return WeekViewEvent.Builder<Appointment>(this)
-            .setId(id!!)
-            .setTitle(title)
-            .setStartTime(start_date)
-            .setEndTime(end_date)
-            .setStyle(style)
-            .build()
-
+        while(true) {
+            try {
+                return WeekViewEvent.Builder<Appointment>(this)
+                    .setId((0..100000).random().toLong())
+                    .setTitle(title)
+                    .setStartTime(start_date)
+                    .setEndTime(end_date)
+                    .setStyle(style)
+                    .build()
+            } catch (e: Exception) {}
+        }
     }
 
     override fun compareTo(other: Appointment): Int {

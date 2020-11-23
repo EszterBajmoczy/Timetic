@@ -1,6 +1,5 @@
 package hu.bme.aut.android.timetic.ui.calendar
 
-import android.util.Log
 import androidx.lifecycle.*
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.Role
@@ -66,21 +65,18 @@ class CalendarViewModel : ViewModel() {
         apps: LiveData<List<Appointment>>,
         appsFromBackend: LiveData<List<Appointment>>
     ): List<Appointment>? {
-        val appointmentIds = ArrayList<String>()
-
         val backendList = appsFromBackend.value
         val dbList = apps.value
+        var list = dbList ?: ArrayList()
 
         if(dbList != null) {
-            //check if it is already in the local database
-            if (backendList != null) {
-                for (item in backendList){
-                    appointmentIds.add(item.backendId+item.organizationUrl)
-                    if(newOrUpdatedAppointment(item)){
-                        insert(item)
-                    }
-                }
-                deleteCanceledAppointments(appointmentIds)
+            if(backendList != null) {
+                //check if it is already in the local database
+                Singleton.appointmentOrganizer(repo, viewModelScope, backendList, dbList)
+                //result.removeSource(apps)
+
+            } else {
+                list = dbList
             }
         }
         return dbList
@@ -90,26 +86,20 @@ class CalendarViewModel : ViewModel() {
         clients: LiveData<List<Person>>,
         clientsFromBackend: LiveData<List<Person>>
     ): List<Person>? {
-        val clientIds = ArrayList<String>()
-        val clientAlreadyAdded = ArrayList<String>()
-
         val backendList = clientsFromBackend.value
         val dbList = clients.value
+        var list = dbList ?: ArrayList()
 
         if(dbList != null) {
             //check if it is already in the local database
             if (backendList != null) {
-                for (item in backendList){
-                    clientIds.add(item.backendId+item.email)
-                    if(!clientAlreadyAdded.contains(item.backendId+item.email) && newOrUpdatedClient(item) ){
-                        clientAlreadyAdded.add(item.backendId+item.email)
-                        insert(item)
-                    }
-                }
-                deleteClientsWithoutAppointment(clientIds)
+                list = Singleton.personOrganizer(repo, viewModelScope, backendList, dbList)
+                //clientResult.removeSource(clients)
+            } else {
+                list = dbList
             }
         }
-        return dbList
+        return list
     }
 
     fun downloadAppointments(
@@ -117,7 +107,6 @@ class CalendarViewModel : ViewModel() {
         organizationUrl: String,
         token: String
     ) {
-        Log.d("EZAZ", "appontments downloooooooood")
         this.organizationUrl = organizationUrl
         backend = NetworkOrganizationInteractor(
                 organizationUrl,
@@ -161,81 +150,6 @@ class CalendarViewModel : ViewModel() {
         }
         _appsFromBackend.value = appList
         _clientsFromBackend.value = employeeList
-    }
-
-    //delete if some Appointment was deleted at the server side
-    private fun deleteCanceledAppointments(ids: List<String>) {
-        for(item in apps.value!!){
-            if(!ids.contains(item.backendId + item.organizationUrl)){
-                delete(item)
-            }
-        }
-    }
-
-    //checks if the appointment already saved
-    private fun newOrUpdatedAppointment(
-        appointment: Appointment
-    ) : Boolean {
-        for(item in apps.value!!){
-            if(item.backendId == appointment.backendId){
-                if(item.note == appointment.note && item.start_date.timeInMillis == appointment.start_date.timeInMillis &&
-                    item.end_date.timeInMillis == appointment.end_date.timeInMillis &&
-                    item.private_appointment == appointment.private_appointment &&
-                    item.address == appointment.address && appointment.private_appointment){
-                    return false
-                }
-                if(item.note == appointment.note && item.start_date.timeInMillis == appointment.start_date.timeInMillis &&
-                    item.end_date.timeInMillis == appointment.end_date.timeInMillis && item.price!! == appointment.price &&
-                    item.private_appointment == appointment.private_appointment && item.videochat == appointment.videochat &&
-                    item.address == appointment.address && item.personBackendId == appointment.personBackendId && item.activity == appointment.activity){
-                    return false
-                }
-                delete(item)
-                return true
-            }
-        }
-        return true
-    }
-
-    //delete if some Client does not have any appointment
-    private fun deleteClientsWithoutAppointment(ids: List<String>) {
-        for(item in clients.value!!){
-            if(!ids.contains(item.backendId + item.email)){
-                delete(item)
-            }
-        }
-    }
-
-    //checks if the client already saved
-    private fun newOrUpdatedClient(
-        person: Person?
-    ) : Boolean {
-        for(item in clients.value!!){
-            if(item.backendId == person!!.backendId){
-                if(item.name == person.name && item.email == person.email && item.phone == person.phone ){
-                    return false
-                }
-                delete(item)
-                return true
-            }
-        }
-        return true
-    }
-
-    private fun insert(appointment: Appointment) = viewModelScope.launch {
-        repo.insert(appointment)
-    }
-
-    private fun insert(person: Person) = viewModelScope.launch {
-        repo.insert(person)
-    }
-
-    private fun delete(appointment: Appointment) = viewModelScope.launch {
-        repo.deleteAppointment(appointment)
-    }
-
-    private fun delete(person: Person) = viewModelScope.launch {
-        repo.deletePerson(person)
     }
 
     fun deleteAllFromProject() = viewModelScope.launch {

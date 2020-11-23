@@ -66,7 +66,7 @@ class ClientOperationsFragment : Fragment(){
         initRecyclerView()
         setFloatingActionButton()
 
-        if(!MyApplication.getOrganizationUrl()!!.isNullOrEmpty()) {
+        if(MyApplication.getOrganizationUrl()!!.isNotEmpty()) {
             initialize(false)
         } else {
             initialize(true)

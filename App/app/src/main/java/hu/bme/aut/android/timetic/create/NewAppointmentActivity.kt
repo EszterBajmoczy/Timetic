@@ -73,7 +73,7 @@ class NewAppointmentActivity : AppCompatActivity() {
             role = Role.CLIENT
             //Details view
             viewModel.getAppointmentByNetId(appointmentId!!)
-            viewModel.appDetail.observe(this,  ClientDetailViewObserver())
+            viewModel.appDetail.observe(this,  clientDetailViewObserver())
         } else {
             role = Role.EMPLOYEE
             if(isNetworkAvailable()) {
@@ -113,7 +113,7 @@ class NewAppointmentActivity : AppCompatActivity() {
                 if(appointmentId != null){
                     //Details view
                     viewModel.getAppointmentByNetId(appointmentId)
-                    viewModel.appDetail.observe(this,  AppObserver())
+                    viewModel.appDetail.observe(this,  appObserver())
                 }
                 else{
                     //Create view
@@ -166,7 +166,7 @@ class NewAppointmentActivity : AppCompatActivity() {
                 }
             } else {
                 viewModel.getAppointmentByNetId(appointmentId!!)
-                viewModel.appDetail.observe(this,  ClientDetailViewObserver())
+                viewModel.appDetail.observe(this,  clientDetailViewObserver())
             }
         }
         viewModel.meetingUrl.observe(this, Observer {
@@ -175,7 +175,7 @@ class NewAppointmentActivity : AppCompatActivity() {
         })
     }
 
-    private fun AppObserver(): Observer<Appointment> {
+    private fun appObserver(): Observer<Appointment> {
         observer = androidx.lifecycle.Observer { app ->
             appointment = app
             viewModel.clients.observe(this, androidx.lifecycle.Observer { clientList->
@@ -281,30 +281,29 @@ class NewAppointmentActivity : AppCompatActivity() {
         return observer
     }
 
-    private fun ClientDetailViewObserver(): Observer<Appointment> {
+    private fun clientDetailViewObserver(): Observer<Appointment> {
         observer = androidx.lifecycle.Observer { app ->
             appointment = app
 
             if(app.personBackendId != null && app.personBackendId.isNotEmpty()){
                 viewModel.getPersonByNetId(app.personBackendId)
+                viewModel.personDetail.observe(this, Observer{person ->
+                    setPersonSpinner(listOf(person.name), person.name)
+                    spPerson.isClickable = false
+
+
+                    clientCall.setOnClickListener {
+                        val callIntent = Intent(Intent.ACTION_DIAL)
+                        callIntent.data = Uri.parse("tel:${person.phone}")
+                        startActivity(callIntent)
+                    }
+
+                    clientEmail.setOnClickListener {
+                        val intent = Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", person.phone, null))
+                        startActivity(Intent.createChooser(intent, "Choose an Email client :"))
+                    }
+                })
             }
-
-            viewModel.personDetail.observe(this, Observer{person ->
-                setPersonSpinner(listOf(person.name), person.name)
-                spPerson.isClickable = false
-
-
-                clientCall.setOnClickListener {
-                    val callIntent = Intent(Intent.ACTION_DIAL)
-                    callIntent.data = Uri.parse("tel:${person.phone}")
-                    startActivity(callIntent)
-                }
-
-                clientEmail.setOnClickListener {
-                    val intent = Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", person.phone, null))
-                    startActivity(Intent.createChooser(intent, "Choose an Email client :"))
-                }
-            })
 
             setActivitySpinner(listOf(app.activity), null)
             spActivity.isClickable = false
