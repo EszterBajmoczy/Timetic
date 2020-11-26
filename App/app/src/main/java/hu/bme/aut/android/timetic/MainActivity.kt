@@ -131,13 +131,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setFirstRunAndSynchronizeReceiver(pref: SharedPreferences) {
-        //if(!pref.contains("NotFirst")){
+        if(!pref.contains("NotFirst")){
             val editor: SharedPreferences.Editor = pref.edit()
             editor.putBoolean("NotFirst", false)
             editor.apply()
 
             val calAlarm = Calendar.getInstance()
-            calAlarm[Calendar.HOUR_OF_DAY] = 2
+            calAlarm[Calendar.HOUR_OF_DAY] = 13
             calAlarm[Calendar.MINUTE] = 0
             calAlarm[Calendar.SECOND] = 0
 
@@ -147,10 +147,10 @@ class MainActivity : AppCompatActivity() {
             val pendingIntent = PendingIntent.getBroadcast(applicationContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
 
             val alarmManager =  getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, calAlarm.timeInMillis, pendingIntent)
+
             alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calAlarm.timeInMillis, AlarmManager.INTERVAL_DAY, pendingIntent)
-        Log.d( "EZAZ", "register alarm")
-       // }
+            Log.d( "EZAZ", "register alarm")
+       }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

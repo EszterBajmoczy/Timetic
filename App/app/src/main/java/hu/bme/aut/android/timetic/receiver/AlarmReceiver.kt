@@ -39,20 +39,20 @@ class AlarmReceiver : BroadcastReceiver() {
         notification( "AlarmReceiver ;)", context)
         // Get the content resolver for your app
         val mResolver = context.contentResolver
-/*
+
         val settingsBundle = Bundle().apply {
             putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true)
             putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true)
         }
         ContentResolver.requestSync(mAccount, AUTHORITY, settingsBundle)
 
- */
 
+/*
         ContentResolver.addPeriodicSync(
             mAccount,
             AUTHORITY,
             Bundle.EMPTY,
-            SYNC_INTERVAL)
+            SYNC_INTERVAL) */
 
     }
 

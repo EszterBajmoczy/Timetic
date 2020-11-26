@@ -65,7 +65,6 @@ class NetworkDeveloperInteractor(auth: HttpBasicAuth?, autb: HttpBearerAuth?) {
             } catch (e: Exception) {
                 e.printStackTrace()
                 handler.post {
-                    //logerror
                     if (response != null) {
                         onError(e, response.code(), call.request().toString())
                     } else {

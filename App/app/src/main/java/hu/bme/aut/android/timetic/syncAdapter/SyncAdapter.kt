@@ -7,8 +7,11 @@ import android.app.NotificationManager
 import android.content.*
 import android.os.Build
 import android.os.Bundle
-import android.os.Looper
+import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.lifecycle.viewModelScope
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import hu.bme.aut.android.timetic.*
 import hu.bme.aut.android.timetic.create.getAppointment
 import hu.bme.aut.android.timetic.create.getClient
@@ -17,12 +20,17 @@ import hu.bme.aut.android.timetic.create.toHashMap
 import hu.bme.aut.android.timetic.data.model.Appointment
 import hu.bme.aut.android.timetic.data.model.Person
 import hu.bme.aut.android.timetic.dataManager.DBRepository
-import hu.bme.aut.android.timetic.dataManager.NetworkOrganizationInteractor
+import hu.bme.aut.android.timetic.network.apiOrganization.OrganizationApi
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.network.models.CommonAppointment
 import hu.bme.aut.android.timetic.network.models.ForClientAppointment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
+import retrofit2.Retrofit
+import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.*
 
 class SyncAdapter @JvmOverloads constructor(
@@ -32,8 +40,8 @@ class SyncAdapter @JvmOverloads constructor(
     val mContentResolver: ContentResolver = context.contentResolver
 ) : AbstractThreadedSyncAdapter(context, autoInitialize, allowParallelSyncs) {
     private var mapSize: Int = 0
-    private var appointmentsBackend = ArrayList<Appointment>()
-    private var personsBackend = ArrayList<Person>()
+    private var appointments = ArrayList<Appointment>()
+    private var persons = ArrayList<Person>()
     private var notificationCount = 1
     private lateinit var repo: DBRepository
     private lateinit var role: Role
@@ -51,10 +59,6 @@ class SyncAdapter @JvmOverloads constructor(
         notification( "SyncAdapter at $hour:$minute")
 
         //TODO save LastSync date in millis
-        val calendar = Calendar.getInstance()
-        val editor =  MyApplication.secureSharedPreferences.edit()
-        editor.putLong("LastSync", calendar.timeInMillis)
-        editor.apply()
 
         if(MyApplication.getToken().isNullOrEmpty() || MyApplication.getDevToken().isNullOrEmpty() ){
             role = if(MyApplication.getToken() != null && MyApplication.getToken()!!.isNotEmpty()){
@@ -62,7 +66,6 @@ class SyncAdapter @JvmOverloads constructor(
             } else {
                 Role.CLIENT
             }
-            Looper.prepare()
             synchronize()
         } else {
             notification( "Unable to synchronize, please log in")
@@ -72,14 +75,33 @@ class SyncAdapter @JvmOverloads constructor(
     private fun synchronize() {
         when(role) {
             Role.EMPLOYEE -> {
-                val backend =  NetworkOrganizationInteractor(MyApplication.getOrganizationUrl()!!, null, HttpBearerAuth("bearer", MyApplication.getToken()!!))
-                backend.getEmployeeAppointments(onSuccess = this::successEmployeeAppointmentList, onError = this::errorAppointmentList)
+                //sync
+                val apiOrg = getApi(MyApplication.getOrganizationUrl()!!)
+                val response: retrofit2.Response<List<CommonAppointment>> = apiOrg.employeeAppointmentsGet().execute()
+                if (response.isSuccessful){
+                    successAppointmentList(response.body()!!)
+                } else {
+                    notification( "Unable to synchronize")
+                }
+                //async
+                //val backend =  NetworkOrganizationInteractor(MyApplication.getOrganizationUrl()!!, null, HttpBearerAuth("bearer", MyApplication.getToken()!!))
+                //backend.getEmployeeAppointments(onSuccess = this::successAppointmentList, onError = this::errorAppointmentList)
             }
             Role.CLIENT -> {
                 val organizationsMapString = MyApplication.secureSharedPreferences.getString("OrganizationsMap", "")
                 val organizationMap = organizationsMapString!!.toHashMap()
                 mapSize = organizationMap.size
-                for((url,token) in organizationMap){
+                for((url, _) in organizationMap){
+                    //sync
+                    val apiOrg = getApi(url)
+                    val response: retrofit2.Response<List<ForClientAppointment>> = apiOrg.clientAppointmentsGet().execute()
+                    if (response.isSuccessful){
+                        successClientAppointmentList(response.body()!!, url)
+                    } else {
+                        notification( "Unable to synchronize")
+                    }
+                    /*
+                    //async
                     val backend = NetworkOrganizationInteractor(
                         url,
                         null,
@@ -89,39 +111,60 @@ class SyncAdapter @JvmOverloads constructor(
                         )
                     )
                     backend.getClientAppointments(onSuccess = this::successClientAppointmentList, onError = this::errorAppointmentList)
+
+                     */
                 }
             }
-
         }
+    }
 
+    private fun getApi(url: String): OrganizationApi {
+        val m = Moshi.Builder()
+            .add(KotlinJsonAdapterFactory())
+            .build()
+
+        val client =  OkHttpClient.Builder()
+            .addInterceptor(HttpBearerAuth(
+                "bearer",
+                MyApplication.getToken()!!
+            ))
+            .build()
+
+        val retrofit = Retrofit.Builder()
+            .baseUrl(url)
+            .client(client)
+            .addConverterFactory(MoshiConverterFactory.create(m))
+            .build()
+
+        return retrofit.create(OrganizationApi::class.java)
     }
 
     private fun successClientAppointmentList(list: List<ForClientAppointment>, organizationUrl: String) {
         mapSize -= 1
         for(item in list){
             val a = item.getAppointment(organizationUrl)
-            appointmentsBackend.add(a)
+            appointments.add(a)
             val c = item.getEmployee()
-            if(!personsBackend.contains(c)){
-                personsBackend.add(c)
+            if(!persons.contains(c)){
+                persons.add(c)
             }
         }
         if(mapSize < 1){
             appointments()
-            persons()
+            clients()
         }
     }
 
-    private fun successEmployeeAppointmentList(list: List<CommonAppointment>) {
+    private fun successAppointmentList(list: List<CommonAppointment>) {
         for(item in list){
-            appointmentsBackend.add(item.getAppointment())
+            appointments.add(item.getAppointment())
             val c = item.getClient()
-            if(c != null && !personsBackend.contains(c)) {
-                personsBackend.add(c)
+            if(c != null && !persons.contains(c)) {
+                persons.add(c)
             }
         }
         appointments()
-        persons()
+        clients()
     }
 
     private fun notification(title: String, text: String? = null) {
@@ -145,31 +188,38 @@ class SyncAdapter @JvmOverloads constructor(
     }
 
     private fun appointments() {
+        Log.d("EZAZ", "appontments success")
         val dao = MyApplication.myDatabase.roomDao()
         repo = DBRepository(dao)
-        //get appointments synchron from db
-        val dbList = repo.getAppointmentList()
+        val apps = repo.getAppointmentList()
 
-        val appointmentIds = ArrayList<String>()
+        UseCases().appointmentOrganizer(repo, CoroutineScope(Dispatchers.IO), appointments, apps)
 
-        //check if it is already in the local database
-        UseCases().appointmentOrganizer(repo, CoroutineScope(Dispatchers.IO), appointmentsBackend, dbList)
+        //check if there is an appointment today
+        for(item in appointments) {
+            val todayStart = Calendar.getInstance()
+            todayStart.set(Calendar.HOUR_OF_DAY, 0)
+            todayStart.set(Calendar.MINUTE, 0)
+            todayStart.set(Calendar.SECOND, 0)
+            val todayEnd = Calendar.getInstance()
+            todayEnd.set(Calendar.HOUR_OF_DAY, 23)
+            todayEnd.set(Calendar.MINUTE, 59)
+            todayEnd.set(Calendar.SECOND, 59)
 
-        for (item in appointmentsBackend) {
-            //make a unique id in the list
-            appointmentIds.add(item.backendId + item.organizationUrl)
+            if(item.start_date > todayStart && item.start_date < todayEnd){
+                val title = getTitle(item)
+                val text = getText(item)
+                notification(title, text)
+            }
         }
-
     }
 
-    private fun persons() {
+    private fun clients() {
         val dao = MyApplication.myDatabase.roomDao()
         repo = DBRepository(dao)
-        //get persons synchron from db
-        val dbList = repo.getPersonList()
+        val personsFromDB = repo.getPersonList()
 
-        //check if it is already in the local database
-        UseCases().personOrganizer(repo, CoroutineScope(Dispatchers.IO), personsBackend, dbList)
+        UseCases().personOrganizer(repo, CoroutineScope(Dispatchers.IO), persons, personsFromDB)
     }
 
     private fun getTitle(appointment: Appointment): String {
@@ -192,10 +242,5 @@ class SyncAdapter @JvmOverloads constructor(
             return "${0}${value}"
         }
         return value.toString()
-    }
-
-    private fun errorAppointmentList(e: Throwable, code: Int?, call: String) {
-        notification("Unable to synchronize, please log in")
-        UseCases.logBackendError(e, code, call)
     }
 }

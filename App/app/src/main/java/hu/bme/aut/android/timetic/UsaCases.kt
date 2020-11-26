@@ -1,5 +1,6 @@
 package hu.bme.aut.android.timetic
 
+import android.util.Log
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import hu.bme.aut.android.timetic.data.model.Appointment
 import hu.bme.aut.android.timetic.data.model.Person
@@ -16,6 +17,7 @@ class UseCases {
                 403 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "403 - Forbidden")
                 404 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "404 - Not Found")
                 409 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "409 - Conflict")
+                500 -> FirebaseCrashlytics.getInstance().setCustomKey("Code", "505 - Internal Server Error")
             }
             FirebaseCrashlytics.getInstance().setCustomKey("Call", call)
             FirebaseCrashlytics.getInstance().recordException(e)
@@ -133,7 +135,6 @@ class UseCases {
         }
         return true
     }
-
 
     private fun insert(repo: DBRepository, scope: CoroutineScope, appointment: Appointment) = scope.launch {
         repo.insert(appointment)

@@ -48,27 +48,32 @@ class MonthCalendarFragment : Fragment(), AppointmentAdapter.AppointmentItemClic
 
         val calendarView = view?.findViewById(R.id.calendarMonthView) as MaterialCalendarView
         viewModel.result.observe(viewLifecycleOwner, Observer {
-            calendarView.removeDecorators()
-            for(appointment in it){
-                val date = CalendarDay.from(appointment.start_date.get(Calendar.YEAR),  appointment.start_date.get(Calendar.MONTH) + 1, appointment.start_date.get(Calendar.DAY_OF_MONTH))
-                calendarView.addDecorators(CurrentDayDecorator(requireActivity(), date))
-            }
-            calendarView.setOnDateChangedListener { _, date, _ ->
-                dateMonthView.text = date.day.toString()
-                //list events under the calendar
-                val list = ArrayList<Appointment>()
-                for(item in it) {
-                    val appointmentDate = CalendarDay.from(item.start_date.get(Calendar.YEAR),  item.start_date.get(Calendar.MONTH) + 1, item.start_date.get(Calendar.DAY_OF_MONTH))
-                    if(date == appointmentDate){
-                        list.add(item)
-                    }
+            if(it != null) {
+                calendarView.removeDecorators()
+                for(appointment in it){
+                    val date = CalendarDay.from(appointment.start_date.get(Calendar.YEAR),  appointment.start_date.get(Calendar.MONTH) + 1, appointment.start_date.get(Calendar.DAY_OF_MONTH))
+                    calendarView.addDecorators(CurrentDayDecorator(requireActivity(), date))
                 }
-                adapter.update(list)
+                calendarView.setOnDateChangedListener { _, date, _ ->
+                    dateMonthView.text = date.day.toString()
+                    //list events under the calendar
+                    val list = ArrayList<Appointment>()
+                    for(item in it) {
+                        val appointmentDate = CalendarDay.from(item.start_date.get(Calendar.YEAR),  item.start_date.get(Calendar.MONTH) + 1, item.start_date.get(Calendar.DAY_OF_MONTH))
+                        if(date == appointmentDate){
+                            list.add(item)
+                        }
+                    }
+                    adapter.update(list)
+                }
             }
         })
-        viewModel.clientResult.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
-            //it needs an observer to be able to save the clients
-        })
+
+        if(!viewModel.clientResult.hasObservers()){
+            viewModel.clientResult.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
+                //it needs an observer to be able to save the clients
+            })
+        }
 
         calendarView.setOnDateLongClickListener { _, _ ->
             val intent = Intent(activity, NewAppointmentActivity::class.java)

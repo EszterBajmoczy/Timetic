@@ -42,7 +42,7 @@ class Appointment(
             title = note
         }
         else{
-            title = "Event"
+            title = "Névtelen"
         }
 
         while(true) {
