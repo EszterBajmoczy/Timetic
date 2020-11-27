@@ -53,6 +53,11 @@ class SyncAdapter @JvmOverloads constructor(
         provider: ContentProviderClient,
         syncResult: SyncResult
     ) {
+        val calendar = Calendar.getInstance()
+        val editor = MyApplication.secureSharedPreferences.edit()
+        editor.putLong("LastSync", calendar.timeInMillis)
+        editor.apply()
+
         val c = Calendar.getInstance()
         val hour = c.get(Calendar.HOUR_OF_DAY)
         val minute = c.get(Calendar.MINUTE)
@@ -228,7 +233,7 @@ class SyncAdapter @JvmOverloads constructor(
         } else if(appointment.note != "" && appointment.note != null){
             appointment.note
         } else{
-            "You have an appointment today:"
+            "Magán időpont:"
         }
     }
 

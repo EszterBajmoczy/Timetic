@@ -31,8 +31,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:background="@color/lightgrey"
-                android:padding="2dp"/>
+                android:background="@color/light"
+                android:padding="8dp"/>
 
         </LinearLayout>
 
@@ -58,8 +58,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:background="@color/lightgrey"
-                android:padding="2dp"
+                android:background="@color/light"
+                android:padding="8dp"
                 android:inputType="textEmailAddress"
                 android:selectAllOnFocus="true"/>
 
@@ -87,8 +87,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:background="@color/lightgrey"
-                android:padding="2dp"/>
+                android:background="@color/light"
+                android:padding="8dp"/>
 
         </LinearLayout>
 
@@ -99,9 +99,6 @@
             tools:context=".create.NewClientActivity"
             android:layout_gravity="center"
             android:orientation="vertical">
-
-
-
         </LinearLayout>
 
         <LinearLayout
@@ -115,13 +112,16 @@
                 android:id="@+id/btCancelClient"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
-                android:text="@string/tCancel"/>
+                android:text="@string/tCancel"
+                android:background="@color/colorPrimaryLight"
+                android:layout_marginEnd="20dp"/>
 
             <Button
                 android:id="@+id/btSaveClient"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
-                android:text="@string/tSave"/>
+                android:text="@string/tSave"
+                android:background="@color/colorPrimaryLight"/>
         </LinearLayout>
 
     </LinearLayout>

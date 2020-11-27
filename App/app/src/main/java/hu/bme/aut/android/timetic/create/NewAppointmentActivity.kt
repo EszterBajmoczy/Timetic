@@ -464,7 +464,7 @@ class NewAppointmentActivity : AppCompatActivity() {
     }
 
     private fun setDateChooseButtonValue(){
-        val simpleFormat = SimpleDateFormat("MM.dd.yyyy\nHH:mm", Locale.getDefault())
+        val simpleFormat = SimpleDateFormat("yyyy.MM.dd\nHH:mm", Locale.getDefault())
         if(appointment != null){
             btChooseStartTime.text = simpleFormat.format(appointment!!.start_date.time)
             startTime = appointment!!.start_date.timeInMillis
@@ -540,7 +540,7 @@ class NewAppointmentActivity : AppCompatActivity() {
                             c.set(Calendar.MINUTE, minute)
                             startTime = c.timeInMillis
 
-                            val simpleFormat = SimpleDateFormat("MM.dd.yyyy\nHH:mm", Locale.getDefault())
+                            val simpleFormat = SimpleDateFormat("yyyy.MM.dd\nHH:mm", Locale.getDefault())
                             btChooseStartTime.text = simpleFormat.format(c.time)
 
                             val defaultTimeLength = defaultSharedPreferences.getString("timeRange", "60")?.toInt()
@@ -586,7 +586,7 @@ class NewAppointmentActivity : AppCompatActivity() {
                             c.set(Calendar.MINUTE, minute)
                             endTime = c.timeInMillis
 
-                            val simpleFormat = SimpleDateFormat("MM.dd.yyyy\nHH:mm", Locale.getDefault())
+                            val simpleFormat = SimpleDateFormat("yyyy.MM.dd\nHH:mm", Locale.getDefault())
                             btChooseEndTime.text = simpleFormat.format(c.time)
                         },
                         c.get(Calendar.HOUR_OF_DAY),

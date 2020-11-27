@@ -1,10 +1,7 @@
 package hu.bme.aut.android.timetic
 
-import android.app.AlarmManager
-import android.app.PendingIntent
 import android.content.*
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -20,7 +17,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
 import hu.bme.aut.android.timetic.create.toHashMap
-import hu.bme.aut.android.timetic.receiver.AlarmReceiver
+import hu.bme.aut.android.timetic.receiver.BootReceiver
 import hu.bme.aut.android.timetic.settings.SettingsActivity
 import hu.bme.aut.android.timetic.ui.calendar.CalendarViewModel
 import hu.bme.aut.android.timetic.ui.calendar.CalendarViewModelFactory
@@ -92,7 +89,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        //update last syncronization date
+        //update last synchronization date
         viewModel.appsDownloaded.observe(this, androidx.lifecycle.Observer {
             val calendar = Calendar.getInstance()
             val editor = pref.edit()
@@ -132,25 +129,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun setFirstRunAndSynchronizeReceiver(pref: SharedPreferences) {
         if(!pref.contains("NotFirst")){
-            val editor: SharedPreferences.Editor = pref.edit()
-            editor.putBoolean("NotFirst", false)
-            editor.apply()
-
-            val calAlarm = Calendar.getInstance()
-            calAlarm[Calendar.HOUR_OF_DAY] = 13
-            calAlarm[Calendar.MINUTE] = 0
-            calAlarm[Calendar.SECOND] = 0
-
             val intent = Intent()
-            intent.setClass(applicationContext, AlarmReceiver::class.java)
-            intent.action = ".receiver.AlarmReceiver"
-            val pendingIntent = PendingIntent.getBroadcast(applicationContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-
-            val alarmManager =  getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calAlarm.timeInMillis, AlarmManager.INTERVAL_DAY, pendingIntent)
-            Log.d( "EZAZ", "register alarm")
-       }
+            intent.setClass(applicationContext, BootReceiver::class.java)
+            //set the synchronization
+            BootReceiver().onReceive(applicationContext, intent)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

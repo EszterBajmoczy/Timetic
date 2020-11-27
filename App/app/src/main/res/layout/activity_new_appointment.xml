@@ -68,7 +68,7 @@
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
-                android:background="@color/lightgrey"
+                android:background="@color/light"
                 android:padding="2dp"/>
 
             <TextView
@@ -84,14 +84,16 @@
                 android:layout_width="150dp"
                 android:layout_height="match_parent"
                 android:layout_column="0"
-                android:id="@+id/btChooseStartTime">
+                android:id="@+id/btChooseStartTime"
+                android:background="@color/light">
 
 
             </Button>
             <Button
                 android:layout_width="150dp"
                 android:layout_height="match_parent"
-                android:id="@+id/btChooseEndTime">
+                android:id="@+id/btChooseEndTime"
+                android:background="@color/light">
 
             </Button>
 
@@ -110,7 +112,7 @@
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
-                android:background="@color/lightgrey"
+                android:background="@color/light"
                 android:padding="2dp"/>
 
             <Space
@@ -160,7 +162,7 @@
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
-                android:background="@color/lightgrey"
+                android:background="@color/light"
                 android:padding="2dp"/>
 
             <TextView
@@ -184,7 +186,7 @@
                     android:layout_width="120dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="15dp"
-                    android:background="@color/lightgrey"
+                    android:background="@color/light"
                     android:padding="2dp"
                     android:inputType="numberDecimal"/>
 
@@ -244,7 +246,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
-                android:background="@color/lightgrey"
+                android:background="@color/light"
                 android:padding="2dp"
                 android:inputType="textMultiLine"
                 android:scrollbars="vertical"
@@ -261,15 +263,19 @@
 
             <Button
                 android:id="@+id/btCancel"
-                android:layout_width="150dp"
+                android:layout_width="140dp"
                 android:layout_height="wrap_content"
-                android:text="@string/tCancel"/>
+                android:text="@string/tCancel"
+                android:background="@color/colorPrimaryLight"
+                android:layout_marginEnd="20dp"/>
 
             <Button
                 android:id="@+id/btSave"
-                android:layout_width="150dp"
+                android:layout_width="140dp"
                 android:layout_height="wrap_content"
-                android:text="@string/tSave"/>
+                android:text="@string/tSave"
+                android:background="@color/colorPrimaryLight"/>
+
         </LinearLayout>
 
     </LinearLayout>

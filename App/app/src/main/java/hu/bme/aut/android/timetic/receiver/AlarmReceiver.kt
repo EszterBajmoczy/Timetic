@@ -19,15 +19,9 @@ import hu.bme.aut.android.timetic.R
 const val AUTHORITY = "hu.bme.aut.android.timetic.syncAdapter"
 // An account type, in the form of a domain name
 const val ACCOUNT_TYPE = "hu.bme.aut.android.timetic"
-// The account name
-const val ACCOUNTPlaceholder = "placeholderaccount"
 
 // Account
 const val ACCOUNT = "default_account"
-// Sync interval constants
-const val SECONDS_PER_MINUTE = 60L
-const val SYNC_INTERVAL_IN_MINUTES = 60
-const val SYNC_INTERVAL = SYNC_INTERVAL_IN_MINUTES * SECONDS_PER_MINUTE
 
 class AlarmReceiver : BroadcastReceiver() {
 

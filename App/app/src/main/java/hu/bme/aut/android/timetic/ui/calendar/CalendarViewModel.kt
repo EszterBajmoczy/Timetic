@@ -71,7 +71,7 @@ class CalendarViewModel : ViewModel() {
         if(dbList != null) {
             if(backendList != null) {
                 //check if it is already in the local database
-                //UseCases().appointmentOrganizer(repo, viewModelScope, backendList, dbList)
+                UseCases().appointmentOrganizer(repo, viewModelScope, backendList, dbList)
                 _appsFromBackend.value = null
             }
         }
@@ -88,7 +88,7 @@ class CalendarViewModel : ViewModel() {
         if(dbList != null) {
             //check if it is already in the local database
             if (backendList != null) {
-                //UseCases().personOrganizer(repo, viewModelScope, backendList, dbList)
+                UseCases().personOrganizer(repo, viewModelScope, backendList, dbList)
                 _clientsFromBackend.value = null
             }
 

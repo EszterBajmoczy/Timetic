@@ -119,7 +119,7 @@ class CalendarMainFragment : Fragment() {
         syncDate.timeInMillis = pref.getLong("LastSync", 0)
 
         if(syncDate.timeInMillis < yesterday.timeInMillis && syncDate.timeInMillis != 0L){
-            val simpleFormat = SimpleDateFormat("MM.dd.yyyy\nHH:mm", Locale.getDefault())
+            val simpleFormat = SimpleDateFormat("yyyy.MM.dd\nHH:mm", Locale.getDefault())
             tLastSynchronized.text = getString(R.string.last_sync) + simpleFormat.format(syncDate.time)
             tLastSynchronized.visibility = View.VISIBLE
         } else {

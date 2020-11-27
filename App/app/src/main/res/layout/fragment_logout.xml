@@ -24,13 +24,16 @@
             android:id="@+id/logoutYes"
             android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:text="@string/tYes" />
+            android:text="@string/tYes"
+            android:background="@color/colorPrimaryLight"
+            android:layout_marginEnd="20dp"/>
 
         <Button
             android:id="@+id/logoutNo"
             android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:text="@string/tNo" />
+            android:text="@string/tNo"
+            android:background="@color/colorPrimaryLight"/>
 
     </LinearLayout>
 
