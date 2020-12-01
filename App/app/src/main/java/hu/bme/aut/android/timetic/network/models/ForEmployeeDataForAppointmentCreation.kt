@@ -18,9 +18,10 @@ import hu.bme.aut.android.timetic.network.models.CommonClient
 
 /**
  * 
- * @param activities 
- * @param clients 
- * @param places 
+ * @param activities
+ * @param clients
+ * @param employees
+ * @param places
  */
 
 data class ForEmployeeDataForAppointmentCreation (

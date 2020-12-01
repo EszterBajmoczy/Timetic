@@ -31,7 +31,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:background="@color/light"
+                android:background="@color/colorAccentLighter"
                 android:padding="8dp"/>
 
         </LinearLayout>
@@ -58,7 +58,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:background="@color/light"
+                android:background="@color/colorAccentLighter"
                 android:padding="8dp"
                 android:inputType="textEmailAddress"
                 android:selectAllOnFocus="true"/>
@@ -87,7 +87,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:background="@color/light"
+                android:background="@color/colorAccentLighter"
                 android:padding="8dp"/>
 
         </LinearLayout>
@@ -113,7 +113,8 @@
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:text="@string/tCancel"
-                android:background="@color/colorPrimaryLight"
+                android:background="@color/colorAccent"
+                android:textColor="@color/colorAccentLighter"
                 android:layout_marginEnd="20dp"/>
 
             <Button
@@ -121,7 +122,8 @@
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:text="@string/tSave"
-                android:background="@color/colorPrimaryLight"/>
+                android:background="@color/colorAccent"
+                android:textColor="@color/colorAccentLighter"/>
         </LinearLayout>
 
     </LinearLayout>

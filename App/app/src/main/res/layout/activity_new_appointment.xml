@@ -68,7 +68,7 @@
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
-                android:background="@color/light"
+                android:background="@color/colorAccentLighter"
                 android:padding="2dp"/>
 
             <TextView
@@ -85,7 +85,8 @@
                 android:layout_height="match_parent"
                 android:layout_column="0"
                 android:id="@+id/btChooseStartTime"
-                android:background="@color/light">
+                android:background="@color/colorAccentLighter"
+                android:layout_marginEnd="8dp">
 
 
             </Button>
@@ -93,7 +94,7 @@
                 android:layout_width="150dp"
                 android:layout_height="match_parent"
                 android:id="@+id/btChooseEndTime"
-                android:background="@color/light">
+                android:background="@color/colorAccentLighter">
 
             </Button>
 
@@ -112,7 +113,7 @@
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
-                android:background="@color/light"
+                android:background="@color/colorAccentLighter"
                 android:padding="2dp"/>
 
             <Space
@@ -162,7 +163,7 @@
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
-                android:background="@color/light"
+                android:background="@color/colorAccentLighter"
                 android:padding="2dp"/>
 
             <TextView
@@ -186,7 +187,7 @@
                     android:layout_width="120dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="15dp"
-                    android:background="@color/light"
+                    android:background="@color/colorAccentLighter"
                     android:padding="2dp"
                     android:inputType="numberDecimal"/>
 
@@ -246,7 +247,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
-                android:background="@color/light"
+                android:background="@color/colorAccentLighter"
                 android:padding="2dp"
                 android:inputType="textMultiLine"
                 android:scrollbars="vertical"
@@ -266,7 +267,8 @@
                 android:layout_width="140dp"
                 android:layout_height="wrap_content"
                 android:text="@string/tCancel"
-                android:background="@color/colorPrimaryLight"
+                android:background="@color/colorAccent"
+                android:textColor="@color/colorAccentLighter"
                 android:layout_marginEnd="20dp"/>
 
             <Button
@@ -274,7 +276,8 @@
                 android:layout_width="140dp"
                 android:layout_height="wrap_content"
                 android:text="@string/tSave"
-                android:background="@color/colorPrimaryLight"/>
+                android:background="@color/colorAccent"
+                android:textColor="@color/colorAccentLighter"/>
 
         </LinearLayout>
 

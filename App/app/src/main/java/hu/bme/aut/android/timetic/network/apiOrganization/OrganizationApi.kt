@@ -99,7 +99,7 @@ interface OrganizationApi {
     fun clientConsultationGet(@Query("appointmentId") appointmentId: kotlin.String): Call<CommonConsultation>
 
      /**
-     * Gets the data so as to create and appointment
+     * Gets the necessary data for create an appointment
      * 
      * Responses:
      *  - 200: successful operation

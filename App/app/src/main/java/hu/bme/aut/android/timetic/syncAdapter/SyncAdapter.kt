@@ -20,6 +20,7 @@ import hu.bme.aut.android.timetic.create.toHashMap
 import hu.bme.aut.android.timetic.data.model.Appointment
 import hu.bme.aut.android.timetic.data.model.Person
 import hu.bme.aut.android.timetic.dataManager.DBRepository
+import hu.bme.aut.android.timetic.dataManager.TokenAuthenticator
 import hu.bme.aut.android.timetic.network.apiOrganization.OrganizationApi
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.network.models.CommonAppointment
@@ -81,7 +82,7 @@ class SyncAdapter @JvmOverloads constructor(
         when(role) {
             Role.EMPLOYEE -> {
                 //sync
-                val apiOrg = getApi(MyApplication.getOrganizationUrl()!!)
+                val apiOrg = getApiWithAuthenticator(MyApplication.getOrganizationUrl()!!, MyApplication.getToken()!!)
                 val response: retrofit2.Response<List<CommonAppointment>> = apiOrg.employeeAppointmentsGet().execute()
                 if (response.isSuccessful){
                     successAppointmentList(response.body()!!)
@@ -96,9 +97,9 @@ class SyncAdapter @JvmOverloads constructor(
                 val organizationsMapString = MyApplication.secureSharedPreferences.getString("OrganizationsMap", "")
                 val organizationMap = organizationsMapString!!.toHashMap()
                 mapSize = organizationMap.size
-                for((url, _) in organizationMap){
+                for((url, token) in organizationMap){
                     //sync
-                    val apiOrg = getApi(url)
+                    val apiOrg = getApiWithAuthenticator(url, token)
                     val response: retrofit2.Response<List<ForClientAppointment>> = apiOrg.clientAppointmentsGet().execute()
                     if (response.isSuccessful){
                         successClientAppointmentList(response.body()!!, url)
@@ -123,15 +124,16 @@ class SyncAdapter @JvmOverloads constructor(
         }
     }
 
-    private fun getApi(url: String): OrganizationApi {
+    private fun getApiWithAuthenticator(url: String, token: String): OrganizationApi {
         val m = Moshi.Builder()
             .add(KotlinJsonAdapterFactory())
             .build()
 
         val client =  OkHttpClient.Builder()
+            .authenticator(TokenAuthenticator())
             .addInterceptor(HttpBearerAuth(
                 "bearer",
-                MyApplication.getToken()!!
+                token
             ))
             .build()
 

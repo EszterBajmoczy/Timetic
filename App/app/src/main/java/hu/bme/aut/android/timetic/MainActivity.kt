@@ -129,6 +129,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun setFirstRunAndSynchronizeReceiver(pref: SharedPreferences) {
         if(!pref.contains("NotFirst")){
+            /*val editor = pref.edit()
+            editor.putBoolean("NotFirst", true)
+            editor.apply()
+
+             */
+
             val intent = Intent()
             intent.setClass(applicationContext, BootReceiver::class.java)
             //set the synchronization

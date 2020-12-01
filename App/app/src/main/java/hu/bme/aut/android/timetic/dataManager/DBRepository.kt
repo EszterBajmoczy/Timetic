@@ -11,8 +11,12 @@ import hu.bme.aut.android.timetic.database.models.RoomPerson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class DBRepository(private val roomDao: RoomDao) {
-    private val calendarTypeConverter = CalendarTypeConverter()
+open class DBRepository(private val roomDao: RoomDao) {
+    private var calendarTypeConverter = CalendarTypeConverter()
+
+    fun setTypeConverter(typeConverter: CalendarTypeConverter) {
+        calendarTypeConverter = typeConverter
+    }
 
     suspend fun deleteAllTables() = withContext(Dispatchers.IO) {
         roomDao.deletePersonTable()
