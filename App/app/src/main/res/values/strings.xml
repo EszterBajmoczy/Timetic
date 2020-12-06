@@ -58,6 +58,7 @@
     <string name="vOffNotification">off</string>
 
     <string name="tDefaultActivity">Alapértelmezett activity</string>
+    <string name="tDefaultLocation">Alapértelmezett helyszín</string>
 
     <!-- Statistic Fragment -->
     <string name="tSelectDateRange">Időtartam választás</string>

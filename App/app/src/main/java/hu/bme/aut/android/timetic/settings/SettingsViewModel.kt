@@ -13,6 +13,9 @@ class SettingsViewModel : ViewModel() {
     private val _activities = MutableLiveData<List<String>>()
     val activities: LiveData<List<String>> = _activities
 
+    private val _locations = MutableLiveData<List<String>>()
+    val locations: LiveData<List<String>> = _locations
+
     fun getDataForAppointmentCreation(organizationUrl: String, token: String){
         backend =
             NetworkOrganizationInteractor(
@@ -36,5 +39,6 @@ class SettingsViewModel : ViewModel() {
             }
         }
         _activities.value = stringList
+        _locations.value = data.places
     }
 }

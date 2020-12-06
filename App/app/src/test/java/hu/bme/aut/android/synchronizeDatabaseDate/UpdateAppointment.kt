@@ -31,7 +31,7 @@ class UpdateAppointment {
             price = 8000.0,
             private_appointment = false,
             videochat = true,
-            address = "Ügyfélnél",
+            location = "Ügyfélnél",
             personBackendId = "234g2z47823zeuhfdsf",
             activity = "Arckezelés",
             organizationUrl = null
@@ -45,7 +45,7 @@ class UpdateAppointment {
             price = null,
             private_appointment = true,
             videochat = false,
-            address = null,
+            location = null,
             personBackendId = null,
             activity = null,
             organizationUrl = "https://optipus.ddns.net:8080"
@@ -64,7 +64,7 @@ class UpdateAppointment {
             price = 18000.0,
             private_appointment = false,
             videochat = true,
-            address = "Ügyfélnél",
+            location = "Ügyfélnél",
             personBackendId = "234g2z47823zeuhfdsf",
             activity = "Masszázs",
             organizationUrl = null

@@ -5,6 +5,7 @@ import android.net.ConnectivityManager
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
@@ -52,8 +53,11 @@ class SettingsActivity : AppCompatActivity() {
                 val activityType = findPreference<ListPreference>("activityType")
                 activityType?.isVisible = false
 
+                val location = findPreference<ListPreference>("location")
+                location?.isVisible = false
             } else {
                 val activityType = findPreference<ListPreference>("activityType")
+                val location = findPreference<ListPreference>("location")
 
                 if(isNetworkConnection()){
                     viewModel.activities.observe(this, androidx.lifecycle.Observer {
@@ -63,8 +67,16 @@ class SettingsActivity : AppCompatActivity() {
                             activityType.entryValues = it.toTypedArray()
                         }
                     })
+                    viewModel.locations.observe(this, Observer {
+                        if (location != null) {
+                            location.entries = it.toTypedArray()
+                            location.setDefaultValue(it[0])
+                            location.entryValues = it.toTypedArray()
+                        }
+                    })
                 } else {
                     activityType?.isEnabled = false
+                    location?.isEnabled = false
                     Toast.makeText(context, getString(R.string.network_needed_long), Toast.LENGTH_LONG).show()
                 }
             }

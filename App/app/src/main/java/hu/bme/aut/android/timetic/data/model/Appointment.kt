@@ -5,7 +5,6 @@ import com.alamkanak.weekview.WeekViewEvent
 import hu.bme.aut.android.timetic.R
 import java.lang.Exception
 import java.util.*
-import kotlin.random.Random.Default.nextInt
 
 class Appointment(
     val id: Long?,
@@ -16,7 +15,7 @@ class Appointment(
     val price: Double? = null,
     val private_appointment: Boolean,
     val videochat: Boolean?,
-    val address: String?,
+    val location: String?,
     val personBackendId: String?,
     val activity: String?,
     var organizationUrl: String? = null

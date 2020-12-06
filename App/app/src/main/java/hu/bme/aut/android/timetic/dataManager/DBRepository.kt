@@ -66,7 +66,7 @@ open class DBRepository(private val roomDao: RoomDao) {
             price = price,
             private_appointment = private_appointment,
             videochat = videochat,
-            address = address,
+            location = location,
             personBackendId = personBackendId,
             activity = activity,
             organizationUrl = organizationUrl
@@ -83,7 +83,7 @@ open class DBRepository(private val roomDao: RoomDao) {
             price = price,
             private_appointment = private_appointment,
             videochat = videochat,
-            address = address,
+            location = location,
             personBackendId = personBackendId,
             activity = activity,
             organizationUrl = organizationUrl

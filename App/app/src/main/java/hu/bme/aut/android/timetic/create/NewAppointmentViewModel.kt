@@ -30,8 +30,8 @@ class NewAppointmentViewModel: ViewModel() {
     private val _clients = MutableLiveData<List<CommonClient>>()
     val clients: LiveData<List<CommonClient>> = _clients
 
-    private val _places = MutableLiveData<List<String>>()
-    val places: LiveData<List<String>> = _places
+    private val _locations = MutableLiveData<List<String>>()
+    val locations: LiveData<List<String>> = _locations
 
     private val _employee = MutableLiveData<CommonEmployee>()
     val employee: LiveData<CommonEmployee> = _employee
@@ -72,7 +72,7 @@ class NewAppointmentViewModel: ViewModel() {
     private fun successDataForCreation(data: ForEmployeeDataForAppointmentCreation) {
         this.data = data
 
-        _places.value = data.places
+        _locations.value = data.places
         _clients.value = data.clients
         _activities.value = data.activities
         _employee.value = data.employees?.get(0)
@@ -149,7 +149,7 @@ fun CommonAppointment.getAppointment(): Appointment{
     end.timeInMillis = endTime!!
     return if(isPrivate!!){
         Appointment(id = null, backendId = id!!, note = note, start_date = start, end_date = end, price = null, private_appointment = isPrivate,
-            videochat = null, address = place, personBackendId = null, activity = null)
+            videochat = null, location = place, personBackendId = null, activity = null)
     }
     else {
         Appointment(
@@ -161,7 +161,7 @@ fun CommonAppointment.getAppointment(): Appointment{
             price = price,
             private_appointment = isPrivate,
             videochat = online!!,
-            address = place,
+            location = place,
             personBackendId = client!!.id,
             activity = activity!!.name
         )
@@ -191,7 +191,7 @@ fun ForClientAppointment.getAppointment(url: String): Appointment{
         price = price,
         private_appointment = false,
         videochat = online!!,
-        address = place,
+        location = place,
         personBackendId = employee!!.id,
         activity = activity!!.name,
         organizationUrl = url

@@ -1,6 +1,5 @@
 package hu.bme.aut.android.timetic
 
-import android.util.Log
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import hu.bme.aut.android.timetic.data.model.Appointment
 import hu.bme.aut.android.timetic.data.model.Person
@@ -54,13 +53,13 @@ class UseCases {
                 if(item.note == appointment.note && item.start_date.timeInMillis == appointment.start_date.timeInMillis &&
                     item.end_date.timeInMillis == appointment.end_date.timeInMillis &&
                     item.private_appointment == appointment.private_appointment &&
-                    item.address == appointment.address && appointment.private_appointment){
+                    item.location == appointment.location && appointment.private_appointment){
                     return false
                 }
                 if(item.note == appointment.note && item.start_date.timeInMillis == appointment.start_date.timeInMillis &&
                     item.end_date.timeInMillis == appointment.end_date.timeInMillis && item.price!! == appointment.price &&
                     item.private_appointment == appointment.private_appointment && item.videochat == appointment.videochat &&
-                    item.address == appointment.address && item.personBackendId == appointment.personBackendId && item.activity == appointment.activity){
+                    item.location == appointment.location && item.personBackendId == appointment.personBackendId && item.activity == appointment.activity){
                     return false
                 }
                 delete(repo, scope, item)

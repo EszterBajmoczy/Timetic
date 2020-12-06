@@ -29,6 +29,11 @@
             app:title="@string/tDefaultActivity"
             app:useSimpleSummaryProvider="true" />
 
+        <ListPreference
+            app:key="location"
+            app:title="@string/tDefaultLocation"
+            app:useSimpleSummaryProvider="true" />
+
         <EditTextPreference
             android:digits="0123456789"
             android:inputType="number"

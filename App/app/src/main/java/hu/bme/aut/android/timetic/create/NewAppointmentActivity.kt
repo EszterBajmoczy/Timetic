@@ -11,10 +11,8 @@ import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.AdapterView
+import android.widget.*
 import android.widget.AdapterView.OnItemSelectedListener
-import android.widget.ArrayAdapter
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -41,12 +39,13 @@ class NewAppointmentActivity : AppCompatActivity() {
     private var endTime: Long? = null
 
     private lateinit var activities : List<CommonActivity>
+    private lateinit var locations : List<String>
     private lateinit var clients : List<CommonClient>
     private lateinit var employee : CommonEmployee
 
     private lateinit var activity : CommonActivity
     private lateinit var client : CommonClient
-    private lateinit var place : String
+    private lateinit var location : String
 
     private var appointment: Appointment? = null
     private lateinit var observer: Observer<Appointment>
@@ -73,7 +72,7 @@ class NewAppointmentActivity : AppCompatActivity() {
             role = Role.CLIENT
             //Details view
             viewModel.getAppointmentByNetId(appointmentId!!)
-            viewModel.appDetail.observe(this,  clientDetailViewObserver())
+            viewModel.appDetail.observe(this,  clientObserver())
         } else {
             role = Role.EMPLOYEE
             if(isNetworkAvailable()) {
@@ -84,8 +83,13 @@ class NewAppointmentActivity : AppCompatActivity() {
                         tActivity.visibility = View.GONE
                         spActivity.visibility = View.GONE
 
+                        tLocation.visibility = View.GONE
+                        spLocation.visibility = View.GONE
+
                         tPerson.visibility = View.GONE
                         spPerson.visibility = View.GONE
+
+                        personContacts.visibility = View.GONE
 
                         tPrice.visibility = View.GONE
                         etPrice.visibility = View.GONE
@@ -98,8 +102,13 @@ class NewAppointmentActivity : AppCompatActivity() {
                         tActivity.visibility = View.VISIBLE
                         spActivity.visibility = View.VISIBLE
 
+                        tLocation.visibility = View.VISIBLE
+                        spLocation.visibility = View.VISIBLE
+
                         tPerson.visibility = View.VISIBLE
                         spPerson.visibility = View.VISIBLE
+
+                        personContacts.visibility = View.VISIBLE
 
                         tPrice.visibility = View.VISIBLE
                         etPrice.visibility = View.VISIBLE
@@ -113,22 +122,33 @@ class NewAppointmentActivity : AppCompatActivity() {
                 if(appointmentId != null){
                     //Details view
                     viewModel.getAppointmentByNetId(appointmentId)
-                    viewModel.appDetail.observe(this,  appObserver())
+                    viewModel.appDetail.observe(this,  employeeObserver())
                 }
                 else{
                     //Create view
                     viewModel.clients.observe(this, androidx.lifecycle.Observer {
+                        //set Person Spinner
                         clients = it
-                        setPersonSpinner(getStringClients(it))
+                        setSpinner(spPerson, getStringClients(it)) {
+                                index -> this@NewAppointmentActivity.client = clients[index]
+                        }
                     })
 
                     viewModel.activities.observe(this, androidx.lifecycle.Observer {
                         activities = it
-                        setActivitySpinner(getStringActivities(it))
+                        //set Activity Spinner
+                        val defaultActivity = defaultSharedPreferences.getString("activityType", "")
+                        setSpinner(spActivity, getStringActivities(it), null, defaultActivity)
+                        { index -> this@NewAppointmentActivity.activity = activities[index] }
                     })
 
-                    viewModel.places.observe(this, androidx.lifecycle.Observer {
-                        setLocationSpinner(it)
+                    viewModel.locations.observe(this, androidx.lifecycle.Observer {
+                        locations = it
+                        //setLocationSpinner
+                        val defaultLocation = defaultSharedPreferences.getString("location", "")
+                        setSpinner(spLocation, it, null, defaultLocation)
+                            { index -> this@NewAppointmentActivity.location = locations[index] }
+
                     })
                     viewModel.employee.observe(this, androidx.lifecycle.Observer {
                         employee = it
@@ -138,11 +158,11 @@ class NewAppointmentActivity : AppCompatActivity() {
 
                     setDateChooseButtons()
 
-                    btCancel.setOnClickListener {
+                    setButton(btCancel, null, View.OnClickListener {
                         finish()
-                    }
+                    })
 
-                    btSave.setOnClickListener {
+                    setButton(btSave, null, View.OnClickListener {
                         if(checkData()){
                             if(isNetworkAvailable()){
                                 viewModel.saveAppointment(getAppointment())
@@ -150,7 +170,7 @@ class NewAppointmentActivity : AppCompatActivity() {
                                 Toast.makeText(applicationContext,  getString(R.string.network_needed_new_appointment), Toast.LENGTH_LONG).show()
                             }
                         }
-                    }
+                    })
 
                     swVideochat.isChecked = defaultSharedPreferences.getBoolean("defaultVideoChat",false)
 
@@ -166,7 +186,13 @@ class NewAppointmentActivity : AppCompatActivity() {
                 }
             } else {
                 viewModel.getAppointmentByNetId(appointmentId!!)
-                viewModel.appDetail.observe(this,  clientDetailViewObserver())
+                viewModel.appDetail.observe(this,  Observer {app ->
+                    if(app.private_appointment){
+                        privateAppointmentNoInternet(app)
+                    } else {
+                        employeeNoInternet(app)
+                    }
+                })
             }
         }
         viewModel.meetingUrl.observe(this, Observer {
@@ -175,14 +201,17 @@ class NewAppointmentActivity : AppCompatActivity() {
         })
     }
 
-    private fun appObserver(): Observer<Appointment> {
+    private fun employeeObserver(): Observer<Appointment> {
         observer = androidx.lifecycle.Observer { app ->
             appointment = app
             viewModel.clients.observe(this, androidx.lifecycle.Observer { clientList->
                 clients = clientList
                 app.personBackendId?.let{ clientId->
+                    //set Person Spinner
                     val person = getClient(clientList, clientId)!!
-                    setPersonSpinner(getStringClients(clientList), person.name)
+                    setSpinner(spPerson, getStringClients(clientList), person.name) {
+                        index -> this@NewAppointmentActivity.client = clients[index]
+                    }
 
                     personCall.setOnClickListener {
                         val callIntent = Intent(Intent.ACTION_DIAL)
@@ -199,11 +228,18 @@ class NewAppointmentActivity : AppCompatActivity() {
 
             viewModel.activities.observe(this, androidx.lifecycle.Observer {
                 activities = it
-                setActivitySpinner(getStringActivities(it), app.activity)
+                val defaultActivity = defaultSharedPreferences.getString("activityType", "")
+
+                setSpinner(spActivity, getStringActivities(it), app.activity, defaultActivity)
+                    { index -> this@NewAppointmentActivity.activity = activities[index] }
             })
 
-            viewModel.places.observe(this, androidx.lifecycle.Observer {
-                setLocationSpinner(it, app.address)
+            viewModel.locations.observe(this, androidx.lifecycle.Observer {
+                locations = it
+                val defaultLocation = defaultSharedPreferences.getString("location", "")
+
+                setSpinner(spLocation, it, app.location, defaultLocation)
+                    { index -> this@NewAppointmentActivity.location = locations[index] }
             })
             viewModel.employee.observe(this, androidx.lifecycle.Observer {
                 employee = it
@@ -215,17 +251,10 @@ class NewAppointmentActivity : AppCompatActivity() {
             setDateChooseButtonValue()
             setDateChooseButtons()
 
-            val tomorrow = Calendar.getInstance()
-            tomorrow.add(Calendar.DAY_OF_MONTH, 1)
-            tomorrow.set(Calendar.HOUR_OF_DAY, 0)
-            tomorrow.set(Calendar.MINUTE, 0)
-            tomorrow.set(Calendar.MILLISECOND, 0)
-            tomorrow.add(Calendar.MILLISECOND, -1)
-
             btCancel.setText(R.string.tCancelAppointment)
 
             btSave.setText(R.string.tModify)
-            if(app.start_date.before(tomorrow)){
+            if(isInThePast(app.start_date)){
                 btSave.visibility = View.GONE
                 btCancel.visibility = View.GONE
             } else {
@@ -242,14 +271,14 @@ class NewAppointmentActivity : AppCompatActivity() {
                         val a = getAppointment()
 
                         if(app.start_date.timeInMillis == a.startTime && app.end_date.timeInMillis == a.endTime &&
-                            app.private_appointment == a.isPrivate && app.address == a.place && app.note == a.note &&
+                            app.private_appointment == a.isPrivate && app.note == a.note &&
                             a.isPrivate){
 
                             finish()
                         }
                         else if (app.start_date.timeInMillis == a.startTime && app.end_date.timeInMillis == a.endTime &&
                             app.private_appointment == a.isPrivate && app.personBackendId == a.client!!.id &&
-                            app.activity == a.activity!!.name && app.address == a.place &&
+                            app.activity == a.activity!!.name && app.location == a.place &&
                             app.price == a.price && app.videochat == a.online && app.note == a.note) {
 
                             finish()
@@ -281,44 +310,95 @@ class NewAppointmentActivity : AppCompatActivity() {
         return observer
     }
 
-    private fun clientDetailViewObserver(): Observer<Appointment> {
+    private fun employeeNoInternet(app: Appointment){
+        appointment = app
+        setTitle(R.string.title_activity_new_appointment_Detail)
+
+        viewModel.getPersonByNetId(app.personBackendId!!)
+        viewModel.personDetail.observe(this, Observer{person ->
+            setPersonsAndContacts(person)
+        })
+
+        setSpinners(app)
+
+        viewModel.employee.observe(this, androidx.lifecycle.Observer {
+            employee = it
+        })
+
+        etPrice.setText(app.price.toString())
+        etPrice.isClickable = false
+
+        setDateChooseButtonValue()
+
+        if(app.videochat != null){
+            swVideochat.isChecked = app.videochat
+            val c = Calendar.getInstance()
+            if(app.end_date.after(c) && app.videochat){
+                btConsultation.visibility = View.VISIBLE
+
+                btConsultation.setOnClickListener {
+                    if(isNetworkAvailable()){
+                        val organizationsMapString = MyApplication.secureSharedPreferences.getString("OrganizationsMap", "")
+                        val organizationMap = organizationsMapString!!.toHashMap()
+                        if(organizationMap.containsKey(app.organizationUrl)) {
+                            viewModel.getMeetingUrlByClient(app.organizationUrl!!, organizationMap[app.organizationUrl!!]!!, app.backendId)
+                        }
+                    } else {
+                        Toast.makeText(applicationContext, getString(R.string.network_needed_join_meeting), Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
+        else{
+            swVideochat.isChecked = false
+        }
+        swVideochat.isClickable = false
+
+        etNote.setText(app.note)
+        etNote.isClickable = false
+
+        if(isInThePast(app.start_date)){
+            setButton(btCancel, null, null)
+        } else {
+            setButton(btCancel, R.string.tCancelAppointment, View.OnClickListener {
+                if(isNetworkAvailable()) {
+                    viewModel.appDetail.removeObserver(observer)
+
+                    val organizationsMapString = MyApplication.secureSharedPreferences.getString("OrganizationsMap", "")
+                    val organizationMap = organizationsMapString!!.toHashMap()
+                    if(organizationMap.containsKey(app.organizationUrl)){
+                        viewModel.cancelAppointmentByClient(
+                            app.organizationUrl!!,
+                            organizationMap[app.organizationUrl!!]!!,
+                            app.backendId
+                        )
+                    }
+                } else {
+                    Toast.makeText(this, getString(R.string.network_needed_cancel_appointment), Toast.LENGTH_LONG).show()
+                }
+            })
+            setButton(btSave, R.string.tModify, View.OnClickListener {
+                Toast.makeText(this, getString(R.string.network_needed_cancel_appointment), Toast.LENGTH_LONG).show()
+
+            })
+        }
+    }
+
+    private fun clientObserver(): Observer<Appointment> {
         observer = androidx.lifecycle.Observer { app ->
             appointment = app
+            setTitle(R.string.title_activity_new_appointment_Detail)
 
-            if(app.private_appointment) {
-                privateAppointmentNoInternet(app)
-                return@Observer
-            }
+            viewModel.getPersonByNetId(app.personBackendId!!)
+            viewModel.personDetail.observe(this, Observer{person ->
+                setPersonsAndContacts(person)
+            })
 
-            if(app.personBackendId != null && app.personBackendId.isNotEmpty()){
-                viewModel.getPersonByNetId(app.personBackendId)
-                viewModel.personDetail.observe(this, Observer{person ->
-                    setPersonSpinner(listOf(person.name), person.name)
-                    spPerson.isClickable = false
-
-
-                    personCall.setOnClickListener {
-                        val callIntent = Intent(Intent.ACTION_DIAL)
-                        callIntent.data = Uri.parse("tel:${person.phone}")
-                        startActivity(callIntent)
-                    }
-
-                    personEmail.setOnClickListener {
-                        val intent = Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", person.phone, null))
-                        startActivity(Intent.createChooser(intent, "Choose an Email client :"))
-                    }
-                })
-            }
-
-            setActivitySpinner(listOf(app.activity), null)
-            spActivity.isClickable = false
-            setLocationSpinner(listOf(app.address), app.address)
-            spLocation.isClickable = false
+            setSpinners(app)
 
             viewModel.employee.observe(this, androidx.lifecycle.Observer {
                 employee = it
             })
-            setTitle(R.string.title_activity_new_appointment_Detail)
 
             tPrivate.visibility = View.GONE
             swPrivate.visibility = View.GONE
@@ -327,20 +407,7 @@ class NewAppointmentActivity : AppCompatActivity() {
             etPrice.isClickable = false
 
             setDateChooseButtonValue()
-
-            val tomorrow = Calendar.getInstance()
-            tomorrow.add(Calendar.DAY_OF_MONTH, 1)
-            tomorrow.set(Calendar.HOUR_OF_DAY, 0)
-            tomorrow.set(Calendar.MINUTE, 0)
-            tomorrow.set(Calendar.MILLISECOND, 0)
-            tomorrow.add(Calendar.MILLISECOND, -1)
-
-            btCancel.setText(R.string.tCancelAppointment)
-            if(role == Role.EMPLOYEE){
-                btSave.setText(R.string.tModify)
-            } else {
-                btSave.visibility = View.GONE
-            }
+            setButton(btSave, null, null)
 
             if(app.videochat != null){
                 swVideochat.isChecked = app.videochat
@@ -369,10 +436,10 @@ class NewAppointmentActivity : AppCompatActivity() {
             etNote.setText(app.note)
             etNote.isClickable = false
 
-            if(app.start_date.before(tomorrow)){
-                btCancel.visibility = View.GONE
+            if(isInThePast(app.start_date)){
+                setButton(btCancel, null, null)
             } else {
-                btCancel.setOnClickListener {
+                setButton(btCancel, R.string.tCancelAppointment, View.OnClickListener {
                     if(isNetworkAvailable()) {
                         viewModel.appDetail.removeObserver(observer)
 
@@ -388,18 +455,18 @@ class NewAppointmentActivity : AppCompatActivity() {
                     } else {
                         Toast.makeText(this, getString(R.string.network_needed_cancel_appointment), Toast.LENGTH_LONG).show()
                     }
-                }
-
-                btSave.setOnClickListener {
-                    Toast.makeText(this, getString(R.string.network_needed_cancel_appointment), Toast.LENGTH_LONG).show()
-                }
+                })
             }
         }
         return observer
     }
 
     private fun privateAppointmentNoInternet(app: Appointment) {
-        setLocationSpinner(listOf(app.address), app.address)
+        //setLocationSpinner
+        val defaultLocation = defaultSharedPreferences.getString("location", "")
+        setSpinner(spLocation, listOf(app.location), app.location, defaultLocation)
+        { index -> this@NewAppointmentActivity.location = locations[index] }
+
         spLocation.isClickable = false
 
         viewModel.employee.observe(this, androidx.lifecycle.Observer {
@@ -410,6 +477,8 @@ class NewAppointmentActivity : AppCompatActivity() {
         swPrivate.isChecked = app.private_appointment
         tActivity.visibility = View.GONE
         spActivity.visibility = View.GONE
+        tLocation.visibility = View.GONE
+        spLocation.visibility = View.GONE
         tPerson.visibility = View.GONE
         spPerson.visibility = View.GONE
         personContacts.visibility = View.GONE
@@ -420,13 +489,6 @@ class NewAppointmentActivity : AppCompatActivity() {
 
         setDateChooseButtonValue()
 
-        val tomorrow = Calendar.getInstance()
-        tomorrow.add(Calendar.DAY_OF_MONTH, 1)
-        tomorrow.set(Calendar.HOUR_OF_DAY, 0)
-        tomorrow.set(Calendar.MINUTE, 0)
-        tomorrow.set(Calendar.MILLISECOND, 0)
-        tomorrow.add(Calendar.MILLISECOND, -1)
-
         btCancel.setText(R.string.tCancelAppointment)
         if(role == Role.EMPLOYEE){
             btSave.setText(R.string.tModify)
@@ -435,7 +497,7 @@ class NewAppointmentActivity : AppCompatActivity() {
         etNote.setText(app.note)
         etNote.isClickable = false
 
-        if(app.start_date.before(tomorrow)){
+        if(isInThePast(app.start_date)){
             btCancel.visibility = View.GONE
         } else {
             btCancel.setOnClickListener {
@@ -460,7 +522,6 @@ class NewAppointmentActivity : AppCompatActivity() {
                 Toast.makeText(this, getString(R.string.network_needed_cancel_appointment), Toast.LENGTH_LONG).show()
             }
         }
-
     }
 
     private fun setDateChooseButtonValue(){
@@ -471,16 +532,15 @@ class NewAppointmentActivity : AppCompatActivity() {
             btChooseEndTime.text = simpleFormat.format(appointment!!.end_date.time)
             endTime = appointment!!.end_date.timeInMillis
         }
-
     }
 
     private fun getAppointment() : CommonAppointment{
         return if(swPrivate.isChecked){
-            CommonAppointment(id = appointment?.backendId, isPrivate = swPrivate.isChecked, startTime = startTime, endTime = endTime, client = null, activity = null, employee = employee, place = place,
+            CommonAppointment(id = appointment?.backendId, isPrivate = swPrivate.isChecked, startTime = startTime, endTime = endTime, client = null, activity = null, employee = employee, place = null,
                 price = null, online = null, note = etNote.text.toString())
         }
         else{
-            CommonAppointment(id = appointment?.backendId, isPrivate = swPrivate.isChecked, startTime = startTime, endTime = endTime, client = client, activity = activity, employee = employee, place = place,
+            CommonAppointment(id = appointment?.backendId, isPrivate = swPrivate.isChecked, startTime = startTime, endTime = endTime, client = client, activity = activity, employee = employee, place = location,
                 price = etPrice.text.toString().toDouble(), online = swVideochat.isChecked, note = etNote.text.toString())
         }
     }
@@ -499,14 +559,10 @@ class NewAppointmentActivity : AppCompatActivity() {
         }
         if(startTime != null && endTime != null && etPrice.text.toString() != ""){
             //it is not possible to modify and add appointment before tomorrow
-            val tomorrow = Calendar.getInstance()
-            tomorrow.add(Calendar.DAY_OF_MONTH, 1)
-            tomorrow.set(Calendar.HOUR_OF_DAY, 0)
-            tomorrow.set(Calendar.MINUTE, 0)
-            tomorrow.set(Calendar.MILLISECOND, 0)
-            tomorrow.add(Calendar.MILLISECOND, -1)
+            val date = Calendar.getInstance()
+            date.timeInMillis = startTime as Long
 
-            if(startTime != null && endTime != null && startTime!! < tomorrow.timeInMillis){
+            if(startTime != null && endTime != null && isInThePast(date)){
                 Toast.makeText(this, getString(R.string.appointment_befare_tommorow_error), Toast.LENGTH_LONG).show()
                 return false
             }
@@ -600,91 +656,37 @@ class NewAppointmentActivity : AppCompatActivity() {
         }
     }
 
-    private fun setActivitySpinner(
-        activityList: List<String?>,
-        activity: String? = null
+    private fun setSpinner(
+        spinner: Spinner,
+        list: List<String?>,
+        selectedItem: String? = null,
+        default: String? = null,
+        saveValue: (Int) -> Unit
     ) {
         val arrayAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, activityList)
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, list)
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spActivity.adapter = arrayAdapter
-
-        if(activity != null){
-            spActivity.setSelection(activityList.indexOf(activity))
-        }
-        else{
-            //setDefaultActivity from settings
-            val defaultActivity = defaultSharedPreferences.getString("activityType", "")
-            defaultActivity?.let {
-                val index = activityList.indexOf(defaultActivity)
+        spinner.adapter = arrayAdapter
+        if(selectedItem != null){
+            spinner.setSelection(list.indexOf(selectedItem))
+        } else{
+            //setDefaultLocation from settings
+            default?.let {value ->
+                val index = list.indexOf(value)
                 if(index != -1){
-                    spActivity.setSelection(index)
+                    spinner .setSelection(index)
                 }
             }
-        }
-        if(!MyApplication.getOrganizationUrl().isNullOrEmpty() && isNetworkAvailable()){
-            spActivity.onItemSelectedListener = object : OnItemSelectedListener {
-                override fun onItemSelected(
-                    parent: AdapterView<*>,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    this@NewAppointmentActivity.activity = activities[position]
-                }
-                override fun onNothingSelected(parent: AdapterView<*>?) {}
-            }
-        }
-    }
-
-    private fun setPersonSpinner(
-        clientList: List<String?>,
-        client: String? = null
-    ) {
-        val arrayAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, clientList)
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spPerson.adapter = arrayAdapter
-        if(client != null){
-            spPerson.setSelection(clientList.indexOf(client))
-        }
-        if(!MyApplication.getOrganizationUrl().isNullOrEmpty() && isNetworkAvailable()){
-            spPerson.onItemSelectedListener = object : OnItemSelectedListener {
-                override fun onItemSelected(
-                    parent: AdapterView<*>,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    this@NewAppointmentActivity.client = clients[position]
-                }
-
-                override fun onNothingSelected(parent: AdapterView<*>?) {}
-            }
-        }
-    }
-
-    private fun setLocationSpinner(
-        placesList: List<String?>,
-        address: String? = null
-    ) {
-        val arrayAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, placesList)
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spLocation.adapter = arrayAdapter
-        if(address != null){
-            spLocation.setSelection(placesList.indexOf(address))
         }
         if(!MyApplication.getOrganizationUrl().isNullOrEmpty() && isNetworkAvailable()) {
-            spLocation.onItemSelectedListener = object : OnItemSelectedListener {
+            spinner.onItemSelectedListener = object : OnItemSelectedListener {
                 override fun onItemSelected(
                     parent: AdapterView<*>,
                     view: View?,
                     position: Int,
                     id: Long
                 ) {
-                    val selected = parent.getItemAtPosition(position).toString()
-                    place = selected
+                    saveValue(position)
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -721,6 +723,61 @@ class NewAppointmentActivity : AppCompatActivity() {
         val connectivityManager = applicationContext?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val activeNetworkInfo = connectivityManager.activeNetworkInfo
         return activeNetworkInfo != null && activeNetworkInfo.isConnected
+    }
+
+    //set button and visibility
+    private fun setButton(button: Button, text: Int?, listener: View.OnClickListener?) {
+        if(text == null && listener == null) {
+            button.visibility = View.GONE
+        } else {
+            if (text != null) {
+                button.setText(text)
+            }
+            button.setOnClickListener(listener)
+        }
+    }
+
+    private fun isInThePast(startDate: Calendar): Boolean {
+        val tomorrow = Calendar.getInstance()
+        tomorrow.add(Calendar.DAY_OF_MONTH, 1)
+        tomorrow.set(Calendar.HOUR_OF_DAY, 0)
+        tomorrow.set(Calendar.MINUTE, 0)
+        tomorrow.set(Calendar.MILLISECOND, 0)
+        tomorrow.add(Calendar.MILLISECOND, -1)
+        return startDate.before(tomorrow)
+    }
+
+    private fun setPersonsAndContacts(person: Person) {
+        //set Person Spinner
+        setSpinner(spPerson, listOf(person.name), person.name) {
+                index -> this@NewAppointmentActivity.client = clients[index]
+        }
+        spPerson.isClickable = false
+
+        personCall.setOnClickListener {
+            val callIntent = Intent(Intent.ACTION_DIAL)
+            callIntent.data = Uri.parse("tel:${person.phone}")
+            startActivity(callIntent)
+        }
+
+        personEmail.setOnClickListener {
+            val intent = Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", person.phone, null))
+            startActivity(Intent.createChooser(intent, "Choose an Email client :"))
+        }
+    }
+
+    private fun setSpinners(app: Appointment) {
+        //set Activity Spinner
+        val defaultActivity = defaultSharedPreferences.getString("activityType", "")
+        setSpinner(spActivity, listOf(app.activity), null, defaultActivity)
+        { index -> this@NewAppointmentActivity.activity = activities[index] }
+        spActivity.isClickable = false
+
+        //set Location Spinner
+        val defaultLocation = defaultSharedPreferences.getString("location", "")
+        setSpinner(spLocation, listOf(app.location), app.location, defaultLocation)
+        { index -> this@NewAppointmentActivity.location = locations[index] }
+        spLocation.isClickable = false
     }
 }
 
