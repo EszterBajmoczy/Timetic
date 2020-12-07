@@ -12,12 +12,6 @@ class SplashScreen : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash_screen)
         val handler = Handler()
-        val pref = MyApplication.secureSharedPreferences
-
-        val editor = pref.edit()
-        editor.putBoolean("NotFirst", false)
-        editor.apply()
-
         val thread = Runnable {
             val secureSharedPreferences = MyApplication.secureSharedPreferences
 
