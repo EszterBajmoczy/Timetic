@@ -1,4 +1,4 @@
-package hu.bme.aut.android.timetic.adapter
+package hu.bme.aut.android.timetic.recyclerViewAdapter
 
 import android.view.LayoutInflater
 import android.view.View
@@ -12,7 +12,7 @@ import hu.bme.aut.android.timetic.network.models.CommonOrganization
 import java.util.*
 import kotlin.collections.ArrayList
 
-
+//Adapter for the organization recycler view in the OrganisationOperationFragment
 class OrganizationAdapter(
     private val listener: OrganizationClickListener
 ) :

@@ -6,14 +6,7 @@ import android.content.SharedPreferences
 import androidx.room.Room
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import hu.bme.aut.android.timetic.database.Database
-import hu.bme.aut.android.timetic.network.apiOrganization.OrganizationApi
-import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
-import okhttp3.OkHttpClient
-import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
 
 class MyApplication : Application() {
 
@@ -42,27 +35,6 @@ class MyApplication : Application() {
 
 		fun getEmail(): String? {
 			return secureSharedPreferences.getString("Email", "")
-		}
-
-		fun getOrganizationApiForRefresh(): OrganizationApi {
-			val m = Moshi.Builder()
-				.add(KotlinJsonAdapterFactory())
-				.build()
-
-			val client =  OkHttpClient.Builder()
-				.addInterceptor(HttpBearerAuth(
-					"bearer",
-					getRefreshToken()!!
-				))
-				.build()
-
-			val retrofit = Retrofit.Builder()
-				.baseUrl(secureSharedPreferences.getString("OrganizationUrl", "").toString())
-				.client(client)
-				.addConverterFactory(MoshiConverterFactory.create(m))
-				.build()
-
-			return retrofit.create(OrganizationApi::class.java)
 		}
 	}
 	

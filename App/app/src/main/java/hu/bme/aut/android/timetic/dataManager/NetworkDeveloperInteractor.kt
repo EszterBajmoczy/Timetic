@@ -3,6 +3,7 @@ package hu.bme.aut.android.timetic.dataManager
 import android.os.Handler
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.network.auth.HttpBasicAuth
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.network.apiDeveloper.DeveloperApi
@@ -39,7 +40,7 @@ class NetworkDeveloperInteractor(auth: HttpBasicAuth?, autb: HttpBearerAuth?) {
         }
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://optipus.ddns.net:8080")
+            .baseUrl(MyApplication.developerBaseUrl)
             .client(client)
             .addConverterFactory(MoshiConverterFactory.create(m))
             .build()

@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import hu.bme.aut.android.timetic.R
-import hu.bme.aut.android.timetic.adapter.OrganizationAdapter
+import hu.bme.aut.android.timetic.recyclerViewAdapter.OrganizationAdapter
 import hu.bme.aut.android.timetic.network.models.CommonOrganization
 import hu.bme.aut.android.timetic.ui.loginAregistration.login.afterTextChanged
 import hu.bme.aut.android.timetic.ui.organizationoperations.info.OrganizationInfoActivity

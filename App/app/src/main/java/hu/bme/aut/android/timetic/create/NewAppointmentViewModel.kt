@@ -142,6 +142,7 @@ class NewAppointmentViewModel: ViewModel() {
     }
 }
 
+//extension function
 fun CommonAppointment.getAppointment(): Appointment{
     val start = Calendar.getInstance()
     start.timeInMillis = startTime!!
@@ -168,6 +169,7 @@ fun CommonAppointment.getAppointment(): Appointment{
     }
 }
 
+//extension function
 fun CommonAppointment.getClient(): Person? {
     return if(isPrivate!!) {
          null
@@ -177,6 +179,7 @@ fun CommonAppointment.getClient(): Person? {
     }
 }
 
+//extension function
 fun ForClientAppointment.getAppointment(url: String): Appointment{
     val start = Calendar.getInstance()
     start.timeInMillis = startTime!!
@@ -198,6 +201,7 @@ fun ForClientAppointment.getAppointment(url: String): Appointment{
     )
 }
 
+//extension function
 fun ForClientAppointment.getEmployee(): Person {
     return Person(id = null, backendId = employee!!.id!!, name = employee.name!!, email = employee.email!!, phone = employee.phone!!)
 }

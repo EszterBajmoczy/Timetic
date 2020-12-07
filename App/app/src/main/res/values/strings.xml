@@ -50,9 +50,11 @@
     <string name="tOff">Off</string>
     <string name="tDefaultTimeRange">Alapértelmezett időponthossz (perc)</string>
 
+    <string name="eAtBeginning">Kezdéskor</string>
     <string name="eHalfHour">Fél óra</string>
     <string name="eOneHour">1 óra</string>
     <string name="eOffNotification">Kikapcsolás</string>
+    <string name="vAtBeginning">at_beginning</string>
     <string name="vHalfHour">half_hour</string>
     <string name="vOneHour">one_hour</string>
     <string name="vOffNotification">off</string>
@@ -125,5 +127,9 @@
     <string name="network_needed_password_reset">Internetkapcsolat szükséges a jelszó visszaállításához</string>
     <string name="network_needed_log_in">Internetkapcsolat szükséges a bejelentkezéshez</string>
     <string name="last_sync">Utoljára szinkronizálva: "</string>
+
+    <string name="registration">Regisztrálás</string>
+    <string name="registrate_new_client">Új ügyfél felvétele</string>
+    <string name="private_appointment">Magán időpont:</string>
 
 </resources>

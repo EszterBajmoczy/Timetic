@@ -1,4 +1,4 @@
-package hu.bme.aut.android.timetic.adapter
+package hu.bme.aut.android.timetic.recyclerViewAdapter
 
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +9,7 @@ import hu.bme.aut.android.timetic.R
 import hu.bme.aut.android.timetic.data.model.Appointment
 import java.util.*
 
+//Adapter for the appointment recycler view in the MonthCalendarFragment
 class AppointmentAdapter(private val listener: AppointmentItemClickListener) :
     RecyclerView.Adapter<AppointmentAdapter.AppointmentViewHolder>() {
 
@@ -59,12 +60,6 @@ class AppointmentAdapter(private val listener: AppointmentItemClickListener) :
                 item?.let { location -> listener.onItemClick(location) }
             }
         }
-
-    }
-
-    fun addItem(item: Appointment) {
-        items.add(item)
-        notifyItemInserted(items.size - 1)
     }
 
     fun update(list: List<Appointment>) {

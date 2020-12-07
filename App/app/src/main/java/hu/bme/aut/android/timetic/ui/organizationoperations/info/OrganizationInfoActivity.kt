@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
-import hu.bme.aut.android.timetic.adapter.ClientAdapter
+import hu.bme.aut.android.timetic.recyclerViewAdapter.ClientAdapter
 import hu.bme.aut.android.timetic.create.NewClientActivity
 import hu.bme.aut.android.timetic.create.toHashMap
 import hu.bme.aut.android.timetic.data.model.Person

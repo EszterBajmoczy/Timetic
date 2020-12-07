@@ -24,23 +24,32 @@ const val ACCOUNT_TYPE = "hu.bme.aut.android.timetic"
 const val ACCOUNT = "default_account"
 
 class AlarmReceiver : BroadcastReceiver() {
+    companion object{
+        var count = 0
+    }
 
     override fun onReceive(context: Context, intent: Intent?) {
-        //TODO periodic or not?
-        val mAccount = createSyncAccount(context)
-        Log.d( "EZAZ", "alarm")
+        val title = intent?.getStringExtra("Title")
+        val text = intent?.getStringExtra("Text")
 
-        notification( "AlarmReceiver ;)", context)
-        // Get the content resolver for your app
-        val mResolver = context.contentResolver
+        if(title != null){
+            //if it's called just to make a notification of an appointment
+            notification(title, text, context)
+        } else {
+            //if it's called to synchronize
+            //TODO periodic or not?
+            val mAccount = createSyncAccount(context)
+            Log.d( "EZAZ", "alarm")
 
-        val settingsBundle = Bundle().apply {
-            putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true)
-            putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true)
-        }
-        ContentResolver.requestSync(mAccount, AUTHORITY, settingsBundle)
+            notification( "AlarmReceiver ;)", context = context)
+            // Get the content resolver for your app
+            val mResolver = context.contentResolver
 
-
+            val settingsBundle = Bundle().apply {
+                putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true)
+                putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true)
+            }
+            ContentResolver.requestSync(mAccount, AUTHORITY, settingsBundle)
 /*
         ContentResolver.addPeriodicSync(
             mAccount,
@@ -48,32 +57,15 @@ class AlarmReceiver : BroadcastReceiver() {
             Bundle.EMPTY,
             SYNC_INTERVAL) */
 
+        }
     }
 
     private fun createSyncAccount(context: Context): Account {
         val accountManager = context.getSystemService(Context.ACCOUNT_SERVICE) as AccountManager
-        return Account(ACCOUNT, ACCOUNT_TYPE).also { newAccount ->
-            /*
-             * Add the account and account type, no password or user data
-             * If successful, return the Account object, otherwise report an error.
-             */
-            if (accountManager.addAccountExplicitly(newAccount, null, null)) {
-                /*
-                 * If you don't set android:syncable="true" in
-                 * in your <provider> element in the manifest,
-                 * then call context.setIsSyncable(account, AUTHORITY, 1)
-                 * here.
-                 */
-            } else {
-                /*
-                 * The account exists or some other error occurred. Log this, report it,
-                 * or handle it internally.
-                 */
-            }
-        }
+        return Account(ACCOUNT, ACCOUNT_TYPE).also { }
     }
 
-    private fun notification(title: String, context: Context) {
+    private fun notification(title: String, text: String? = null, context: Context) {
         val manager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -88,8 +80,9 @@ class AlarmReceiver : BroadcastReceiver() {
                 .setWhen(System.currentTimeMillis())
                 .setSmallIcon(R.drawable.logo_round)
                 .setContentTitle(title)
+                .setContentText(text)
                 .build()
-        manager.notify(0, notification)
+        manager.notify(count, notification)
+        count += 1
     }
-
 }

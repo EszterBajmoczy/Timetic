@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
-import hu.bme.aut.android.timetic.adapter.ClientAdapter
+import hu.bme.aut.android.timetic.recyclerViewAdapter.ClientAdapter
 import hu.bme.aut.android.timetic.create.NewClientActivity
 import hu.bme.aut.android.timetic.ui.loginAregistration.login.afterTextChanged
 import kotlinx.android.synthetic.main.fragment_client_operations.*

@@ -16,11 +16,13 @@
     <string-array name="notification_entries">
         <item>@string/eOffNotification</item>
         <item>@string/eHalfHour</item>
+        <item>@string/eHalfHour</item>
         <item>@string/eOneHour</item>
     </string-array>
 
     <string-array name="notification_values">
         <item>@string/vOffNotification</item>
+        <item>@string/vHalfHour</item>
         <item>@string/vHalfHour</item>
         <item>@string/vOneHour</item>
     </string-array>

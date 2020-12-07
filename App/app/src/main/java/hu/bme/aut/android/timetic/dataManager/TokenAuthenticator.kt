@@ -1,9 +1,15 @@
 package hu.bme.aut.android.timetic.dataManager
 
 import android.content.Intent
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import hu.bme.aut.android.timetic.MyApplication
+import hu.bme.aut.android.timetic.network.apiOrganization.OrganizationApi
+import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.network.models.CommonToken
 import okhttp3.*
+import retrofit2.Retrofit
+import retrofit2.converter.moshi.MoshiConverterFactory
 
 class TokenAuthenticator : Authenticator {
 
@@ -23,7 +29,7 @@ class TokenAuthenticator : Authenticator {
     private fun getUpdatedToken(): String {
         // request to login API to get fresh token
         // synchronously calling login API
-        val apiOrg = MyApplication.getOrganizationApiForRefresh()
+        val apiOrg = getOrganizationApiForRefresh()
         val loginResponse: retrofit2.Response<CommonToken> = apiOrg.employeeRefreshGet().execute()
         var newToken = ""
         if (loginResponse.isSuccessful) {
@@ -38,5 +44,28 @@ class TokenAuthenticator : Authenticator {
             MyApplication.appContext.sendBroadcast(Intent("Logout"))
         }
         return newToken
+    }
+
+    fun getOrganizationApiForRefresh(): OrganizationApi {
+        val m = Moshi.Builder()
+            .add(KotlinJsonAdapterFactory())
+            .build()
+
+        val client =  OkHttpClient.Builder()
+            .addInterceptor(
+                HttpBearerAuth(
+                "bearer",
+                MyApplication.getRefreshToken()!!
+            )
+            )
+            .build()
+
+        val retrofit = Retrofit.Builder()
+            .baseUrl(MyApplication.secureSharedPreferences.getString("OrganizationUrl", "").toString())
+            .client(client)
+            .addConverterFactory(MoshiConverterFactory.create(m))
+            .build()
+
+        return retrofit.create(OrganizationApi::class.java)
     }
 }

@@ -39,7 +39,7 @@ class NewClientActivity : AppCompatActivity() {
 
         if(organizationId != null && organizationUrl != null) {
             role = Role.CLIENT
-            title = "Regisztrálás"
+            setTitle(R.string.registration)
 
             viewModel.initialize(organizationUrl)
 
@@ -70,7 +70,7 @@ class NewClientActivity : AppCompatActivity() {
             }
         } else {
             role = Role.EMPLOYEE
-            title = "Új ügyfél felvétele"
+            setTitle(R.string.registrate_new_client)
 
             viewModel.initialize(MyApplication.getOrganizationUrl()!!, MyApplication.getToken()!!)
 

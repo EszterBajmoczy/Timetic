@@ -1,15 +1,12 @@
 package hu.bme.aut.android.timetic.syncAdapter
 
 import android.accounts.Account
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
+import android.app.*
 import android.content.*
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.lifecycle.viewModelScope
+import androidx.preference.PreferenceManager
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import hu.bme.aut.android.timetic.*
@@ -25,10 +22,9 @@ import hu.bme.aut.android.timetic.network.apiOrganization.OrganizationApi
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.network.models.CommonAppointment
 import hu.bme.aut.android.timetic.network.models.ForClientAppointment
+import hu.bme.aut.android.timetic.receiver.AlarmReceiver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -59,13 +55,6 @@ class SyncAdapter @JvmOverloads constructor(
         editor.putLong("LastSync", calendar.timeInMillis)
         editor.apply()
 
-        val c = Calendar.getInstance()
-        val hour = c.get(Calendar.HOUR_OF_DAY)
-        val minute = c.get(Calendar.MINUTE)
-        notification( "SyncAdapter at $hour:$minute")
-
-        //TODO save LastSync date in millis
-
         if(MyApplication.getToken().isNullOrEmpty() || MyApplication.getDevToken().isNullOrEmpty() ){
             role = if(MyApplication.getToken() != null && MyApplication.getToken()!!.isNotEmpty()){
                 Role.EMPLOYEE
@@ -74,7 +63,7 @@ class SyncAdapter @JvmOverloads constructor(
             }
             synchronize()
         } else {
-            notification( "Unable to synchronize, please log in")
+            notification("Unable to synchronize, please log in")
         }
     }
 
@@ -87,11 +76,8 @@ class SyncAdapter @JvmOverloads constructor(
                 if (response.isSuccessful){
                     successAppointmentList(response.body()!!)
                 } else {
-                    notification( "Unable to synchronize")
+                    notification("Unable to synchronize")
                 }
-                //async
-                //val backend =  NetworkOrganizationInteractor(MyApplication.getOrganizationUrl()!!, null, HttpBearerAuth("bearer", MyApplication.getToken()!!))
-                //backend.getEmployeeAppointments(onSuccess = this::successAppointmentList, onError = this::errorAppointmentList)
             }
             Role.CLIENT -> {
                 val organizationsMapString = MyApplication.secureSharedPreferences.getString("OrganizationsMap", "")
@@ -104,21 +90,8 @@ class SyncAdapter @JvmOverloads constructor(
                     if (response.isSuccessful){
                         successClientAppointmentList(response.body()!!, url)
                     } else {
-                        notification( "Unable to synchronize")
+                        notification("Unable to synchronize")
                     }
-                    /*
-                    //async
-                    val backend = NetworkOrganizationInteractor(
-                        url,
-                        null,
-                        HttpBearerAuth(
-                            "bearer",
-                            token
-                        )
-                    )
-                    backend.getClientAppointments(onSuccess = this::successClientAppointmentList, onError = this::errorAppointmentList)
-
-                     */
                 }
             }
         }
@@ -174,7 +147,10 @@ class SyncAdapter @JvmOverloads constructor(
         clients()
     }
 
-    private fun notification(title: String, text: String? = null) {
+    private fun notification(
+        title: String,
+        text: String? = null
+    ) {
         val manager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -182,7 +158,6 @@ class SyncAdapter @JvmOverloads constructor(
                 NotificationChannel("default", "Default", NotificationManager.IMPORTANCE_DEFAULT)
             manager.createNotificationChannel(channel)
         }
-
         val notification =
             NotificationCompat.Builder(context, "default")
                 .setDefaults(Notification.DEFAULT_ALL)
@@ -195,11 +170,11 @@ class SyncAdapter @JvmOverloads constructor(
     }
 
     private fun appointments() {
-        Log.d("EZAZ", "appontments success")
         val dao = MyApplication.myDatabase.roomDao()
         repo = DBRepository(dao)
         val apps = repo.getAppointmentList()
 
+        //modifies the local database if needed / do the synchronization
         UseCases().appointmentOrganizer(repo, CoroutineScope(Dispatchers.IO), appointments, apps)
 
         //check if there is an appointment today
@@ -216,7 +191,7 @@ class SyncAdapter @JvmOverloads constructor(
             if(item.start_date > todayStart && item.start_date < todayEnd){
                 val title = getTitle(item)
                 val text = getText(item)
-                notification(title, text)
+                setNotification(title, text, item.start_date)
             }
         }
     }
@@ -226,7 +201,44 @@ class SyncAdapter @JvmOverloads constructor(
         repo = DBRepository(dao)
         val personsFromDB = repo.getPersonList()
 
+        //modifies the local database if needed / do the synchronization
         UseCases().personOrganizer(repo, CoroutineScope(Dispatchers.IO), persons, personsFromDB)
+    }
+
+    private fun setNotification(title: String, text: String, startDate: Calendar) {
+        val defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences (context)
+
+        when (defaultSharedPreferences.getString("notification", "")){
+            "at_beginning" -> {
+                notificationAt(title, text, startDate)
+            }
+            "half_hour" -> {
+                startDate.set(Calendar.MINUTE, -30)
+                notificationAt(title, text, startDate)
+            }
+            "one_hour" -> {
+                startDate.set(Calendar.HOUR_OF_DAY, -1)
+                notificationAt(title, text, startDate)
+            }
+            else -> {}
+        }
+    }
+
+    private fun notificationAt(
+        title: String,
+        text: String? = null,
+        calendar: Calendar
+    ) {
+        val intent = Intent()
+        intent.setClass(context, AlarmReceiver::class.java)
+        intent.action = ".receiver.AlarmReceiver.$title.$text"
+        intent.putExtra("Title", title)
+        intent.putExtra("Text", text)
+        val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+        val alarmManager =  context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
     }
 
     private fun getTitle(appointment: Appointment): String {
@@ -235,7 +247,7 @@ class SyncAdapter @JvmOverloads constructor(
         } else if(appointment.note != "" && appointment.note != null){
             appointment.note
         } else{
-            "Magán időpont:"
+            context.getString(R.string.private_appointment)
         }
     }
 
@@ -244,6 +256,7 @@ class SyncAdapter @JvmOverloads constructor(
                 "- ${format(appointment.end_date.get(Calendar.HOUR_OF_DAY))}:${format(appointment.end_date.get(Calendar.MINUTE))}"
     }
 
+    //format hour and minute like 3 -> 03 if needed
     private fun format(value: Int) : String{
         if(value.toString().length == 1){
             return "${0}${value}"

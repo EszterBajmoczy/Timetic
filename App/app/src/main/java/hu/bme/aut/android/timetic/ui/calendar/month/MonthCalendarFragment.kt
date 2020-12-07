@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
 import hu.bme.aut.android.timetic.R
-import hu.bme.aut.android.timetic.adapter.AppointmentAdapter
+import hu.bme.aut.android.timetic.recyclerViewAdapter.AppointmentAdapter
 import hu.bme.aut.android.timetic.create.NewAppointmentActivity
 import hu.bme.aut.android.timetic.data.model.Appointment
 import hu.bme.aut.android.timetic.ui.calendar.CalendarViewModel

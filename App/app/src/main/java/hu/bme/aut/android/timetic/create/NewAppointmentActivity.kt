@@ -30,7 +30,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-
 class NewAppointmentActivity : AppCompatActivity() {
     private lateinit var viewModel: NewAppointmentViewModel
     private lateinit var defaultSharedPreferences: SharedPreferences
@@ -69,12 +68,12 @@ class NewAppointmentActivity : AppCompatActivity() {
         })
 
         if(MyApplication.getOrganizationUrl().isNullOrEmpty()){
-            role = Role.CLIENT
+            //Role: Client
             //Details view
             viewModel.getAppointmentByNetId(appointmentId!!)
             viewModel.appDetail.observe(this,  clientObserver())
         } else {
-            role = Role.EMPLOYEE
+            //Role: Employee
             if(isNetworkAvailable()) {
                 viewModel.getDataForAppointmentCreation(MyApplication.getOrganizationUrl()!!, MyApplication.getToken()!!)
 
@@ -251,22 +250,20 @@ class NewAppointmentActivity : AppCompatActivity() {
             setDateChooseButtonValue()
             setDateChooseButtons()
 
-            btCancel.setText(R.string.tCancelAppointment)
-
-            btSave.setText(R.string.tModify)
             if(isInThePast(app.start_date)){
-                btSave.visibility = View.GONE
-                btCancel.visibility = View.GONE
+                setButton(btSave, null, null)
+                setButton(btCancel, null, null)
             } else {
-                btCancel.setOnClickListener {
+                setButton(btCancel, R.string.tCancelAppointment, View.OnClickListener {
                     if(isNetworkAvailable()) {
                         viewModel.appDetail.removeObserver(observer)
                         viewModel.cancelAppointment(app.backendId)
                     } else {
                         Toast.makeText(applicationContext, getString(R.string.network_needed_cancel_appointment), Toast.LENGTH_LONG).show()
                     }
-                }
-                btSave.setOnClickListener {
+                })
+
+                setButton(btSave, R.string.tModify, View.OnClickListener {
                     if(isNetworkAvailable()) {
                         val a = getAppointment()
 
@@ -289,7 +286,7 @@ class NewAppointmentActivity : AppCompatActivity() {
                     } else {
                         Toast.makeText(applicationContext, getString(R.string.network_needed_modify_appointment), Toast.LENGTH_LONG).show()
                     }
-                }
+                })
             }
 
             if(app.videochat != null){
@@ -489,18 +486,13 @@ class NewAppointmentActivity : AppCompatActivity() {
 
         setDateChooseButtonValue()
 
-        btCancel.setText(R.string.tCancelAppointment)
-        if(role == Role.EMPLOYEE){
-            btSave.setText(R.string.tModify)
-        }
-
         etNote.setText(app.note)
         etNote.isClickable = false
 
         if(isInThePast(app.start_date)){
-            btCancel.visibility = View.GONE
+            setButton(btCancel, null, null)
         } else {
-            btCancel.setOnClickListener {
+            setButton(btCancel, R.string.tCancelAppointment, View.OnClickListener {
                 if(isNetworkAvailable()) {
                     viewModel.appDetail.removeObserver(observer)
 
@@ -516,11 +508,11 @@ class NewAppointmentActivity : AppCompatActivity() {
                 } else {
                     Toast.makeText(this, getString(R.string.network_needed_cancel_appointment), Toast.LENGTH_LONG).show()
                 }
-            }
-
-            btSave.setOnClickListener {
+            })
+            setButton(btSave, R.string.tModify, View.OnClickListener {
                 Toast.makeText(this, getString(R.string.network_needed_cancel_appointment), Toast.LENGTH_LONG).show()
-            }
+
+            })
         }
     }
 

@@ -1,4 +1,4 @@
-package hu.bme.aut.android.timetic.adapter
+package hu.bme.aut.android.timetic.recyclerViewAdapter
 
 import android.view.LayoutInflater
 import android.view.View
@@ -14,7 +14,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.reflect.KFunction1
 
-
+//Adapter for the client recycler view in the ClientOperationsFragment
 class ClientAdapter(
     private val callCallBack: KFunction1<@ParameterName(name = "number") String, Unit>,
     private val emailCallBack: KFunction1<@ParameterName(name = "email") String, Unit>
