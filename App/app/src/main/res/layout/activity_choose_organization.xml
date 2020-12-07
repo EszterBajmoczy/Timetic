@@ -35,7 +35,7 @@
         android:layout_gravity="top|center"
         android:layout_margin="@dimen/fab_margin"
         app:srcCompat="@drawable/mcv_action_next"
-        android:background="@color/colorPrimaryLight"
+        android:backgroundTint="@color/colorPrimaryLight"
         android:layout_marginTop="300dp"/>
 
 </LinearLayout>
