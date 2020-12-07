@@ -72,10 +72,13 @@ class SyncAdapter @JvmOverloads constructor(
             Role.EMPLOYEE -> {
                 //sync
                 val apiOrg = getApiWithAuthenticator(MyApplication.getOrganizationUrl()!!, MyApplication.getToken()!!)
-                val response: retrofit2.Response<List<CommonAppointment>> = apiOrg.employeeAppointmentsGet().execute()
-                if (response.isSuccessful){
-                    successAppointmentList(response.body()!!)
-                } else {
+                try {
+                    val response: retrofit2.Response<List<CommonAppointment>> = apiOrg.employeeAppointmentsGet().execute()
+                    if (response.isSuccessful){
+                        successAppointmentList(response.body()!!)
+                    }
+                } catch (e: Exception) {
+                    UseCases.logBackendError(e, null, "@GET(employee/appointments)")
                     notification("Unable to synchronize")
                 }
             }
@@ -86,10 +89,13 @@ class SyncAdapter @JvmOverloads constructor(
                 for((url, token) in organizationMap){
                     //sync
                     val apiOrg = getApiWithAuthenticator(url, token)
-                    val response: retrofit2.Response<List<ForClientAppointment>> = apiOrg.clientAppointmentsGet().execute()
-                    if (response.isSuccessful){
-                        successClientAppointmentList(response.body()!!, url)
-                    } else {
+                    try {
+                        val response: retrofit2.Response<List<ForClientAppointment>> = apiOrg.clientAppointmentsGet().execute()
+                        if (response.isSuccessful){
+                            successClientAppointmentList(response.body()!!, url)
+                        }
+                    } catch (e: Exception) {
+                        UseCases.logBackendError(e, null, "@GET(employee/appointments)")
                         notification("Unable to synchronize")
                     }
                 }

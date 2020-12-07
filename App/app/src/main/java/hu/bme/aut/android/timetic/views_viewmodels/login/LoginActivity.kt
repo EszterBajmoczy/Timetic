@@ -1,6 +1,5 @@
 package hu.bme.aut.android.timetic.views_viewmodels.login
 
-import ForgottenPasswordActivity
 import android.app.Activity
 import android.content.*
 import android.net.ConnectivityManager
@@ -19,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import hu.bme.aut.android.timetic.*
+import hu.bme.aut.android.timetic.views_viewmodels.forgottenpassword.ForgottenPasswordActivity
 
 class LoginActivity : AppCompatActivity() {
 

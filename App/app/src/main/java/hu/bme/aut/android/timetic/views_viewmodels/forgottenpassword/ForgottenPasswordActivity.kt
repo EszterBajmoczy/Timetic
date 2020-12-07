@@ -1,3 +1,4 @@
+package hu.bme.aut.android.timetic.views_viewmodels.forgottenpassword
 
 import android.app.Activity
 import android.content.Intent

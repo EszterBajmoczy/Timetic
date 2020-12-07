@@ -16,7 +16,7 @@ import androidx.core.app.NotificationCompat
 import hu.bme.aut.android.timetic.R
 
 // The authority for the sync adapter's content provider
-const val AUTHORITY = "hu.bme.aut.android.timetic.syncAdapter"
+const val AUTHORITY = "hu.bme.aut.android.timetic.synchronization"
 // An account type, in the form of a domain name
 const val ACCOUNT_TYPE = "hu.bme.aut.android.timetic"
 // Account
@@ -55,7 +55,6 @@ class AlarmReceiver : BroadcastReceiver() {
     }
 
     private fun createSyncAccount(context: Context): Account {
-        val accountManager = context.getSystemService(Context.ACCOUNT_SERVICE) as AccountManager
         return Account(ACCOUNT, ACCOUNT_TYPE).also { }
     }
 
