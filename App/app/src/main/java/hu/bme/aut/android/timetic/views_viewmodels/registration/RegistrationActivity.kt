@@ -1,9 +1,7 @@
 package hu.bme.aut.android.timetic.views_viewmodels.registration
 
 import android.app.Activity
-import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
+import android.content.*
 import android.net.ConnectivityManager
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -19,6 +17,7 @@ import hu.bme.aut.android.timetic.MainActivity
 import hu.bme.aut.android.timetic.MyApplication
 
 import hu.bme.aut.android.timetic.R
+import hu.bme.aut.android.timetic.StartScreenActivity
 import hu.bme.aut.android.timetic.views_viewmodels.login.afterTextChanged
 import kotlinx.android.synthetic.main.activity_registration.*
 

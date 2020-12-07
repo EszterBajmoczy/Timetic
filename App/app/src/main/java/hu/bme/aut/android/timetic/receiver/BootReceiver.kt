@@ -12,8 +12,9 @@ class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
         this.context = context
         val calAlarm = Calendar.getInstance()
+        calAlarm.add(Calendar.DAY_OF_MONTH, 1)
         calAlarm[Calendar.HOUR_OF_DAY] = 0
-        calAlarm[Calendar.MINUTE] = 56
+        calAlarm[Calendar.MINUTE] = 15
         calAlarm[Calendar.SECOND] = 0
 
         val intent = Intent()

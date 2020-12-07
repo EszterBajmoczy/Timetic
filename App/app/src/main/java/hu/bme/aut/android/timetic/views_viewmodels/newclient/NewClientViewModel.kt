@@ -125,4 +125,8 @@ class NewClientViewModel : ViewModel() {
     private fun insert(person: Person) = viewModelScope.launch {
         repo.insert(person)
     }
+
+    fun deleteAllFromProject() = viewModelScope.launch {
+        repo.deleteAllTables()
+    }
 }

@@ -2,6 +2,7 @@ package hu.bme.aut.android.timetic.views_viewmodels.statistic
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -70,6 +71,7 @@ class StatisticDiagramFragment : Fragment() {
     //sumhours of activities
     private fun setDataPieChart1(list: List<ForEmployeeActivityForReport>) {
         ch1Container.removeAllViewsInLayout()
+        chart1!!.clearChart()
         var sum = 0
 
         val colors = resources.getStringArray(R.array.color_values)
@@ -99,6 +101,7 @@ class StatisticDiagramFragment : Fragment() {
     //sumIncome of activities
     private fun setDataPieChart2(list: List<ForEmployeeActivityForReport>) {
         ch2Container.removeAllViewsInLayout()
+        chart2!!.clearChart()
         var sum = 0
 
         val colors = resources.getStringArray(R.array.color_values)
@@ -106,6 +109,7 @@ class StatisticDiagramFragment : Fragment() {
             item.sumIncome?.let {
                 sum += it.toInt()
             }
+            Log.d("EZAZ", item.name)
 
             chart2!!.addPieSlice(
                 PieModel(
@@ -127,6 +131,7 @@ class StatisticDiagramFragment : Fragment() {
 
 
     private fun setDataPieChart3(sumLocalHours: Double, sumOnlineHours: Double) {
+        chart3!!.clearChart()
         chart3!!.addPieSlice(
             PieModel(
                 resources.getString(R.string.private_appointments)                ,
@@ -149,6 +154,7 @@ class StatisticDiagramFragment : Fragment() {
     }
 
     private fun setDataPieChart4(sumLocalIncome: Double, sumOnlineIncome: Double) {
+        chart4!!.clearChart()
         chart4!!.addPieSlice(
             PieModel(
                 resources.getString(R.string.private_appointments),

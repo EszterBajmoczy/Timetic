@@ -1,10 +1,13 @@
 package hu.bme.aut.android.timetic.views_viewmodels.settings
 
 import androidx.lifecycle.*
+import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.UseCases
 import hu.bme.aut.android.timetic.connectionmanager.NetworkOrganizationInteractor
 import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.network.models.ForEmployeeDataForAppointmentCreation
+import hu.bme.aut.android.timetic.repository.DBRepository
+import kotlinx.coroutines.launch
 import kotlin.collections.ArrayList
 
 class SettingsViewModel : ViewModel() {
@@ -40,5 +43,11 @@ class SettingsViewModel : ViewModel() {
         }
         _activities.value = stringList
         _locations.value = data.places
+    }
+
+    fun deleteAllFromProject() = viewModelScope.launch {
+        val dao = MyApplication.myDatabase.roomDao()
+        val repo = DBRepository(dao)
+        repo.deleteAllTables()
     }
 }

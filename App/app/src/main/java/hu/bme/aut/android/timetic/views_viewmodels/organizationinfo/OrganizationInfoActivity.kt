@@ -1,6 +1,9 @@
 package hu.bme.aut.android.timetic.views_viewmodels.organizationinfo
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -10,8 +13,10 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import hu.bme.aut.android.timetic.MainActivity
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
+import hu.bme.aut.android.timetic.StartScreenActivity
 import hu.bme.aut.android.timetic.recyclerViewAdapter.ClientAdapter
 import hu.bme.aut.android.timetic.views_viewmodels.newclient.NewClientActivity
 import hu.bme.aut.android.timetic.views_viewmodels.newclient.toHashMap
@@ -54,8 +59,31 @@ class OrganizationInfoActivity : AppCompatActivity() {
                     startActivity(intent)
                 } else {
                     Toast.makeText(this, getString(R.string.activated_organization), Toast.LENGTH_LONG).show()
+                    viewModel.sendOrganizationIdToDev(MyApplication.getDevToken()!!, organizationId)
                 }
             }
+        })
+
+        viewModel.clientRegistered.observe(this, Observer {success ->
+            if(success) {
+                viewModel.getTokenForClient(organizationUrl, MyApplication.getEmail()!!, MyApplication.getRefreshToken()!!)
+            } else {
+                Toast.makeText(this, getString(R.string.something_went_wrong), Toast.LENGTH_LONG).show()
+            }
+        })
+
+        viewModel.tokenSuccess.observe(this, Observer {list ->
+            val organizationsMapString = MyApplication.secureSharedPreferences.getString("OrganizationsMap", "")
+            val organizationMap = organizationsMapString!!.toHashMap()
+
+            organizationMap[list[0]] = list[1]
+
+            val editor = MyApplication.secureSharedPreferences.edit()
+            editor.putString("OrganizationsMap", organizationMap.toString())
+            editor.apply()
+
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
         })
         initRecyclerView()
     }
@@ -96,5 +124,34 @@ class OrganizationInfoActivity : AppCompatActivity() {
     private fun emailCallBack(email: String){
         val intent = Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", email, null))
         startActivity(Intent.createChooser(intent, getString(R.string.email_text)))
+    }
+
+    //handle system logout
+    private val logoutReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            viewModel.deleteAllFromProject()
+
+            val secureSharedPreferences = MyApplication.secureSharedPreferences
+
+            val editor = secureSharedPreferences.edit()
+            editor.clear()
+            editor.apply()
+
+            val intent = Intent(this@OrganizationInfoActivity, StartScreenActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        registerReceiver(logoutReceiver, IntentFilter("Logout"))
+    }
+
+    override fun onPause() {
+        super.onPause()
+        try {
+            unregisterReceiver(logoutReceiver)
+        } catch (e: Exception){}
     }
 }

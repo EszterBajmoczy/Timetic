@@ -13,6 +13,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
+import hu.bme.aut.android.timetic.StartScreenActivity
 import hu.bme.aut.android.timetic.network.models.CommonOrganization
 import hu.bme.aut.android.timetic.views_viewmodels.login.LoginActivity
 import kotlinx.android.synthetic.main.activity_choose_organization.*
@@ -33,6 +34,22 @@ class ChooseOrganizationActivity : AppCompatActivity() {
                 initialize()
                 context.unregisterReceiver(this)
             }
+        }
+    }
+
+    private val logoutReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            viewModel.deleteAllFromProject()
+
+            val secureSharedPreferences = MyApplication.secureSharedPreferences
+
+            val editor = secureSharedPreferences.edit()
+            editor.clear()
+            editor.apply()
+
+            val intent = Intent(this@ChooseOrganizationActivity, StartScreenActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
         }
     }
 
@@ -97,11 +114,15 @@ class ChooseOrganizationActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
-        try {
-            applicationContext?.unregisterReceiver(internetStateChangedReceiver)
-        } catch (e: Exception) {
-
-        }
         super.onPause()
+        try {
+            unregisterReceiver(internetStateChangedReceiver)
+            unregisterReceiver(logoutReceiver)
+        } catch (e: Exception) {}
+    }
+
+    override fun onStart() {
+        super.onStart()
+        registerReceiver(logoutReceiver, IntentFilter("Logout"))
     }
 }

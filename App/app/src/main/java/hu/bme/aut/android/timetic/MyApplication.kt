@@ -44,14 +44,14 @@ class MyApplication : Application() {
 		myDatabase = Room.databaseBuilder(
                     applicationContext,
                     Database::class.java,
-                    "timetic_database"
+                    "timetic"
                 ).build()
 
 		val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
 		val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
 
 		secureSharedPreferences = EncryptedSharedPreferences.create(
-			"encrypted_shared_preferences",
+			"my_encrypted_shared_preferences",
 			masterKeyAlias,
 			applicationContext,
 			EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,

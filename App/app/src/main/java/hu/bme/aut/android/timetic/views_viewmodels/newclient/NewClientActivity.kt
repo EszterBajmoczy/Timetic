@@ -1,7 +1,9 @@
 package hu.bme.aut.android.timetic.views_viewmodels.newclient
 
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -12,10 +14,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import hu.bme.aut.android.timetic.MainActivity
-import hu.bme.aut.android.timetic.MyApplication
-import hu.bme.aut.android.timetic.R
-import hu.bme.aut.android.timetic.Role
+import hu.bme.aut.android.timetic.*
 import hu.bme.aut.android.timetic.network.models.CommonClient
 import kotlinx.android.synthetic.main.activity_new_client.*
 import kotlinx.android.synthetic.main.item_new_client.view.*
@@ -187,6 +186,34 @@ class NewClientActivity : AppCompatActivity() {
         val connectivityManager = applicationContext?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val activeNetworkInfo = connectivityManager.activeNetworkInfo
         return activeNetworkInfo != null && activeNetworkInfo.isConnected
+    }
+
+    private val logoutReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            viewModel.deleteAllFromProject()
+
+            val secureSharedPreferences = MyApplication.secureSharedPreferences
+
+            val editor = secureSharedPreferences.edit()
+            editor.clear()
+            editor.apply()
+
+            val intent = Intent(this@NewClientActivity, StartScreenActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        registerReceiver(logoutReceiver, IntentFilter("Logout"))
+    }
+
+    override fun onPause() {
+        super.onPause()
+        try {
+            unregisterReceiver(logoutReceiver)
+        } catch (e: Exception){}
     }
 }
 

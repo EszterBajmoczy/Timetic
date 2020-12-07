@@ -128,7 +128,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setFirstRunAndSynchronization(pref: SharedPreferences) {
-        //if(!pref.contains("NotFirst")){
+        if(!pref.contains("NotFirst")){
             val editor = pref.edit()
             editor.putBoolean("NotFirst", true)
             editor.apply()
@@ -137,7 +137,7 @@ class MainActivity : AppCompatActivity() {
             intent.setClass(applicationContext, BootReceiver::class.java)
             //set the synchronization
             BootReceiver().onReceive(applicationContext, intent)
-        //}
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

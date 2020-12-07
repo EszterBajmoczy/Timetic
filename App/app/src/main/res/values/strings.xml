@@ -127,6 +127,7 @@
     <string name="network_needed_password_reset">Internetkapcsolat szükséges a jelszó visszaállításához</string>
     <string name="network_needed_log_in">Internetkapcsolat szükséges a bejelentkezéshez</string>
     <string name="last_sync">Utoljára szinkronizálva: "</string>
+    <string name="something_went_wrong">Valami hiba történt.</string>
 
     <string name="registration">Regisztrálás</string>
     <string name="registrate_new_client">Új ügyfél felvétele</string>

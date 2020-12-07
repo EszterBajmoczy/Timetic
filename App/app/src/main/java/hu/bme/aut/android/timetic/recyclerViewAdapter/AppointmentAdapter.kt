@@ -27,7 +27,12 @@ class AppointmentAdapter(private val listener: AppointmentItemClickListener) :
         val time = "${format(item.start_date.get(Calendar.HOUR_OF_DAY))}:${format(item.start_date.get(Calendar.MINUTE))} " +
                 "- ${format(item.end_date.get(Calendar.HOUR_OF_DAY))}:${format(item.end_date.get(Calendar.MINUTE))}"
 
-        holder.name.text = item.activity
+        holder.name.text = if(item.activity == ""){
+            "Magán időpont"
+        } else {
+            item.activity
+        }
+
         holder.time.text = time
 
         holder.item = item

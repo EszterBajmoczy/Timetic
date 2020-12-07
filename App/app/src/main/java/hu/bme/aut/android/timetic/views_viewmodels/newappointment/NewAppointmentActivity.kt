@@ -4,9 +4,7 @@ import android.app.DatePickerDialog
 import android.app.DatePickerDialog.OnDateSetListener
 import android.app.TimePickerDialog
 import android.app.TimePickerDialog.OnTimeSetListener
-import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
+import android.content.*
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Bundle
@@ -771,6 +769,34 @@ class NewAppointmentActivity : AppCompatActivity() {
         setSpinner(spLocation, listOf(app.location), app.location, defaultLocation)
         { index -> this@NewAppointmentActivity.location = locations[index] }
         spLocation.isClickable = false
+    }
+
+    private val logoutReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            viewModel.deleteAllFromProject()
+
+            val secureSharedPreferences = MyApplication.secureSharedPreferences
+
+            val editor = secureSharedPreferences.edit()
+            editor.clear()
+            editor.apply()
+
+            val intent = Intent(this@NewAppointmentActivity, StartScreenActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        registerReceiver(logoutReceiver, IntentFilter("Logout"))
+    }
+
+    override fun onPause() {
+        super.onPause()
+        try {
+            unregisterReceiver(logoutReceiver)
+        } catch (e: Exception){}
     }
 }
 

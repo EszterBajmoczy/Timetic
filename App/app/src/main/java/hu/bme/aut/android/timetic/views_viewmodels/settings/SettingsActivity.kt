@@ -1,6 +1,9 @@
 package hu.bme.aut.android.timetic.views_viewmodels.settings
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.widget.Toast
@@ -12,6 +15,7 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
+import hu.bme.aut.android.timetic.StartScreenActivity
 
 
 class SettingsActivity : AppCompatActivity() {
@@ -87,5 +91,36 @@ class SettingsActivity : AppCompatActivity() {
             val activeNetworkInfo = connectivityManager.activeNetworkInfo
             return activeNetworkInfo != null && activeNetworkInfo.isConnected
         }
+    }
+
+    //handle system logout
+    private val logoutReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            viewModel?.let {viewModel ->
+                viewModel.deleteAllFromProject()
+
+                val secureSharedPreferences = MyApplication.secureSharedPreferences
+
+                val editor = secureSharedPreferences.edit()
+                editor.clear()
+                editor.apply()
+
+                val intent = Intent(this@SettingsActivity, StartScreenActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+            }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        registerReceiver(logoutReceiver, IntentFilter("Logout"))
+    }
+
+    override fun onPause() {
+        super.onPause()
+        try {
+            unregisterReceiver(logoutReceiver)
+        } catch (e: Exception){}
     }
 }

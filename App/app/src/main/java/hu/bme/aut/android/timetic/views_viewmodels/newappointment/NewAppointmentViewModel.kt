@@ -3,6 +3,7 @@ package hu.bme.aut.android.timetic.views_viewmodels.newappointment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import hu.bme.aut.android.timetic.MyApplication
 import hu.bme.aut.android.timetic.R
 import hu.bme.aut.android.timetic.UseCases
@@ -13,6 +14,7 @@ import hu.bme.aut.android.timetic.network.auth.HttpBearerAuth
 import hu.bme.aut.android.timetic.repository.DBRepository
 import hu.bme.aut.android.timetic.network.models.*
 import hu.bme.aut.android.timetic.Result
+import kotlinx.coroutines.launch
 import java.util.*
 
 class NewAppointmentViewModel: ViewModel() {
@@ -142,6 +144,10 @@ class NewAppointmentViewModel: ViewModel() {
 
     private fun successAddAppointment(appointment: CommonAppointment) {
         _result.value = Result(true, null)
+    }
+
+    fun deleteAllFromProject() = viewModelScope.launch {
+        repo.deleteAllTables()
     }
 }
 
