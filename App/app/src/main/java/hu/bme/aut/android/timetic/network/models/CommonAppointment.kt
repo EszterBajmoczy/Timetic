@@ -12,12 +12,7 @@
 package hu.bme.aut.android.timetic.network.models
 
 
-import com.alamkanak.weekview.WeekViewDisplayable
-import com.alamkanak.weekview.WeekViewEvent
 import com.squareup.moshi.Json
-import hu.bme.aut.android.timetic.R
-import hu.bme.aut.android.timetic.data.model.Appointment
-import java.util.*
 
 /**
  * 

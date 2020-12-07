@@ -12,7 +12,6 @@ import hu.bme.aut.android.timetic.network.models.CommonOrganization
 import java.util.*
 import kotlin.collections.ArrayList
 
-//Adapter for the organization recycler view in the OrganisationOperationFragment
 class OrganizationAdapter(
     private val listener: OrganizationClickListener
 ) :

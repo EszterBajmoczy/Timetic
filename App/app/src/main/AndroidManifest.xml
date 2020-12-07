@@ -9,7 +9,7 @@
     <uses-permission android:name="android.permission.READ_SYNC_STATS" />
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:name=".MyApplication"
@@ -20,10 +20,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".ui.organizationoperations.info.OrganizationInfoActivity" />
+        <activity android:name=".views_viewmodels.login.login"></activity>
+        <activity android:name=".views_viewmodels.organizationinfo.OrganizationInfoActivity" />
 
         <service
-            android:name=".syncAdapter.SyncService"
+            android:name=".synchronization.SyncService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -36,13 +37,13 @@
         </service>
 
         <provider
-            android:name=".syncAdapter.StubProvider"
-            android:authorities="hu.bme.aut.android.timetic.syncAdapter"
+            android:name=".synchronization.StubProvider"
+            android:authorities="hu.bme.aut.android.timetic.synchronization"
             android:exported="false"
             android:syncable="true" />
 
         <service
-            android:name=".syncAdapter.AuthenticatorService"
+            android:name=".synchronization.AuthenticatorService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -54,8 +55,8 @@
                 android:resource="@xml/authenticator" />
         </service>
 
-        <activity android:name=".ForgottenPasswordActivity" />
-        <activity android:name=".create.NewClientActivity" />
+        <activity android:name=".views_viewmodels.forgottenpassword.ForgottenPasswordActivity" />
+        <activity android:name=".views_viewmodels.newclient.NewClientActivity" />
 
         <receiver
             android:name=".receiver.AlarmReceiver"
@@ -65,13 +66,12 @@
                 <action android:name=".receiver.AlarmReceiver" />
             </intent-filter>
         </receiver>
-
         <receiver
             android:name=".receiver.BootReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
@@ -84,10 +84,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ChooseOrganizationActivity" />
-        <activity android:name=".create.NewAppointmentActivity" />
+        <activity android:name=".views_viewmodels.chooseorganisations.ChooseOrganizationActivity" />
+        <activity android:name=".views_viewmodels.newappointment.NewAppointmentActivity" />
         <activity
-            android:name=".settings.SettingsActivity"
+            android:name=".views_viewmodels.settings.SettingsActivity"
             android:label="@string/action_settings"
             android:parentActivityName=".MainActivity">
             <meta-data
@@ -95,10 +95,10 @@
                 android:value=".MainActivity" />
         </activity>
         <activity
-            android:name=".ui.loginAregistration.registration.RegistrationActivity"
+            android:name=".views_viewmodels.registration.RegistrationActivity"
             android:label="@string/title_activity_registration" />
         <activity
-            android:name=".ui.loginAregistration.login.LoginActivity"
+            android:name=".views_viewmodels.login.LoginActivity"
             android:label="@string/title_activity_login" />
         <activity
             android:name=".MainActivity"

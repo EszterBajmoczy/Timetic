@@ -1,9 +1,9 @@
 package hu.bme.aut.android.timetic
 
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import hu.bme.aut.android.timetic.data.model.Appointment
-import hu.bme.aut.android.timetic.data.model.Person
-import hu.bme.aut.android.timetic.dataManager.DBRepository
+import hu.bme.aut.android.timetic.models.Appointment
+import hu.bme.aut.android.timetic.models.Person
+import hu.bme.aut.android.timetic.repository.DBRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -22,7 +22,6 @@ class UseCases {
             FirebaseCrashlytics.getInstance().recordException(e)
         }
     }
-
 
     fun appointmentOrganizer(
         repo: DBRepository,
@@ -150,5 +149,4 @@ class UseCases {
     private fun delete(repo: DBRepository, scope: CoroutineScope, person: Person) = scope.launch {
         repo.deletePerson(person)
     }
-
 }

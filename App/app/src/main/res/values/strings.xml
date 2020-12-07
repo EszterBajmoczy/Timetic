@@ -131,5 +131,6 @@
     <string name="registration">Regisztrálás</string>
     <string name="registrate_new_client">Új ügyfél felvétele</string>
     <string name="private_appointment">Magán időpont:</string>
+    <string name="email_text">Choose an Email client :</string>
 
 </resources>

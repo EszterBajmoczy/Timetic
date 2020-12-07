@@ -6,7 +6,7 @@ import android.os.Handler
 import androidx.appcompat.app.AppCompatActivity
 
 class SplashScreen : AppCompatActivity() {
-    private val Splash_Time_Out: Long = 1000
+    private val timeout: Long = 1000
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -16,6 +16,7 @@ class SplashScreen : AppCompatActivity() {
         val thread = Runnable {
             val secureSharedPreferences = MyApplication.secureSharedPreferences
 
+            //checks if the user is already signed in
             if(secureSharedPreferences.contains("Token") || secureSharedPreferences.contains("DevToken")){
                 val intent = Intent(this, MainActivity::class.java)
                 startActivity(intent)
@@ -26,6 +27,6 @@ class SplashScreen : AppCompatActivity() {
             }
             finish()
         }
-        handler.postDelayed(thread, Splash_Time_Out)
+        handler.postDelayed(thread, timeout)
     }
 }

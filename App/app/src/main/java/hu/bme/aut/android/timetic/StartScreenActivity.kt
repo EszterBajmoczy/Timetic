@@ -3,8 +3,9 @@ package hu.bme.aut.android.timetic
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import hu.bme.aut.android.timetic.ui.loginAregistration.login.LoginActivity
-import hu.bme.aut.android.timetic.ui.loginAregistration.registration.RegistrationActivity
+import hu.bme.aut.android.timetic.views_viewmodels.chooseorganisations.ChooseOrganizationActivity
+import hu.bme.aut.android.timetic.views_viewmodels.login.LoginActivity
+import hu.bme.aut.android.timetic.views_viewmodels.registration.RegistrationActivity
 import kotlinx.android.synthetic.main.activity_start_screen.*
 
 class StartScreenActivity : AppCompatActivity() {

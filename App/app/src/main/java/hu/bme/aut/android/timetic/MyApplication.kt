@@ -60,8 +60,4 @@ class MyApplication : Application() {
 
 		appContext = applicationContext
 	}
-
-
-
-
 }

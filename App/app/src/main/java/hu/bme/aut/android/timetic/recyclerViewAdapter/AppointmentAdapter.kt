@@ -6,10 +6,9 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import hu.bme.aut.android.timetic.R
-import hu.bme.aut.android.timetic.data.model.Appointment
+import hu.bme.aut.android.timetic.models.Appointment
 import java.util.*
 
-//Adapter for the appointment recycler view in the MonthCalendarFragment
 class AppointmentAdapter(private val listener: AppointmentItemClickListener) :
     RecyclerView.Adapter<AppointmentAdapter.AppointmentViewHolder>() {
 

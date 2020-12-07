@@ -23,7 +23,7 @@
         <GridLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:context=".create.NewAppointmentActivity"
+            tools:context=".views_viewmodels.newappointment.NewAppointmentActivity"
             android:columnCount="2"
             android:layout_gravity="center"
             >

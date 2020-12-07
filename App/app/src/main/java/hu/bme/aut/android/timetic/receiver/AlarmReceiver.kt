@@ -19,7 +19,6 @@ import hu.bme.aut.android.timetic.R
 const val AUTHORITY = "hu.bme.aut.android.timetic.syncAdapter"
 // An account type, in the form of a domain name
 const val ACCOUNT_TYPE = "hu.bme.aut.android.timetic"
-
 // Account
 const val ACCOUNT = "default_account"
 
@@ -39,11 +38,6 @@ class AlarmReceiver : BroadcastReceiver() {
             //if it's called to synchronize
             //TODO periodic or not?
             val mAccount = createSyncAccount(context)
-            Log.d( "EZAZ", "alarm")
-
-            notification( "AlarmReceiver ;)", context = context)
-            // Get the content resolver for your app
-            val mResolver = context.contentResolver
 
             val settingsBundle = Bundle().apply {
                 putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true)

@@ -16,11 +16,11 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
-import hu.bme.aut.android.timetic.create.toHashMap
+import hu.bme.aut.android.timetic.views_viewmodels.newclient.toHashMap
 import hu.bme.aut.android.timetic.receiver.BootReceiver
-import hu.bme.aut.android.timetic.settings.SettingsActivity
-import hu.bme.aut.android.timetic.ui.calendar.CalendarViewModel
-import hu.bme.aut.android.timetic.ui.calendar.CalendarViewModelFactory
+import hu.bme.aut.android.timetic.views_viewmodels.settings.SettingsActivity
+import hu.bme.aut.android.timetic.views_viewmodels.calendar.CalendarViewModel
+import hu.bme.aut.android.timetic.views_viewmodels.calendar.CalendarViewModelFactory
 import kotlinx.android.synthetic.main.nav_header_main.view.*
 import java.util.*
 
@@ -48,16 +48,13 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         registerReceiver(logoutReceiver, IntentFilter("Logout"))
-
     }
 
     override fun onPause() {
         super.onPause()
         try {
             unregisterReceiver(logoutReceiver)
-        } catch (e: Exception){
-
-        }
+        } catch (e: Exception){}
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,14 +62,17 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.main_activity)
 
         val pref = MyApplication.secureSharedPreferences
-        setFirstRunAndSynchronizeReceiver(pref)
+        setFirstRunAndSynchronization(pref)
 
         viewModel = ViewModelProvider(this, CalendarViewModelFactory()).get(CalendarViewModel::class.java)
 
         if(!MyApplication.getOrganizationUrl().isNullOrEmpty() || MyApplication.getOrganizationUrl() != ""){
             role = Role.EMPLOYEE
-            viewModel.downloadAppointments(role, MyApplication.getOrganizationUrl()!!,
-                MyApplication.getToken()!!)
+            viewModel.downloadAppointments(
+                role,
+                MyApplication.getOrganizationUrl()!!,
+                MyApplication.getToken()!!
+            )
         } else {
             role = Role.CLIENT
             val fab: FloatingActionButton = findViewById(R.id.fab)
@@ -127,8 +127,8 @@ class MainActivity : AppCompatActivity() {
         header.tEmail.text = email
     }
 
-    private fun setFirstRunAndSynchronizeReceiver(pref: SharedPreferences) {
-        //if(!pref.contains("NotFirst")){
+    private fun setFirstRunAndSynchronization(pref: SharedPreferences) {
+        if(!pref.contains("NotFirst")){
             val editor = pref.edit()
             editor.putBoolean("NotFirst", true)
             editor.apply()
@@ -137,7 +137,7 @@ class MainActivity : AppCompatActivity() {
             intent.setClass(applicationContext, BootReceiver::class.java)
             //set the synchronization
             BootReceiver().onReceive(applicationContext, intent)
-        //}
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

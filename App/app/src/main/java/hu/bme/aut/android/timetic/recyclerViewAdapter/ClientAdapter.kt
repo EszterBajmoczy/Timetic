@@ -9,12 +9,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import hu.bme.aut.android.timetic.R
-import hu.bme.aut.android.timetic.data.model.Person
+import hu.bme.aut.android.timetic.models.Person
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.reflect.KFunction1
 
-//Adapter for the client recycler view in the ClientOperationsFragment
 class ClientAdapter(
     private val callCallBack: KFunction1<@ParameterName(name = "number") String, Unit>,
     private val emailCallBack: KFunction1<@ParameterName(name = "email") String, Unit>
