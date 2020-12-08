@@ -5,6 +5,7 @@ import android.app.*
 import android.content.*
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
 import com.squareup.moshi.Moshi
@@ -54,6 +55,7 @@ class SyncAdapter @JvmOverloads constructor(
         val editor = MyApplication.secureSharedPreferences.edit()
         editor.putLong("LastSync", calendar.timeInMillis)
         editor.apply()
+        Log.d("TIMETIC_LOG", "SyncAdapter")
 
         if(MyApplication.getToken().isNullOrEmpty() || MyApplication.getDevToken().isNullOrEmpty() ){
             role = if(MyApplication.getToken() != null && MyApplication.getToken()!!.isNotEmpty()){
@@ -219,11 +221,11 @@ class SyncAdapter @JvmOverloads constructor(
                 notificationAt(title, text, startDate)
             }
             "half_hour" -> {
-                startDate.set(Calendar.MINUTE, -30)
+                startDate.add(Calendar.MINUTE, -30)
                 notificationAt(title, text, startDate)
             }
             "one_hour" -> {
-                startDate.set(Calendar.HOUR_OF_DAY, -1)
+                startDate.add(Calendar.HOUR_OF_DAY, -1)
                 notificationAt(title, text, startDate)
             }
             else -> {}

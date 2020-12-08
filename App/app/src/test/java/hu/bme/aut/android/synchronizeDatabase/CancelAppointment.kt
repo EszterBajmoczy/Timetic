@@ -65,7 +65,7 @@ class CancelAppointment {
         sumList.addAll(dbList)
         sumList.addAll(backendList)
 
-        //check what happend with the appointments from the database
+        //check what happened with the appointments from the database
         for(item in sumList) {
             coEvery {
                 mockRepository.insert(item)

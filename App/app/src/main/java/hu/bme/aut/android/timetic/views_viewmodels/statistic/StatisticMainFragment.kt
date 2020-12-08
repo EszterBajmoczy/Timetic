@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -87,7 +88,7 @@ class StatisticMainFragment : Fragment() {
             picker.show(activity?.supportFragmentManager!!, picker.toString())
 
             picker.addOnPositiveButtonClickListener {
-                viewModel.fetchData(it.first!!, it.second!!, MyApplication.getOrganizationUrl()!!, MyApplication.getToken()!!)
+                viewModel.fetchData(correctDate(it.first!!, "Begin"), correctDate(it.second!!, "End"), MyApplication.getOrganizationUrl()!!, MyApplication.getToken()!!)
                 val statisticDiagramFragment =
                     StatisticDiagramFragment()
 
@@ -101,12 +102,30 @@ class StatisticMainFragment : Fragment() {
         }
     }
 
+    //to modify the begin and and dates to be at 00:00 and at 23:59
+    private fun correctDate(value: Long, type: String): Long {
+        val date = Calendar.getInstance()
+        date.timeInMillis = value
+
+        when(type) {
+            "Begin" -> {
+                date.set(Calendar.HOUR_OF_DAY, 0)
+                date.set(Calendar.MINUTE, 0)
+                date.set(Calendar.MILLISECOND, 0)
+            }
+            "End" -> {
+                date.set(Calendar.HOUR_OF_DAY, 23)
+                date.set(Calendar.MINUTE, 59)
+                date.set(Calendar.MILLISECOND, 59)
+            }
+        }
+        return date.timeInMillis
+    }
+
     override fun onPause() {
         try {
             context?.unregisterReceiver(internetStateChangedReceiver)
-        } catch (e: Exception) {
-
-        }
+        } catch (e: Exception) {}
         super.onPause()
     }
 

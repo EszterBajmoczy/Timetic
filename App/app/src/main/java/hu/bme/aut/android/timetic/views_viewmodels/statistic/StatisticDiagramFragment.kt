@@ -109,7 +109,6 @@ class StatisticDiagramFragment : Fragment() {
             item.sumIncome?.let {
                 sum += it.toInt()
             }
-            Log.d("EZAZ", item.name)
 
             chart2!!.addPieSlice(
                 PieModel(

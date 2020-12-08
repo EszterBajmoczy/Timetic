@@ -159,7 +159,6 @@ class LoginViewModel : ViewModel() {
     }
 
     private fun successToken(token: CommonToken) {
-        Log.d("EZAZ", token.token)
         _token.value = token.token
         if(role == Role.CLIENT){
             val n =

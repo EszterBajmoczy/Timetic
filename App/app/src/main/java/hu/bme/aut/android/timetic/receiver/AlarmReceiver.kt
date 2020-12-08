@@ -30,6 +30,7 @@ class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
         val title = intent?.getStringExtra("Title")
         val text = intent?.getStringExtra("Text")
+        Log.d("TIMETIC_LOG", "AlarmReceiver")
 
         if(title != null){
             //if it's called just to make a notification of an appointment
@@ -55,7 +56,26 @@ class AlarmReceiver : BroadcastReceiver() {
     }
 
     private fun createSyncAccount(context: Context): Account {
-        return Account(ACCOUNT, ACCOUNT_TYPE).also { }
+        val accountManager = context.getSystemService(Context.ACCOUNT_SERVICE) as AccountManager
+        return Account(ACCOUNT, ACCOUNT_TYPE).also { newAccount ->
+            /*
+             * Add the account and account type, no password or user data
+             * If successful, return the Account object, otherwise report an error.
+             */
+            if (accountManager.addAccountExplicitly(newAccount, null, null)) {
+                /*
+                 * If you don't set android:syncable="true" in
+                 * in your <provider> element in the manifest,
+                 * then call context.setIsSyncable(account, AUTHORITY, 1)
+                 * here.
+                 */
+            } else {
+                /*
+                 * The account exists or some other error occurred. Log this, report it,
+                 * or handle it internally.
+                 */
+            }
+        }
     }
 
     private fun notification(title: String, text: String? = null, context: Context) {

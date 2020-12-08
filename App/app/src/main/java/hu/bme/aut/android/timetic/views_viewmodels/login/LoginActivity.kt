@@ -105,7 +105,6 @@ class LoginActivity : AppCompatActivity() {
         })
 
         loginViewModel.resetResult.observe(this@LoginActivity, Observer {
-            Log.d("EZAZ", "Resetresult" + it.error + " : "+ it.success)
             val resetResult = it ?: return@Observer
 
             loading.visibility = View.GONE
