@@ -134,4 +134,6 @@
     <string name="private_appointment">Magán időpont:</string>
     <string name="email_text">Choose an Email client :</string>
 
+    <string name="just_number">Csak számot adhat meg.</string>
+
 </resources>

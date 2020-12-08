@@ -45,14 +45,34 @@ class SettingsActivity : AppCompatActivity() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
 
+            val timeRange = findPreference<EditTextPreference>("timeRange")
+            timeRange?.setOnPreferenceChangeListener { _, newValue ->
+                try {
+                    newValue.toString().toInt()
+                    true
+                } catch (e: Exception) {
+                    Toast.makeText(context, getString(R.string.just_number), Toast.LENGTH_LONG).show()
+                    false
+                }
+            }
+
+            val price = findPreference<EditTextPreference>("price")
+            price?.setOnPreferenceChangeListener { _, newValue ->
+                try {
+                    newValue.toString().toInt()
+                    true
+                } catch (e: Exception) {
+                    Toast.makeText(context, getString(R.string.just_number), Toast.LENGTH_LONG).show()
+                    false
+                }
+            }
+
             if(viewModel == null){
                 val defaultVideoChat = findPreference<SwitchPreference>("defaultVideoChat")
                 defaultVideoChat?.isVisible = false
 
-                val timeRange = findPreference<EditTextPreference>("timeRange")
                 timeRange?.isVisible = false
 
-                val price = findPreference<EditTextPreference>("price")
                 price?.isVisible = false
 
                 val activityType = findPreference<ListPreference>("activityType")

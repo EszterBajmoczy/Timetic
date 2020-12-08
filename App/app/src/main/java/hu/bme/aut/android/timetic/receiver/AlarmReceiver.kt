@@ -37,7 +37,6 @@ class AlarmReceiver : BroadcastReceiver() {
             notification(title, text, context)
         } else {
             //if it's called to synchronize
-            //TODO periodic or not?
             val mAccount = createSyncAccount(context)
 
             val settingsBundle = Bundle().apply {
