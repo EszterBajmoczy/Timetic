@@ -291,17 +291,18 @@ class NewAppointmentActivity : AppCompatActivity() {
                     if(isNetworkAvailable()) {
                         val a = getAppointment()
 
+                        //first check if it is modified, if yes than validate at the end
                         if(app.start_date.timeInMillis == a.startTime && app.end_date.timeInMillis == a.endTime &&
                             app.private_appointment == a.isPrivate && app.note == a.note &&
                             a.isPrivate){
-
+                            //private appointment, not modified
                             finish()
                         }
-                        else if (app.start_date.timeInMillis == a.startTime && app.end_date.timeInMillis == a.endTime &&
+                        else if (!a.isPrivate!! && app.start_date.timeInMillis == a.startTime && app.end_date.timeInMillis == a.endTime &&
                             app.private_appointment == a.isPrivate && app.personBackendId == a.client!!.id &&
                             app.activity == a.activity!!.name && app.location == a.place &&
                             app.price == a.price && app.videochat == a.online && app.note == a.note) {
-
+                            //not private appointment, not modified
                             finish()
                         }
                         else if(checkData()){
