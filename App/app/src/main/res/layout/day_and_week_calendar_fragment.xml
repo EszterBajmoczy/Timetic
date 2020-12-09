@@ -21,22 +21,15 @@
         app:timeColumnPadding="6dp"
         app:timeColumnTextColor="@color/colorAccent"
         app:timeColumnBackgroundColor="@color/colorLight"
-        app:headerRowPadding="12dp"
         app:columnGap="2dp"
         app:numberOfVisibleDays="7"
-        app:headerRowBackgroundColor="@color/colorLight"
         app:dayBackgroundColor="@color/colorLight"
-        app:todayBackgroundColor="@color/colorPrimaryLighter"
-        app:singleLineHeader="false"
         app:eventMarginVertical="2dp"
         app:overlappingEventGap="1dp"
         app:showNowLine="true"
         app:nowLineColor="@color/colorPrimaryLight"
-        app:headerRowTextColor="@color/colorAccentDark"
         app:todayHeaderTextColor="@color/colorPrimaryLight"
-        app:firstDayOfWeek="monday"
         app:showFirstDayOfWeekFirst="true"
-        app:headerRowTextSize="13sp"
         />
 
 

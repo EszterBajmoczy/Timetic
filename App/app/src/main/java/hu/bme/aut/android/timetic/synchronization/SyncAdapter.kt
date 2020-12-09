@@ -51,10 +51,6 @@ class SyncAdapter @JvmOverloads constructor(
         provider: ContentProviderClient,
         syncResult: SyncResult
     ) {
-        val calendar = Calendar.getInstance()
-        val editor = MyApplication.secureSharedPreferences.edit()
-        editor.putLong("LastSync", calendar.timeInMillis)
-        editor.apply()
         Log.d("TIMETIC_LOG", "SyncAdapter")
 
         if(MyApplication.getToken().isNullOrEmpty() || MyApplication.getDevToken().isNullOrEmpty() ){
@@ -77,6 +73,7 @@ class SyncAdapter @JvmOverloads constructor(
                 try {
                     val response: retrofit2.Response<List<CommonAppointment>> = apiOrg.employeeAppointmentsGet().execute()
                     if (response.isSuccessful){
+                        saveLastSyncDate()
                         successAppointmentList(response.body()!!)
                     }
                 } catch (e: Exception) {
@@ -94,6 +91,7 @@ class SyncAdapter @JvmOverloads constructor(
                     try {
                         val response: retrofit2.Response<List<ForClientAppointment>> = apiOrg.clientAppointmentsGet().execute()
                         if (response.isSuccessful){
+                            saveLastSyncDate()
                             successClientAppointmentList(response.body()!!, url)
                         }
                     } catch (e: Exception) {
@@ -103,6 +101,13 @@ class SyncAdapter @JvmOverloads constructor(
                 }
             }
         }
+    }
+
+    private fun saveLastSyncDate() {
+        val calendar = Calendar.getInstance()
+        val editor = MyApplication.secureSharedPreferences.edit()
+        editor.putLong("LastSync", calendar.timeInMillis)
+        editor.apply()
     }
 
     private fun getApiWithAuthenticator(url: String, token: String): OrganizationApi {
@@ -221,12 +226,16 @@ class SyncAdapter @JvmOverloads constructor(
                 notificationAt(title, text, startDate)
             }
             "half_hour" -> {
-                startDate.add(Calendar.MINUTE, -30)
-                notificationAt(title, text, startDate)
+                val time = Calendar.getInstance()
+                time.timeInMillis = startDate.timeInMillis
+                time.add(Calendar.MINUTE, -30)
+                notificationAt(title, text, time)
             }
             "one_hour" -> {
-                startDate.add(Calendar.HOUR_OF_DAY, -1)
-                notificationAt(title, text, startDate)
+                val time = Calendar.getInstance()
+                time.timeInMillis = startDate.timeInMillis
+                time.add(Calendar.MINUTE, -30)
+                notificationAt(title, text, time)
             }
             else -> {}
         }

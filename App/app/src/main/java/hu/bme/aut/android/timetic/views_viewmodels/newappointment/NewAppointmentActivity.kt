@@ -32,7 +32,6 @@ import kotlin.collections.ArrayList
 class NewAppointmentActivity : AppCompatActivity() {
     private lateinit var viewModel: NewAppointmentViewModel
     private lateinit var defaultSharedPreferences: SharedPreferences
-    private lateinit var role: Role
     private var startTime : Long? = null
     private var endTime: Long? = null
 
@@ -184,19 +183,45 @@ class NewAppointmentActivity : AppCompatActivity() {
                 }
             } else {
                 viewModel.getAppointmentByNetId(appointmentId!!)
-                viewModel.appDetail.observe(this,  Observer {app ->
-                    if(app.private_appointment){
-                        privateAppointmentNoInternet(app)
-                    } else {
-                        employeeNoInternet(app)
-                    }
-                })
+                viewModel.appDetail.observe(this,  privateAndNoInternetObserver())
             }
         }
         viewModel.meetingUrl.observe(this, Observer {
             JitsiMeetActivity.launch(this, it)
             finish()
         })
+    }
+
+    private fun privateAndNoInternetObserver(): Observer<Appointment> {
+        observer = androidx.lifecycle.Observer { app ->
+            if(app.private_appointment){
+                privateAppointmentNoInternet(app)
+            } else {
+                employeeNoInternet(app)
+            }
+        }
+        return observer
+    }
+
+    private fun personsAndContactsObserver(): Observer<Person> {
+        return Observer { person ->
+            //set Person Spinner
+            setSpinner(spPerson, listOf<String?>(person.name), person.name) {
+            index -> client = clients[index]
+    }
+            spPerson.isClickable = false
+
+            personCall.setOnClickListener {
+                val callIntent = Intent(Intent.ACTION_DIAL)
+                callIntent.data = Uri.parse("tel:${person.phone}")
+                startActivity(callIntent)
+            }
+
+            personEmail.setOnClickListener {
+                val intent = Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", person.phone, null))
+                startActivity(Intent.createChooser(intent, "Choose an Email client :"))
+            }
+        }
     }
 
     private fun employeeObserver(): Observer<Appointment> {
@@ -255,7 +280,7 @@ class NewAppointmentActivity : AppCompatActivity() {
             } else {
                 setButton(btCancel, R.string.tCancelAppointment, View.OnClickListener {
                     if(isNetworkAvailable()) {
-                        viewModel.appDetail.removeObserver(observer)
+                        removeDetailObservers()
                         viewModel.cancelAppointment(app.backendId)
                     } else {
                         Toast.makeText(applicationContext, getString(R.string.network_needed_cancel_appointment), Toast.LENGTH_LONG).show()
@@ -311,9 +336,7 @@ class NewAppointmentActivity : AppCompatActivity() {
         setTitle(R.string.title_activity_new_appointment_Detail)
 
         viewModel.getPersonByNetId(app.personBackendId!!)
-        viewModel.personDetail.observe(this, Observer{person ->
-            setPersonsAndContacts(person)
-        })
+        viewModel.personDetail.observe(this, personsAndContactsObserver())
 
         setSpinners(app)
 
@@ -358,7 +381,10 @@ class NewAppointmentActivity : AppCompatActivity() {
         } else {
             setButton(btCancel, R.string.tCancelAppointment, View.OnClickListener {
                 if(isNetworkAvailable()) {
-                    viewModel.appDetail.removeObserver(observer)
+                    try {
+                        removeDetailObservers()
+                    } catch (e: Exception) {}
+
 
                     val organizationsMapString = MyApplication.secureSharedPreferences.getString("OrganizationsMap", "")
                     val organizationMap = organizationsMapString!!.toHashMap()
@@ -386,9 +412,7 @@ class NewAppointmentActivity : AppCompatActivity() {
             setTitle(R.string.title_activity_new_appointment_Detail)
 
             viewModel.getPersonByNetId(app.personBackendId!!)
-            viewModel.personDetail.observe(this, Observer{person ->
-                setPersonsAndContacts(person)
-            })
+            viewModel.personDetail.observe(this, personsAndContactsObserver())
 
             setSpinners(app)
 
@@ -437,7 +461,7 @@ class NewAppointmentActivity : AppCompatActivity() {
             } else {
                 setButton(btCancel, R.string.tCancelAppointment, View.OnClickListener {
                     if(isNetworkAvailable()) {
-                        viewModel.appDetail.removeObserver(observer)
+                        removeDetailObservers()
 
                         val organizationsMapString = MyApplication.secureSharedPreferences.getString("OrganizationsMap", "")
                         val organizationMap = organizationsMapString!!.toHashMap()
@@ -493,7 +517,7 @@ class NewAppointmentActivity : AppCompatActivity() {
         } else {
             setButton(btCancel, R.string.tCancelAppointment, View.OnClickListener {
                 if(isNetworkAvailable()) {
-                    viewModel.appDetail.removeObserver(observer)
+                    removeDetailObservers()
 
                     val organizationsMapString = MyApplication.secureSharedPreferences.getString("OrganizationsMap", "")
                     val organizationMap = organizationsMapString!!.toHashMap()
@@ -734,27 +758,7 @@ class NewAppointmentActivity : AppCompatActivity() {
         tomorrow.set(Calendar.HOUR_OF_DAY, 0)
         tomorrow.set(Calendar.MINUTE, 0)
         tomorrow.set(Calendar.MILLISECOND, 0)
-        tomorrow.add(Calendar.MILLISECOND, -1)
         return startDate.before(tomorrow)
-    }
-
-    private fun setPersonsAndContacts(person: Person) {
-        //set Person Spinner
-        setSpinner(spPerson, listOf(person.name), person.name) {
-                index -> this@NewAppointmentActivity.client = clients[index]
-        }
-        spPerson.isClickable = false
-
-        personCall.setOnClickListener {
-            val callIntent = Intent(Intent.ACTION_DIAL)
-            callIntent.data = Uri.parse("tel:${person.phone}")
-            startActivity(callIntent)
-        }
-
-        personEmail.setOnClickListener {
-            val intent = Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", person.phone, null))
-            startActivity(Intent.createChooser(intent, "Choose an Email client :"))
-        }
     }
 
     private fun setSpinners(app: Appointment) {
@@ -769,6 +773,14 @@ class NewAppointmentActivity : AppCompatActivity() {
         setSpinner(spLocation, listOf(app.location), app.location, defaultLocation)
         { index -> this@NewAppointmentActivity.location = locations[index] }
         spLocation.isClickable = false
+    }
+
+    private fun removeDetailObservers(){
+        //before cancel it is important
+        try {
+            viewModel.appDetail.removeObservers(this)
+            viewModel.personDetail.removeObservers(this)
+        } catch (e: Exception) {}
     }
 
     private val logoutReceiver = object : BroadcastReceiver() {

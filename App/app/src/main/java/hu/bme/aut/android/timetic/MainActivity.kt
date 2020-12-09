@@ -28,6 +28,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var viewModel: CalendarViewModel
     private lateinit var role: Role
+    private lateinit var pref: SharedPreferences
 
     private val logoutReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -48,6 +49,27 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         registerReceiver(logoutReceiver, IntentFilter("Logout"))
+        downloadData()
+    }
+
+    private fun downloadData() {
+        if(!MyApplication.getOrganizationUrl().isNullOrEmpty() || MyApplication.getOrganizationUrl() != ""){
+            viewModel.downloadAppointments(
+                role,
+                MyApplication.getOrganizationUrl()!!,
+                MyApplication.getToken()!!
+            )
+        } else {
+            val organizationsMapString = pref.getString("OrganizationsMap", "")
+            val organizationMap = organizationsMapString!!.toHashMap()
+            for((url,token) in organizationMap){
+                viewModel.downloadAppointments(
+                    role,
+                    url,
+                    token
+                )
+            }
+        }
     }
 
     override fun onPause() {
@@ -61,32 +83,17 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
 
-        val pref = MyApplication.secureSharedPreferences
+        pref = MyApplication.secureSharedPreferences
         setFirstRunAndSynchronization(pref)
 
         viewModel = ViewModelProvider(this, CalendarViewModelFactory()).get(CalendarViewModel::class.java)
 
         if(!MyApplication.getOrganizationUrl().isNullOrEmpty() || MyApplication.getOrganizationUrl() != ""){
             role = Role.EMPLOYEE
-            viewModel.downloadAppointments(
-                role,
-                MyApplication.getOrganizationUrl()!!,
-                MyApplication.getToken()!!
-            )
         } else {
             role = Role.CLIENT
             val fab: FloatingActionButton = findViewById(R.id.fab)
             fab.visibility = View.GONE
-
-            val organizationsMapString = pref.getString("OrganizationsMap", "")
-            val organizationMap = organizationsMapString!!.toHashMap()
-            for((url,token) in organizationMap){
-                viewModel.downloadAppointments(
-                    role,
-                    url,
-                    token
-                )
-            }
         }
 
         //update last synchronization date
