@@ -14,7 +14,7 @@ import java.util.*
 class BootReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent?) {
-        firstSync(context)
+        val mAccount = createSyncAccount(context)
 
         //set daily synchronization at 00.15
         val calAlarm = Calendar.getInstance()
@@ -30,16 +30,6 @@ class BootReceiver : BroadcastReceiver() {
         val alarmManager =  context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calAlarm.timeInMillis, AlarmManager.INTERVAL_DAY, pendingIntent)
-    }
-
-    private fun firstSync(context: Context) {
-        val mAccount = createSyncAccount(context)
-
-        val settingsBundle = Bundle().apply {
-            putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true)
-            putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true)
-        }
-        ContentResolver.requestSync(mAccount, AUTHORITY, settingsBundle)
     }
 
     private fun createSyncAccount(context: Context): Account {

@@ -56,9 +56,9 @@ class StatisticDiagramFragment : Fragment() {
         chart4 = piechart4
 
         viewModel.data.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
-            if(it.activities != null && it.activities.size <= 1) {
-                piechart1.visibility = View.GONE
-                piechart2.visibility = View.GONE
+            if(it.activities != null && it.activities.size == 0) {
+                ch1CardView.visibility = View.GONE
+                ch1CardView.visibility = View.GONE
             } else{
                 setDataPieChart1(it.activities!!)
                 setDataPieChart2(it.activities)

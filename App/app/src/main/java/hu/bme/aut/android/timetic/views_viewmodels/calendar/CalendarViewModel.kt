@@ -86,8 +86,8 @@ class CalendarViewModel : ViewModel() {
         val dbList = clients.value
 
         if(dbList != null) {
-            //check if it is already in the local database
             if (backendList != null) {
+                //check if it is already in the local database
                 UseCases().personOrganizer(repo, viewModelScope, backendList, dbList)
                 _clientsFromBackend.value = null
             }

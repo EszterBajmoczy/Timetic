@@ -806,6 +806,7 @@ class NewAppointmentActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
+        removeDetailObservers()
         try {
             unregisterReceiver(logoutReceiver)
         } catch (e: Exception){}

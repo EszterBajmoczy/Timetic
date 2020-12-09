@@ -1,9 +1,5 @@
 package hu.bme.aut.android.timetic.models
 
-import com.alamkanak.weekview.WeekViewDisplayable
-import com.alamkanak.weekview.WeekViewEvent
-import hu.bme.aut.android.timetic.R
-import java.lang.Exception
 import java.util.*
 
 class Appointment(
