@@ -5,6 +5,9 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.net.Uri
 
+/*
+* This class based on the tutorial of developer.android.com/training/sync-adapters
+ */
 class StubProvider: ContentProvider() {
     override fun insert(uri: Uri, values: ContentValues?): Uri? = null
 

@@ -49,6 +49,7 @@ class NetworkOrganizationInteractor(private val organizationUrl: String, auth: H
         this.organizationApi = retrofit.create(OrganizationApi::class.java)
     }
 
+    //this method's code is based on the subject of Android-based software development at BME Hungary
     private fun <T> runCallOnBackgroundThread(
         call: Call<T>,
         onSuccess: (T) -> Unit,
@@ -77,6 +78,7 @@ class NetworkOrganizationInteractor(private val organizationUrl: String, auth: H
         }.start()
     }
 
+    //this method's code is based on the subject of Android-based software development at BME Hungary
     private fun <T> runCallOnBackgroundThreadAndAddURL(
         call: Call<T>,
         onSuccess: (T, String) -> Unit,

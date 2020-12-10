@@ -6,6 +6,9 @@ import android.accounts.AccountAuthenticatorResponse
 import android.content.Context
 import android.os.Bundle
 
+/*
+* This class based on the tutorial of developer.android.com/training/sync-adapters
+ */
 class StubAuthenticator(context: Context): AbstractAccountAuthenticator(context) {
     override fun getAuthTokenLabel(authTokenType: String?): String {
         throw UnsupportedOperationException()

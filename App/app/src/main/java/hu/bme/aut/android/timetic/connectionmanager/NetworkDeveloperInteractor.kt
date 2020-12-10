@@ -48,6 +48,7 @@ class NetworkDeveloperInteractor(auth: HttpBasicAuth?, autb: HttpBearerAuth?) {
         this.developerApi = retrofit.create(DeveloperApi::class.java)
     }
 
+    //this method's code is based on the subject of Android-based software development at BME Hungary
     private fun <T> runCallOnBackgroundThread(
         call: Call<T>,
         onSuccess: (T) -> Unit,
