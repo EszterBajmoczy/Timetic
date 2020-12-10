@@ -379,6 +379,7 @@ class NewAppointmentActivity : AppCompatActivity() {
 
         if(isInThePast(app.start_date)){
             setButton(btCancel, null, null)
+            setButton(btSave, null, null)
         } else {
             setButton(btCancel, R.string.tCancelAppointment, View.OnClickListener {
                 if(isNetworkAvailable()) {
@@ -515,6 +516,7 @@ class NewAppointmentActivity : AppCompatActivity() {
 
         if(isInThePast(app.start_date)){
             setButton(btCancel, null, null)
+            setButton(btSave, null, null)
         } else {
             setButton(btCancel, R.string.tCancelAppointment, View.OnClickListener {
                 if(isNetworkAvailable()) {
